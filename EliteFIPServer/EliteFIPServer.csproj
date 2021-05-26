@@ -6,6 +6,9 @@
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject>EliteFIPServer.Program</StartupObject>
     <Authors>Earthstorm Software</Authors>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

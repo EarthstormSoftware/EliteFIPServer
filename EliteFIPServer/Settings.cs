@@ -39,7 +39,7 @@ namespace EliteFIPServer {
 
             // Update running Client Id
             Caller.GetMatricApi().SetClientId(Properties.Settings.Default.MatricClient);
-
+            Caller.GetMatricApi().Connect();
 
         }
 
@@ -58,7 +58,7 @@ namespace EliteFIPServer {
             chkEnableLog.Checked = Properties.Settings.Default.EnableLog;
 
             if (Caller.GetServerState() == CoreState.Started) {
-                BindingList<ClientInfo> activeClients = new BindingList<ClientInfo>(Caller.GetMatricApi().GetConnectClients());
+                BindingList<ClientInfo> activeClients = new BindingList<ClientInfo>(Caller.GetMatricApi().GetConnectedClients());
                 BindingSource dgvSource = new BindingSource(activeClients, null);
                 dgvActiveClients.DataSource = dgvSource;
             } 

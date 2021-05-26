@@ -54,6 +54,7 @@ namespace EliteFIPServer {
         private StatusWatcher StatusWatcher;
         private JournalWatcher JournalWatcher;
 
+        // Current State Information
         private StatusData currentStatus;
         private ShipTargetedData currentTarget;
 
@@ -62,7 +63,7 @@ namespace EliteFIPServer {
         private TargetEventHandler  TargetEventHandler;
 
         // Matric Integration
-        private MatricIntegration matricapi = new MatricIntegration();
+        private MatricIntegration matricapi = new MatricIntegration();        
 
         public ServerCore (EDFIPServerConsole serverConsole) {
             ServerConsole = serverConsole;
@@ -82,6 +83,9 @@ namespace EliteFIPServer {
             TargetEventHandler = new TargetEventHandler(this);
             JournalWatcher.GetEvent<ShipTargetedEvent>().Fired += TargetEventHandler.HandleEvent;
 
+            // Start Matric Integration
+            matricapi.Connect();
+
             // If Immediate start is enabled, start the server
             if (Properties.Settings.Default.ImmediateStart == true) {
                 this.Start();
@@ -99,9 +103,6 @@ namespace EliteFIPServer {
             GameDataTask = new Task(new Action(GameDataWorkerThread), GameDataWorkerCTS.Token);
             GameDataTask.ContinueWith(GameDataWorkerThreadEnded);
             GameDataTask.Start();
-
-            // Start Matric Integration
-            matricapi.Connect();
 
             // Start tracking game events
             StatusWatcher.StartWatching();
@@ -135,8 +136,13 @@ namespace EliteFIPServer {
             DateTime lastSuccessfulUpdate = DateTime.Today;
 
             CancellationToken token = GameDataWorkerCTS.Token;
-            while (token.IsCancellationRequested == false) { 
-
+            while (token.IsCancellationRequested == false) {
+                // Update Matric state
+                if (matricapi.IsConnected()) {
+                    Log.Instance.Info("Updating Matric state");
+                    matricapi.UpdateStatus(currentStatus);
+                    matricapi.UpdateTarget(currentTarget);
+                }
                 while (!GameDataQueue.IsEmpty) {
                     GameDataQueue.TryDequeue(out GameEventTrigger gameEventTrigger);
                     Log.Instance.Info("Game data event received");
@@ -147,22 +153,20 @@ namespace EliteFIPServer {
 
                     } else if (gameEventTrigger.GameEvent == GameEventType.Status) {
                         currentStatus = gameEventTrigger.EventData as StatusData;
-                        Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));
-
-                        // Update Matric state
-                        Log.Instance.Info("Updating Matric status");
-                        matricapi.UpdateStatus(currentStatus);
+                        Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));                        
 
                     } else if (gameEventTrigger.GameEvent == GameEventType.Target) {
                         currentTarget = gameEventTrigger.EventData as ShipTargetedData;
-                        Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));
-
-                        // Update Matric state
-                        Log.Instance.Info("Updating Matric target");
+                        Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));                        
+                    }
+                    // Update Matric state
+                    if (matricapi.IsConnected()) {
+                        Log.Instance.Info("Updating Matric state");
+                        matricapi.UpdateStatus(currentStatus);
                         matricapi.UpdateTarget(currentTarget);
                     }
-                    Log.Instance.Info("Game Data Worker Thread waiting for new work");                    
                 }
+                Log.Instance.Info("Game Data Worker Thread waiting for new work");
                 GameDataWorkerWait.WaitOne();
             }
             Log.Instance.Info("Game Data Worker Thread ending");

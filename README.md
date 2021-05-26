@@ -9,7 +9,7 @@ This allows Matric to reflect the current game state in the UI, with particular 
 screen display rather than a traditional keyboard increases immersion and lowers the requirement to remember
 all the many key bindings you might need.
 
-Current build is available here: [v1.0.0-beta1](https://github.com/EarthstormSoftware/EliteFIPServer/releases/tag/v1.0.0-beta1)
+Current build is available here: [v1.1.0](https://github.com/EarthstormSoftware/EliteFIPServer/releases/tag/v1.1.0)
 
 ## Runtime Pre-requisites
 - Elite FIP Server is a .Net 5.0 application and requires the appropriate [runtime](https://dotnet.microsoft.com/download/dotnet/5.0/runtime) 
@@ -68,7 +68,7 @@ For example: c:\Users\MyUserName\AppData\Roaming\EliteFIPServer
 ---
 
 # Current Features
-EliteFIPServer should work with any Deck (a sample deck will be available shortly), and will toggle button state
+EliteFIPServer should work with any Deck (a sample deck is available [here](https://community.matricapp.com/deck/344/elite-dangerous-fip)), and will toggle button state
 to on/off or set text based on the Matric button name assigned. Therefore to use this with your own deck, simply 
 set the button name for your button to match the one listed and it will be toggled based on Elite state.
 
@@ -77,27 +77,66 @@ set the button name for your button to match the one listed and it will be toggl
 Elite Function | Matric Button name
 -------------- | -----------
 Landing Gear   | btnGear
+Supercruise*   | btnSupercruise
+Flight Assist  | btnFlightAssist
 Hardpoints     | btnHardpoints
 Cargo Scoop    | btnScoop
 Ship Lights    | btnLights
 Night Vision   | btnNVision
 Silent Running | btnSilent
-HUD Mode       | btnHudMode*
+HUD Mode*      | btnHudMode
+FSD Jump*     | btnJump
 
-\* - The HUD Mode integration will set button text to "Combat Mode" or "Analysis Mode" as appropriate, with a 
-carriage return in the middle. This is not configurable (yet).
+\* Supercruise will only illuminate when actually in Supercruise (after charging and the initial short FSD jump to get there)
+
+\* HUD Mode integration will set button text to "Combat" or "Analysis" as appropriate - this is not configurable (yet).
+
+\* FSD Jump indicator is also used when entering Supercruise, so will illuminate briefly at that point.
+
+### Indicator Lights
+These displays are intended for information only, to show simple status data where no button control is expected. 
+
+Elite Status | Matric Button name
+-------------- | -----------
+Docked (at a station) | indDocked
+Landed (on a planet) | indLanded
+Shields Online | indShields
+In wing | indInWing
+Scooping fuel | indScoopingFuel
+Mass locked | indFSDMassLock
+FSD Charging | indFSDCharging
+FSD Cooldown | indFSDCooldown
+Low fuel | indLowFuel
+Overheat | indOverheat
+In danger | indInDanger
+Being interdicted | indInterdiction
+
 
 ### Text Displays
 
 These displays require a text button, of sufficient width and height to display the full text. If the text button
 is not large enough for the content, the behaviour is 'undefined'.
-Text size is per standard Matric setting, but each target item is defined on a new line. 
-The labels match the target item.
+Text size is per standard Matric setting, but each field is defined on a new line. 
+The labels match the target field.
 
-Elite Function | Matric Button name
+Elite Information | Matric Button name
 -------------- | -----------
+Target data (Ship type, Faction, Rank etc)   | txtTarget
 Target labels  | txtTargetLabel
-Target data    | txtTarget
+Status data (Legal state, Cargo weight, Fuel etc)   | txtStatus
+Status labels  | txtStatusLabel
+
+
+---
+# Change History
+
+### 1.1.0          
+- Added Status text and labels
+- Added Flight Assist, SuperCruise and FSD Jump button support
+- Added indicator support for various status flags
+
+### 1.0.0
+- Initial Version
 
 
 ---
