@@ -10,14 +10,14 @@ namespace EliteFIPServer.Logging {
         static Log() {
 #if DEBUG
             // Setup the logging view for Sentinel - http://sentinel.codeplex.com
-            var sentinalTarget = new NLogViewerTarget() {
-                Name = "sentinal",
+            var sentinelTarget = new NLogViewerTarget() {
+                Name = "sentinel",
                 Address = "udp://127.0.0.1:9999",
                 IncludeNLogData = false
             };
-            var sentinalRule = new LoggingRule("*", LogLevel.Trace, sentinalTarget);
-            LogManager.Configuration.AddTarget("sentinal", sentinalTarget);
-            LogManager.Configuration.LoggingRules.Add(sentinalRule);
+            var sentinelRule = new LoggingRule("*", LogLevel.Trace, sentinelTarget);
+            LogManager.Configuration.AddTarget("sentinel", sentinelTarget);
+            LogManager.Configuration.LoggingRules.Add(sentinelRule);
 
             // Setup the logging view for Harvester - http://harvester.codeplex.com
             /*
@@ -43,7 +43,5 @@ namespace EliteFIPServer.Logging {
                 LogManager.DisableLogging();
             }
         }
-    }
-
-    
+    }    
 }

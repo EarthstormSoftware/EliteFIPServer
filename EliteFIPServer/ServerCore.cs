@@ -34,7 +34,7 @@ namespace EliteFIPServer {
         }
     }
 
-    class ServerCore : IGameDataEvent {
+    public class ServerCore : IGameDataEvent {
 
         // Reference to Primary UI 
         private EDFIPServerConsole ServerConsole;
@@ -108,6 +108,9 @@ namespace EliteFIPServer {
             StatusWatcher.StartWatching();
             JournalWatcher.StartWatching();
 
+            // Start Matric Flashing Lights thread
+            matricapi.StartMatricFlashWorker();
+
             ServerCoreState = CoreState.Started;
             ServerConsole.UpdateServerStatus(ServerCoreState);
             Log.Instance.Info("Server Core started");
@@ -123,6 +126,9 @@ namespace EliteFIPServer {
             // Stop tracking game events
             StatusWatcher.StopWatching();
             JournalWatcher.StopWatching();
+
+            // Stop Matric Flashing Lights thread
+            matricapi.StopMatricFlashWorker();
 
             ServerCoreState = CoreState.Stopped;
             ServerConsole.UpdateServerStatus(ServerCoreState);
@@ -193,6 +199,10 @@ namespace EliteFIPServer {
 
         public MatricIntegration GetMatricApi() {
             return matricapi;
-        }        
+        }
+
+        public StatusData GetCurrentStatus() {
+            return currentStatus;
+        }
     }
 }

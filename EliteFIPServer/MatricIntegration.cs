@@ -5,58 +5,77 @@ using Matric.Integration;
 using EliteFIPServer.Logging;
 using EliteFIPProtocol;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace EliteFIPServer {
     public class MatricIntegration {
-        
-        // Switchable Buttons
-        public static string GEAR = "btnGear";
-        public static string SUPERCRUISE = "btnSupercruise";
-        public static string FLIGHTASSIST = "btnFlightAssist";
-        public static string HARDPOINTS = "btnHardpoints";
-        public static string LIGHTS = "btnLights";
-        public static string SCOOP = "btnScoop";        
-        public static string SILENT = "btnSilent";
-        public static string HUDMODE = "btnHudMode";
-        public static string NVISION = "btnNVision";
-        public static string FSDJUMP = "btnJump";
 
-
-        // Indicator Lights
-        public static string DOCKED = "indDocked";
-        public static string LANDED = "indLanded";
-        public static string SHIELDS= "indShields";
-        public static string WING = "indInWing";
-        public static string SCOOPINGFUEL = "indScoopingFuel";        
-        public static string FSDMASSLOCK = "indFSDMassLock";
-        public static string FSDCHARGE = "indFSDCharging";
-        public static string FSDCOOLDOWN = "indFSDCooldown";
-        public static string LOWFUEL = "indLowFuel";
-        public static string OVERHEAT = "indOverheat";
-        public static string INDANGER = "indInDanger";
-        public static string INTERDICTION = "indInterdiction";
-        public static string MAINSHIP = "indMainShip";
-        public static string FIGHTER = "indIFighter";
-        public static string SRV = "indSRV";
-
-
-        // Text Information
-        public static string TARGET = "txtTarget";
-        public static string TARGET_LABEL = "txtTargetLabel";
-        public static string STATUS = "txtStatus";
-        public static string STATUS_LABEL = "txtStatusLabel";
-
-       
-
-        private string WHITE = "#FFFFFF";
-        private string ORANGE = "#EC8908";
-        
         public static List<ClientInfo> ConnectedClients = new List<ClientInfo>();
-
+        private static Dictionary<string, MatricButton> MatricButtonList = CreateButtonList();
+            
         private string AppName = "Elite FIP Server";
         private static string CLIENT_ID;
         private static Matric.Integration.Matric matric;
         private static bool verifiedMatricConnection = false;
+
+        // Matric Flash Worker
+        private CancellationTokenSource MatricFlashWorkerCTS;
+        private Task MatricFlashWorkerTask;
+
+        private static Dictionary<string, MatricButton> CreateButtonList() {
+            var buttonlist = new Dictionary<string, MatricButton>();
+            var templist = new List<MatricButton>();
+
+            // Create Button List 
+            // For reference:
+            // public MatricButton(string buttonName, string buttonLabel, bool isButton = true, bool isIndicator = true, bool isWarning = true , bool isSwitch = true, bool isSlider = false, bool isText = false, bool isPanel = false, 
+            //                     string offText = "Off", string onText = "On", bool buttonState = false, int switchPosition = 1, int sliderPosition = 0)
+                                   
+            templist.Add(new MatricButton(MatricConstants.DOCKED, "Docked", isButton: false, isSwitch: false ));
+            templist.Add(new MatricButton(MatricConstants.LANDED, "Landed", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.LANDINGGEAR, "Landing Gear", offText: "Landing Gear", onText:"Landing Gear"));
+            templist.Add(new MatricButton(MatricConstants.SHIELDS, "Shields", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.SUPERCRUISE, "Supercruise", offText: "Supercruise", onText: "Supercruise"));
+            templist.Add(new MatricButton(MatricConstants.FLIGHTASSIST, "Flight Assist", offText: "Flight Assist", onText: "Flight Assist"));
+            templist.Add(new MatricButton(MatricConstants.HARDPOINTS, "Hardpoints", offText: "Hardpoints", onText: "Hardpoints"));
+            templist.Add(new MatricButton(MatricConstants.INWING, "Wing", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.LIGHTS, "Lights", offText: "Lights", onText: "Lights"));
+            templist.Add(new MatricButton(MatricConstants.CARGOSCOOP, "Cargo Scoop", offText: "Cargo Scoop", onText: "Cargo Scoop"));
+            templist.Add(new MatricButton(MatricConstants.SILENTRUNNING, "Silent Running", offText: "Silent Running", onText: "Silent Running"));
+            templist.Add(new MatricButton(MatricConstants.SCOOPINGFUEL, "Scooping Fuel", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.SRVHANDBRAKE, "SRV Handbrake", offText: "SRV Handbrake", onText: "SRV Handbrake"));
+            templist.Add(new MatricButton(MatricConstants.SRVTURRET, "SRV Turret", offText: "SRV Turret", onText: "SRV Turret"));
+            templist.Add(new MatricButton(MatricConstants.SRVUNDERSHIP, "SRV Under Ship", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.SRVDRIVEASSIST, "SRV DriveAssist", offText: "SRV DriveAssist", onText: "SRV DriveAssist"));
+            templist.Add(new MatricButton(MatricConstants.FSDMASSLOCK, "Mass Locked", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.FSDCHARGE, "FSD Charging", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.FSDCOOLDOWN, "FSD Cooldown", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.LOWFUEL, "Low Fuel", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.OVERHEAT, "Overheat", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INDANGER, "Danger", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INTERDICTION, "Interdiction", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INMAINSHIP, "Main Ship", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INFIGHTER, "Fighter", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INSRV, "SRV", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.HUDMODE, "HUD Mode", offText: "Combat", onText: "Analysis"));
+            templist.Add(new MatricButton(MatricConstants.NIGHTVISION, "Night Vision", offText: "Night Vision", onText: "Night Vision"));
+            templist.Add(new MatricButton(MatricConstants.FSDJUMP, "FSD Jump", offText: "FSD Jump", onText: "FSD Jump"));
+            templist.Add(new MatricButton(MatricConstants.SRVHIGHBEAM, "SRV High Beam", offText: "SRV High Beam", onText: "SRV High Beam"));
+
+            templist.Add(new MatricButton(MatricConstants.STATUS, "Status", isButton: false, isIndicator: false, isWarning:false, isSwitch:false, isText: true));
+            templist.Add(new MatricButton(MatricConstants.STATUS_LABEL, "Ship Status:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
+
+            templist.Add(new MatricButton(MatricConstants.TARGET, "Target", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
+            templist.Add(new MatricButton(MatricConstants.TARGET_LABEL , "Target Info:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
+
+            foreach (MatricButton button in templist) {
+                buttonlist.Add(button.ButtonName, button);
+            }            
+            return buttonlist;
+        }
 
         public void Connect() {
 
@@ -65,81 +84,51 @@ namespace EliteFIPServer {
                 matric = new Matric.Integration.Matric(AppName);
             }
 
-            if (String.IsNullOrEmpty(matric.PIN) == true) {
-                if (String.IsNullOrEmpty(Properties.Settings.Default.MatricPin) == true) {
-                    Log.Instance.Info("Requesting Matric PIN");
-
-                    matric.RequestAuthorizePrompt();
-                    MatricPinEntry pinEntry = new MatricPinEntry();
-                    DialogResult dialogresult = pinEntry.ShowDialog();
-                    if (dialogresult == DialogResult.OK) {
-                        if (String.IsNullOrEmpty(pinEntry.MatricPin) != true) {
-                            Log.Instance.Info("New Matric PIN: {pin}", pinEntry.MatricPin);
-                            matric.PIN = pinEntry.MatricPin;
-                            Properties.Settings.Default.MatricPin = pinEntry.MatricPin;
-                            Properties.Settings.Default.Save();
-                            matric.OnConnectedClientsReceived += Matric_OnConnectedClientsReceived;
-                            matric.GetConnectedClients();
-                        }
-
-                    } else if (dialogresult == DialogResult.Cancel) {
-
+            // Refesh Button Text Config 
+            Log.Instance.Info("Refesh Button Text Config");
+            try {
+                string jsonButtonTextConfig = File.ReadAllText(Constants.ButtonTextConfigFilename);
+                var buttonTextConfigList = JsonConvert.DeserializeObject<List<ButtonTextConfig>>(jsonButtonTextConfig);
+                foreach (ButtonTextConfig buttonConfig in buttonTextConfigList) {
+                    if (MatricButtonList.ContainsKey(buttonConfig.ButtonName)) {
+                        MatricButtonList[buttonConfig.ButtonName].OffText = buttonConfig.OffText;
+                        MatricButtonList[buttonConfig.ButtonName].OnText = buttonConfig.OnText;
+                        MatricButtonList[buttonConfig.ButtonName].UpdateButtonText = buttonConfig.UpdateButtonText;
+                        Log.Instance.Info("Button updated: {name}, Offtext: {offtext}, Ontext: {Ontext},UpdateButtonText: {updatebuttontext}", 
+                            MatricButtonList[buttonConfig.ButtonName].ButtonName, MatricButtonList[buttonConfig.ButtonName].OffText, MatricButtonList[buttonConfig.ButtonName].OnText,MatricButtonList[buttonConfig.ButtonName].UpdateButtonText);
                     }
-                    pinEntry.Dispose();
-
-                } else {
-                    matric.PIN = Properties.Settings.Default.MatricPin;
-                    Log.Instance.Info("Matric PIN: {pin}", matric.PIN);
-                    matric.OnConnectedClientsReceived += Matric_OnConnectedClientsReceived;
-                    matric.GetConnectedClients();
                 }
-            }            
+            } catch {
+                Log.Instance.Info("Unable to refesh Button Text Config");
+            }
+
+
+            matric.OnConnectedClientsReceived += Matric_OnConnectedClientsReceived;
+            matric.GetConnectedClients();              
         }
 
-        public static void Matric_OnConnectedClientsReceived(object source, List<ClientInfo> clients) {
+    public static void Matric_OnConnectedClientsReceived(object source, List<ClientInfo> clients) {
             Log.Instance.Info("Matric client list updated");
 
-            // If we get a client list (even empty) from Matric, we know we have connectivity (aka the PIN is correct)
+            // If we get a client list (even empty) from Matric, we know we have connectivity
             verifiedMatricConnection = true;
-            ConnectedClients = clients;            
-            if (ConnectedClients.Count == 0) {
-                CLIENT_ID = "";
+            ConnectedClients = clients;
+            
+            // Matric version 2 supports use of 'null' Client IDs, in which case the updates are set to all Clients. 
+            // Previous logic to select first client, and store the ID for reuse is removed in favour of updating all.
+            // But we can still log connected clients for info.
+            CLIENT_ID = null;
+            if (ConnectedClients.Count == 0) {                
                 Log.Instance.Info("No clients connected");
             } else {                
                 foreach (ClientInfo clientInfo in ConnectedClients) {
                     Log.Instance.Info("Client name: {name}, IP: {ip}, ID: {id}", clientInfo.Name, clientInfo.IP, clientInfo.Id);
-                }
-                if (String.IsNullOrEmpty(CLIENT_ID)) {
-                    string savedClientId = Properties.Settings.Default.MatricClient;
-                    if (String.IsNullOrEmpty(savedClientId)) {                        
-                        CLIENT_ID = ConnectedClients[0].Id;
-                        Properties.Settings.Default.MatricClient = CLIENT_ID;
-                        Properties.Settings.Default.Save();
-                        Log.Instance.Info("No saved client found, saving default client as: {clientid}", CLIENT_ID);
-                    } else {
-                        Log.Instance.Info("Searching for saved client");
-                        foreach (ClientInfo clientInfo in ConnectedClients) {
-                            if (clientInfo.Id == savedClientId) {
-                                CLIENT_ID = savedClientId;
-                                Log.Instance.Info("Setting client to: {clientid}", CLIENT_ID);
-                                break;
-                            }
-                        }
-                        if (String.IsNullOrEmpty(CLIENT_ID)) {
-                            CLIENT_ID = ConnectedClients[0].Id;
-                            Log.Instance.Info("Saved client not connected, setting client to: {clientid}", CLIENT_ID);
-                        }
-                    }
                 }
             }
         }
 
         public List<ClientInfo> GetConnectedClients() {            
             return ConnectedClients;
-        }
-
-        public void SetClientId(string clientId) {
-            CLIENT_ID = clientId;
         }
 
         public bool IsConnected() {
@@ -149,81 +138,117 @@ namespace EliteFIPServer {
         public void UpdateStatus(StatusData currentStatus) {
             
             if (currentStatus != null) {                
-                Log.Instance.Info("Setting Matric state using: {gamestate}", JsonSerializer.Serialize(currentStatus));
-                List<SetButtonsVisualStateArgs> buttons = new List<SetButtonsVisualStateArgs>();
+                Log.Instance.Info("Setting Matric state using: {gamestate}", System.Text.Json.JsonSerializer.Serialize(currentStatus));
+                                                               
+                // Handle Indicators / Warnings first
+                if (MatricButtonList.ContainsKey(MatricConstants.DOCKED)) { MatricButtonList[MatricConstants.DOCKED].GameState = currentStatus.Docked; }
+                if (MatricButtonList.ContainsKey(MatricConstants.LANDED)) { MatricButtonList[MatricConstants.LANDED].GameState = currentStatus.Landed; }
+                if (MatricButtonList.ContainsKey(MatricConstants.SHIELDS)) { MatricButtonList[MatricConstants.SHIELDS].GameState = !currentStatus.ShieldsUp; }
+                if (MatricButtonList.ContainsKey(MatricConstants.INWING)) { MatricButtonList[MatricConstants.INWING].GameState = currentStatus.InWing; }
+                if (MatricButtonList.ContainsKey(MatricConstants.SCOOPINGFUEL)) { MatricButtonList[MatricConstants.SCOOPINGFUEL].GameState = currentStatus.ScoopingFuel; }
+                if (MatricButtonList.ContainsKey(MatricConstants.SRVUNDERSHIP)) { MatricButtonList[MatricConstants.SRVUNDERSHIP].GameState = currentStatus.SrvUnderShip; }
+                if (MatricButtonList.ContainsKey(MatricConstants.FSDMASSLOCK)) { MatricButtonList[MatricConstants.FSDMASSLOCK].GameState = currentStatus.FsdMassLocked; }
+                if (MatricButtonList.ContainsKey(MatricConstants.FSDCHARGE)) { MatricButtonList[MatricConstants.FSDCHARGE].GameState = currentStatus.FsdCharging; }
+                if (MatricButtonList.ContainsKey(MatricConstants.FSDCOOLDOWN)) { MatricButtonList[MatricConstants.FSDCOOLDOWN].GameState = currentStatus.FsdCooldown; }
+                if (MatricButtonList.ContainsKey(MatricConstants.LOWFUEL)) { MatricButtonList[MatricConstants.LOWFUEL].GameState = currentStatus.LowFuel; }
+                if (MatricButtonList.ContainsKey(MatricConstants.OVERHEAT)) { MatricButtonList[MatricConstants.OVERHEAT].GameState = currentStatus.Overheating; }
+                if (MatricButtonList.ContainsKey(MatricConstants.INDANGER)) { MatricButtonList[MatricConstants.INDANGER].GameState = currentStatus.InDanger; }
+                if (MatricButtonList.ContainsKey(MatricConstants.INTERDICTION)) { MatricButtonList[MatricConstants.INTERDICTION].GameState = currentStatus.BeingInterdicted; }
+                if (MatricButtonList.ContainsKey(MatricConstants.INMAINSHIP)) { MatricButtonList[MatricConstants.INMAINSHIP].GameState = currentStatus.InMainShip; }
+                if (MatricButtonList.ContainsKey(MatricConstants.INFIGHTER)) { MatricButtonList[MatricConstants.INFIGHTER].GameState = currentStatus.InFighter; }
+                if (MatricButtonList.ContainsKey(MatricConstants.INSRV)) { MatricButtonList[MatricConstants.INSRV].GameState = currentStatus.InSRV; }
 
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.LandingGearDown == true ? "on" : "off" , GEAR));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.Supercruise == true ? "on" : "off", SUPERCRUISE));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.FlightAssistOff == false ? "on" : "off", FLIGHTASSIST));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.HardpointsDeployed == true ? "on" : "off", HARDPOINTS));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.LightsOn == true ? "on" : "off", LIGHTS));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.CargoScoopDeployed == true ? "on" : "off", SCOOP));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.SilentRunning == true ? "on" : "off", SILENT));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.HudAnalysisMode == true ? "on" : "off", HUDMODE));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.NightVision == true ? "on" : "off", NVISION));                
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.FsdJump == true ? "on" : "off", FSDJUMP));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.Docked == true ? "on" : "off", DOCKED));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.Landed == true ? "on" : "off", LANDED));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.ShieldsUp == true ? "on" : "off",SHIELDS));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.InWing == true ? "on" : "off", WING));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.ScoopingFuel == true ? "on" : "off",SCOOPINGFUEL));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.FsdMassLocked == true ? "on" : "off", FSDMASSLOCK));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.FsdCharging == true ? "on" : "off", FSDCHARGE));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.FsdCooldown == true ? "on" : "off", FSDCOOLDOWN));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.LowFuel == true ? "on" : "off", LOWFUEL));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.Overheating == true ? "on" : "off", OVERHEAT));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.InDanger == true ? "on" : "off", INDANGER));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.BeingInterdicted == true ? "on" : "off", INTERDICTION));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.InMainShip == true ? "on" : "off", MAINSHIP));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.InFighter == true ? "on" : "off", FIGHTER));
-                buttons.Add(new SetButtonsVisualStateArgs(null, currentStatus.InSRV == true ? "on" : "off", SRV));
-                matric.SetButtonsVisualState(CLIENT_ID, buttons);
+                // Buttons and switches need extra TLC
+                if (MatricButtonList.ContainsKey(MatricConstants.LANDINGGEAR)) { 
+                    MatricButtonList[MatricConstants.LANDINGGEAR].GameState = currentStatus.LandingGearDown;
+                    MatricButtonList[MatricConstants.LANDINGGEAR].SwitchPosition = currentStatus.LandingGearDown ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.SUPERCRUISE)) { 
+                    MatricButtonList[MatricConstants.SUPERCRUISE].GameState = currentStatus.Supercruise;
+                    MatricButtonList[MatricConstants.SUPERCRUISE].SwitchPosition = currentStatus.Supercruise ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.FLIGHTASSIST)) { 
+                    MatricButtonList[MatricConstants.FLIGHTASSIST].GameState = currentStatus.FlightAssistOff;
+                    MatricButtonList[MatricConstants.FLIGHTASSIST].SwitchPosition = currentStatus.FlightAssistOff ? 0 : 1;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.HARDPOINTS)) { 
+                    MatricButtonList[MatricConstants.HARDPOINTS].GameState = currentStatus.HardpointsDeployed;
+                    MatricButtonList[MatricConstants.HARDPOINTS].SwitchPosition = currentStatus.HardpointsDeployed ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.LIGHTS)) { 
+                    MatricButtonList[MatricConstants.LIGHTS].GameState = currentStatus.LightsOn;
+                    MatricButtonList[MatricConstants.LIGHTS].SwitchPosition = currentStatus.LightsOn ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.CARGOSCOOP)) { 
+                    MatricButtonList[MatricConstants.CARGOSCOOP].GameState = currentStatus.CargoScoopDeployed;
+                    MatricButtonList[MatricConstants.CARGOSCOOP].SwitchPosition = currentStatus.CargoScoopDeployed ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.SILENTRUNNING)) { 
+                    MatricButtonList[MatricConstants.SILENTRUNNING].GameState = currentStatus.SilentRunning;
+                    MatricButtonList[MatricConstants.SILENTRUNNING].SwitchPosition = currentStatus.SilentRunning ? 1 : 0;
+                }                                               
+                if (MatricButtonList.ContainsKey(MatricConstants.SRVHANDBRAKE)) { 
+                    MatricButtonList[MatricConstants.SRVHANDBRAKE].GameState = currentStatus.SrvHandbrake;
+                    MatricButtonList[MatricConstants.SRVHANDBRAKE].SwitchPosition = currentStatus.SrvHandbrake ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.SRVTURRET)) { 
+                    MatricButtonList[MatricConstants.SRVTURRET].GameState = currentStatus.SrvTurret;
+                    MatricButtonList[MatricConstants.SRVTURRET].SwitchPosition = currentStatus.SrvTurret ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.SRVDRIVEASSIST)) { 
+                    MatricButtonList[MatricConstants.SRVDRIVEASSIST].GameState = currentStatus.SrvDriveAssist;
+                    MatricButtonList[MatricConstants.SRVDRIVEASSIST].SwitchPosition = currentStatus.SrvDriveAssist ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.HUDMODE)) { 
+                    MatricButtonList[MatricConstants.HUDMODE].GameState = currentStatus.HudAnalysisMode;
+                    MatricButtonList[MatricConstants.HUDMODE].SwitchPosition = currentStatus.HudAnalysisMode ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.NIGHTVISION)) { 
+                    MatricButtonList[MatricConstants.NIGHTVISION].GameState = currentStatus.NightVision;
+                    MatricButtonList[MatricConstants.NIGHTVISION].SwitchPosition = currentStatus.NightVision ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.FSDJUMP)) {
+                    MatricButtonList[MatricConstants.FSDJUMP].GameState = currentStatus.FsdJump;
+                    MatricButtonList[MatricConstants.FSDJUMP].SwitchPosition = currentStatus.FsdJump ? 1 : 0;
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.SRVHIGHBEAM)) { 
+                    MatricButtonList[MatricConstants.SRVHIGHBEAM].GameState = currentStatus.SrvHighBeam;
+                    MatricButtonList[MatricConstants.SRVHIGHBEAM].SwitchPosition = currentStatus.SrvHighBeam ? 1 : 0;
+                }
 
-                matric.SetButtonProperties(CLIENT_ID, null, text: currentStatus.HudAnalysisMode == true ? "Analysis" : "Combat", buttonName : HUDMODE);
-                matric.SetButtonProperties(CLIENT_ID, null, text: FormatStatusText(currentStatus), buttonName: STATUS);
-                matric.SetButtonProperties(CLIENT_ID, null, text: FormatStatusLabel(currentStatus), buttonName: STATUS_LABEL);
+                // Handle Text fields
+                if (MatricButtonList.ContainsKey(MatricConstants.STATUS_LABEL)) {
+                    MatricButtonList[MatricConstants.STATUS_LABEL].OffText = FormatStatusLabel(currentStatus);
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.STATUS)) {
+                    MatricButtonList[MatricConstants.STATUS].OffText = FormatStatusText(currentStatus);
+                }
+
+                foreach (MatricButton button in MatricButtonList.Values) {
+                    if (button != null) {
+                        button.UpdateMatricState(matric, CLIENT_ID);
+                    }
+                }                                                               
             }
-        }
-
-        private void ClearButtonState() {
-            Log.Instance.Info("Clearing Matric Button State");
-            List<SetButtonsVisualStateArgs> buttons = new List<SetButtonsVisualStateArgs>();
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", GEAR));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", SUPERCRUISE));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", FLIGHTASSIST));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", HARDPOINTS));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", LIGHTS));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", SCOOP));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", SILENT));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", HUDMODE));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", NVISION));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", FSDJUMP));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", DOCKED));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", LANDED));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", SHIELDS));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", WING));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", SCOOPINGFUEL));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", FSDMASSLOCK));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", FSDCHARGE));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", FSDCHARGE));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", LOWFUEL));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", OVERHEAT));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", INDANGER));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", INTERDICTION));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", MAINSHIP));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", FIGHTER));
-            buttons.Add(new SetButtonsVisualStateArgs(null, "off", SRV));
-
-            matric.SetButtonsVisualState(CLIENT_ID, buttons);
-            matric.SetButtonProperties(CLIENT_ID, null, "Combat", buttonName: HUDMODE);
         }
 
         public void UpdateTarget(ShipTargetedData currentTarget) {
 
             if (currentTarget != null) {
-                string targetTextColour = currentTarget.LegalStatus == "Wanted" ? ORANGE : WHITE;
-                matric.SetButtonProperties(CLIENT_ID, null, text: FormatTargetText(currentTarget),textcolorOff: targetTextColour, buttonName: TARGET);
-                matric.SetButtonProperties(CLIENT_ID, null, text: FormatTargetLabel(currentTarget), buttonName: TARGET_LABEL);
+
+                // Handle Text fields
+                if (MatricButtonList.ContainsKey(MatricConstants.TARGET_LABEL)) {
+                    MatricButtonList[MatricConstants.TARGET_LABEL].OffText = FormatTargetLabel(currentTarget);
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.TARGET)) {
+                    MatricButtonList[MatricConstants.TARGET].OffText = FormatTargetText(currentTarget);
+                }
+
+                foreach (MatricButton button in MatricButtonList.Values) {
+                    if (button != null) {
+                        button.UpdateMatricState(matric, CLIENT_ID);
+                    }
+                }
             }
         }
 
@@ -310,13 +335,53 @@ namespace EliteFIPServer {
                 statusTemplate = statusTemplate + $"<tr><td><br></td></tr>";
                 statusTemplate = statusTemplate + $"<tr><td>Cargo:</td></tr>";
                 statusTemplate = statusTemplate + $"<tr><td>Main fuel:</td></tr>";
-                statusTemplate = statusTemplate + $"<tr><td>Fuel resovoir:</td></tr>";
+                statusTemplate = statusTemplate + $"<tr><td>Fuel reservoir:</td></tr>";
                 statusTemplate = statusTemplate + $"</table>";
                 displayText = statusTemplate;
             }
             return displayText;
         }
 
+        public void StartMatricFlashWorker() {
+            // Start Matric Flash Thread
+            Log.Instance.Info("Starting Matric Flash Thread");
+            MatricFlashWorkerCTS = new CancellationTokenSource();
+            MatricFlashWorkerTask = new Task(new Action(MatricFlashWorkerThread), MatricFlashWorkerCTS.Token);
+            MatricFlashWorkerTask.ContinueWith(MatricFlashWorkerThreadEnded);
+            MatricFlashWorkerTask.Start();
+        }
 
+        public void StopMatricFlashWorker() {
+            // Start Matric Flash Thread
+            Log.Instance.Info("Stopping Matric Flash Thread");
+            MatricFlashWorkerCTS.Cancel();
+        }
+
+        private void MatricFlashWorkerThread() {            
+            Log.Instance.Info("Matric Flash Worker Thread started");           
+
+            CancellationToken token = MatricFlashWorkerCTS.Token;
+            while (token.IsCancellationRequested == false) {
+                List<SetButtonsVisualStateArgs> buttons = new List<SetButtonsVisualStateArgs>();
+                foreach (MatricButton button in MatricButtonList.Values) {
+                    if (button != null && button.IsWarning && button.GameState) {
+                        buttons.Add(new SetButtonsVisualStateArgs(null, button.ButtonState ? "off" : "on", MatricConstants.WRN + button.ButtonName));
+                        button.ButtonState = !button.ButtonState;
+                    }                                        
+                }
+                if (buttons.Count > 0) {
+                    matric.SetButtonsVisualState(CLIENT_ID, buttons);
+                }
+                Thread.Sleep(500);
+            }
+            Log.Instance.Info("Game Data Worker Thread ending");
+        }
+
+        private void MatricFlashWorkerThreadEnded(Task task) {
+            if (task.Exception != null) {
+                Log.Instance.Info("Matric Flash Worker Thread Exception: {exception}", task.Exception.ToString());
+            }
+            Log.Instance.Info("Matric Flash Worker Thread ended");
+        }        
     }
 }

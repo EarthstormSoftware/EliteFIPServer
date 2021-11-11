@@ -1,0 +1,16 @@
+[
+	{"ButtonName": "LandingGear", "OffText":"Landing Gear", "OnText":"Landing Gear", "UpdateButtonText": false},
+	{"ButtonName": "Supercruise", "OffText":"Supercruise", "OnText":"Supercruise", "UpdateButtonText": false},
+	{"ButtonName": "FlightAssist", "OffText":"Flight Assist", "OnText":"Flight Assist", "UpdateButtonText": false},
+	{"ButtonName": "Hardpoints", "OffText":"Hardpoints", "OnText":"Hardpoints", "UpdateButtonText": false},
+	{"ButtonName": "Lights", "OffText":"Lights", "OnText":"Lights", "UpdateButtonText": false},
+	{"ButtonName": "CargoScoop", "OffText":"Cargo Scoop", "OnText":"Cargo Scoop", "UpdateButtonText": false},
+	{"ButtonName": "SilentRunning", "OffText":"Silent Running", "OnText":"Silent Running", "UpdateButtonText": false},
+	{"ButtonName": "SrvHandbrake", "OffText":"SRV Handbrake", "OnText":"SRV Handbrake", "UpdateButtonText": false},
+	{"ButtonName": "SrvTurret", "OffText":"SRV Turret", "OnText":"SRV Turret", "UpdateButtonText": false},
+	{"ButtonName": "SrvDriveAssist", "OffText":"SRV DriveAssist", "OnText":"SRV DriveAssist", "UpdateButtonText": false},
+	{"ButtonName": "HudMode", "OffText":"Hud Mode", "OnText":"Hud Mode", "UpdateButtonText": false},
+	{"ButtonName": "NightVision", "OffText":"Night Vision", "OnText":"Night Vision", "UpdateButtonText": false},
+	{"ButtonName": "FsdJump", "OffText":"FSD Jump", "OnText":"FSD Jump", "UpdateButtonText": false},
+	{"ButtonName": "SrvHighBeam", "OffText":"SRV High Beam", "OnText":"SRV High Beam", "UpdateButtonText": false}	
+]

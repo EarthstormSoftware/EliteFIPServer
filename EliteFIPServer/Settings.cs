@@ -24,8 +24,6 @@ namespace EliteFIPServer {
 
         private void btnSave_Click(object sender, EventArgs e) {
             Log.Instance.Info("Saving settings");
-            Properties.Settings.Default.MatricPin = txtMatricPin.Text;
-            Properties.Settings.Default.MatricClient = txtMatricClient.Text;
             Properties.Settings.Default.ImmediateStart = chkImmediateStart.Checked;
             Properties.Settings.Default.EnableLog = chkEnableLog.Checked;            
             Properties.Settings.Default.Save();
@@ -36,9 +34,7 @@ namespace EliteFIPServer {
             } else {
                 Log.LogEnabled(false);
             }
-
-            // Update running Client Id
-            Caller.GetMatricApi().SetClientId(Properties.Settings.Default.MatricClient);
+           
             Caller.GetMatricApi().Connect();
 
         }
@@ -52,8 +48,6 @@ namespace EliteFIPServer {
         }
 
         private void loadSettings() {
-            txtMatricPin.Text = Properties.Settings.Default.MatricPin;
-            txtMatricClient.Text = Properties.Settings.Default.MatricClient;
             chkImmediateStart.Checked = Properties.Settings.Default.ImmediateStart;
             chkEnableLog.Checked = Properties.Settings.Default.EnableLog;
 
@@ -63,10 +57,6 @@ namespace EliteFIPServer {
                 dgvActiveClients.DataSource = dgvSource;
             } 
             
-        }
-
-        private void txtMatricPin_TextChanged(object sender, EventArgs e) {
-
         }
     }
 }
