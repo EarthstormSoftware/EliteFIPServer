@@ -9,7 +9,7 @@ This allows Matric to reflect the current game state in the UI, with particular 
 screen display rather than a traditional keyboard increases immersion and lowers the requirement to remember
 all the many key bindings you might need.
 
-Current build is available here: [v1.1.0](https://github.com/EarthstormSoftware/EliteFIPServer/releases/tag/v1.1.0)
+Current build is available here: [v2.0.0](https://github.com/EarthstormSoftware/EliteFIPServer/releases/tag/v2.0.0)
 
 If you are upgrading from a previous section, please double check the Runtime Pre-requisities and any upgrade notes as they might change from version to version.
 
@@ -90,7 +90,7 @@ When upgrading from v1, please review the button name information below and chan
 ---
 
 # Current Features
-EliteFIPServer should work with any Deck (a sample deck is available [here](https://community.matricapp.com/deck/344/elite-dangerous-fip)), and will update Matric objects 
+EliteFIPServer should work with any Deck (a sample deck is available [here](https://community.matricapp.com/deck/435/ed-fip-test)), and will update Matric objects 
 based on the Matric button name assigned. To use with your own deck, set the Name field of the Matric control to the listed below as appropriate, including the prefix to 
 indicate the type of button, and that control will be updated based on Elite state. Examples are below.
 
@@ -120,7 +120,7 @@ A flat text field, used for lables and text information like target data. These 
 ### Button Support Matrix
 
 Elite Data Point | Base Matric Button Name | Indicator | Warning | Button | Switch 
--------------- | -----------
+-------------- | ----------- | ----------- | -------------- | ----------- | ----------- 
 Docked (at a station) | Docked | x | x | | 
 Landed (on a planet) | Landed | x | x | | 
 Landing Gear   | LandingGear | x | x | x | x  
