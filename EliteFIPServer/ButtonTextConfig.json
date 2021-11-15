@@ -12,5 +12,6 @@
 	{"ButtonName": "HudMode", "OffText":"Hud Mode", "OnText":"Hud Mode", "UpdateButtonText": false},
 	{"ButtonName": "NightVision", "OffText":"Night Vision", "OnText":"Night Vision", "UpdateButtonText": false},
 	{"ButtonName": "FsdJump", "OffText":"FSD Jump", "OnText":"FSD Jump", "UpdateButtonText": false},
-	{"ButtonName": "SrvHighBeam", "OffText":"SRV High Beam", "OnText":"SRV High Beam", "UpdateButtonText": false}	
+	{"ButtonName": "SrvHighBeam", "OffText":"SRV High Beam", "OnText":"SRV High Beam", "UpdateButtonText": false},
+	{"ButtonName": "AimDownSight", "OffText": "Aim Down Sight", "OnText": "Aim Down Sight", "UpdateButtonText": false}	
 ]

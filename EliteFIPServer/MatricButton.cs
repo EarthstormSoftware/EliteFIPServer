@@ -95,6 +95,12 @@ namespace EliteFIPServer {
                 controlState.State = new { position = SwitchPosition };
                 controls.Add(controlState);
             }
+            if (IsSlider) {
+                SetControlsStateArgs controlState = new SetControlsStateArgs();
+                controlState.ControlName = MatricConstants.SLD + ButtonName;
+                controlState.State = new { value = SliderPosition };
+                controls.Add(controlState);
+            }
 
             return controls;
         }

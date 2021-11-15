@@ -57,13 +57,28 @@ namespace EliteFIPServer {
             templist.Add(new MatricButton(MatricConstants.OVERHEAT, "Overheat", isButton: false, isSwitch: false));
             templist.Add(new MatricButton(MatricConstants.INDANGER, "Danger", isButton: false, isSwitch: false));
             templist.Add(new MatricButton(MatricConstants.INTERDICTION, "Interdiction", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INMAINSHIP, "Main Ship", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INFIGHTER, "Fighter", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INSRV, "SRV", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INMAINSHIP, "In Main Ship", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INFIGHTER, "In Fighter", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INSRV, "In SRV", isButton: false, isSwitch: false));
             templist.Add(new MatricButton(MatricConstants.HUDMODE, "HUD Mode", offText: "Combat", onText: "Analysis"));
             templist.Add(new MatricButton(MatricConstants.NIGHTVISION, "Night Vision", offText: "Night Vision", onText: "Night Vision"));
             templist.Add(new MatricButton(MatricConstants.FSDJUMP, "FSD Jump", offText: "FSD Jump", onText: "FSD Jump"));
             templist.Add(new MatricButton(MatricConstants.SRVHIGHBEAM, "SRV High Beam", offText: "SRV High Beam", onText: "SRV High Beam"));
+
+            templist.Add(new MatricButton(MatricConstants.ONFOOT, "On Foot", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INTAXI, "In Taxi", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.INMULTICREW, "In Multicrew", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.ONFOOTINSTATION, "On Foot In Station", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.ONFOOTONPLANET, "On Foot On Planet", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.AIMDOWNSIGHT, "Aim Down Sight", offText: "Sights", onText: "Sights"));
+            templist.Add(new MatricButton(MatricConstants.LOWOXYGEN, "Low Oxygen", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.LOWHEALTH, "Low Health", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.COLD, "Cold", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.HOT, "Hot", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.VERYCOLD, "Very Cold", isButton: false, isSwitch: false));
+            templist.Add(new MatricButton(MatricConstants.VERYHOT, "Very Hot", isButton: false, isSwitch: false));
+
+            templist.Add(new MatricButton(MatricConstants.FUELRESERVOIR, "Fuel Reservoir", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isSlider: true, isText: true));
 
             templist.Add(new MatricButton(MatricConstants.STATUS, "Status", isButton: false, isIndicator: false, isWarning:false, isSwitch:false, isText: true));
             templist.Add(new MatricButton(MatricConstants.STATUS_LABEL, "Ship Status:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
@@ -158,6 +173,19 @@ namespace EliteFIPServer {
                 if (MatricButtonList.ContainsKey(MatricConstants.INFIGHTER)) { MatricButtonList[MatricConstants.INFIGHTER].GameState = currentStatus.InFighter; }
                 if (MatricButtonList.ContainsKey(MatricConstants.INSRV)) { MatricButtonList[MatricConstants.INSRV].GameState = currentStatus.InSRV; }
 
+                if (MatricButtonList.ContainsKey(MatricConstants.ONFOOT)) { MatricButtonList[MatricConstants.ONFOOT].GameState = currentStatus.OnFoot; }
+                if (MatricButtonList.ContainsKey(MatricConstants.INTAXI)) { MatricButtonList[MatricConstants.INTAXI].GameState = currentStatus.InTaxi; }
+                if (MatricButtonList.ContainsKey(MatricConstants.INMULTICREW)) { MatricButtonList[MatricConstants.INMULTICREW].GameState = currentStatus.InMulticrew; }
+                if (MatricButtonList.ContainsKey(MatricConstants.ONFOOTINSTATION)) { MatricButtonList[MatricConstants.ONFOOTINSTATION].GameState = currentStatus.OnFootInStation; }
+                if (MatricButtonList.ContainsKey(MatricConstants.ONFOOTONPLANET)) { MatricButtonList[MatricConstants.ONFOOTONPLANET].GameState = currentStatus.OnFootOnPlanet; }                
+                if (MatricButtonList.ContainsKey(MatricConstants.LOWOXYGEN)) { MatricButtonList[MatricConstants.LOWOXYGEN].GameState = currentStatus.LowOxygen; }
+                if (MatricButtonList.ContainsKey(MatricConstants.LOWHEALTH)) { MatricButtonList[MatricConstants.LOWHEALTH].GameState = currentStatus.LowHealth; }
+                if (MatricButtonList.ContainsKey(MatricConstants.COLD)) { MatricButtonList[MatricConstants.COLD].GameState = currentStatus.Cold; }
+                if (MatricButtonList.ContainsKey(MatricConstants.HOT)) { MatricButtonList[MatricConstants.HOT].GameState = currentStatus.Hot; }
+                if (MatricButtonList.ContainsKey(MatricConstants.VERYCOLD)) { MatricButtonList[MatricConstants.VERYCOLD].GameState = currentStatus.VeryCold; }
+                if (MatricButtonList.ContainsKey(MatricConstants.VERYHOT)) { MatricButtonList[MatricConstants.VERYHOT].GameState = currentStatus.VeryHot; }
+
+
                 // Buttons and switches need extra TLC
                 if (MatricButtonList.ContainsKey(MatricConstants.LANDINGGEAR)) { 
                     MatricButtonList[MatricConstants.LANDINGGEAR].GameState = currentStatus.LandingGearDown;
@@ -216,7 +244,27 @@ namespace EliteFIPServer {
                     MatricButtonList[MatricConstants.SRVHIGHBEAM].SwitchPosition = currentStatus.SrvHighBeam ? 1 : 0;
                 }
 
-                // Handle Text fields
+                if (MatricButtonList.ContainsKey(MatricConstants.AIMDOWNSIGHT)) { 
+                    MatricButtonList[MatricConstants.AIMDOWNSIGHT].GameState = currentStatus.AimDownSight;
+                    MatricButtonList[MatricConstants.AIMDOWNSIGHT].SwitchPosition = currentStatus.AimDownSight ? 1 : 0;
+                }
+
+                // Handle Sliders and text fields
+                if (MatricButtonList.ContainsKey(MatricConstants.FUELRESERVOIR)) {
+                    MatricButtonList[MatricConstants.FUELRESERVOIR].OffText = Math.Round((decimal)currentStatus.FuelReservoir, 2).ToString();
+
+                    // Set slider position, and handle data oddities
+                    if (Math.Round((decimal)currentStatus.FuelReservoir, 2) >= 1) {
+                        MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = 100;
+                    } else if (Math.Round((decimal)currentStatus.FuelReservoir, 2) <= 0) {
+                        MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = 0;
+                    } else {
+                        MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = (int)Math.Round((decimal)currentStatus.FuelReservoir, 2)*100;
+                    }                        
+                }
+
+
+                // Handle Special Text fields
                 if (MatricButtonList.ContainsKey(MatricConstants.STATUS_LABEL)) {
                     MatricButtonList[MatricConstants.STATUS_LABEL].OffText = FormatStatusLabel(currentStatus);
                 }
@@ -317,7 +365,7 @@ namespace EliteFIPServer {
                 statusTemplate = statusTemplate + $"<tr><td><br></td></tr>";
                 statusTemplate = statusTemplate + $"<tr><td>{statusData.Cargo.ToString()}</td></tr>";
                 statusTemplate = statusTemplate + $"<tr><td>{Math.Round((decimal)statusData.FuelMain, 2).ToString()}</td></tr>";
-                statusTemplate = statusTemplate + $"<tr><td>{Math.Round((decimal)statusData.FuelResovoir, 2).ToString()}</td></tr>";
+                statusTemplate = statusTemplate + $"<tr><td>{Math.Round((decimal)statusData.FuelReservoir, 2).ToString()}</td></tr>";
                 statusTemplate = statusTemplate + $"</table>";
                 displayText = statusTemplate;
             }

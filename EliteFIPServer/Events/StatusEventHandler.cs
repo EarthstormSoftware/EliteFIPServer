@@ -24,7 +24,8 @@ namespace EliteFIPServer {
                 
                 statusData.LastUpdate = DateTime.Now;
 
-                StatusFlags curState = (StatusFlags)currentStatusData.Flags;
+                // Original Status Flags
+                StatusFlags curState = currentStatusData.Flags;
                 if (curState.HasFlag(StatusFlags.Docked)) { statusData.Docked = true; }
                 if (curState.HasFlag(StatusFlags.Landed)) { statusData.Landed = true; }
                 if (curState.HasFlag(StatusFlags.LandingGearDown)) { statusData.LandingGearDown = true; }
@@ -61,6 +62,21 @@ namespace EliteFIPServer {
                 if (curState.HasFlag(StatusFlags.AltitudeFromAverageRadius)) { statusData.AltitudeFromAverageRadius = true; }
                 if (curState.HasFlag(StatusFlags.SrvHighBeam)) { statusData.SrvHighBeam = true; }
 
+                // Extended Flags from Odyssey
+                MoreStatusFlags curState2 = currentStatusData.Flags2;
+                if (curState2.HasFlag(MoreStatusFlags.OnFoot)) { statusData.OnFoot = true; }
+                if (curState2.HasFlag(MoreStatusFlags.InTaxi)) { statusData.InTaxi = true; }
+                if (curState2.HasFlag(MoreStatusFlags.InMulticrew)) { statusData.InMulticrew = true; }
+                if (curState2.HasFlag(MoreStatusFlags.OnFootInStation)) { statusData.OnFootInStation = true; }
+                if (curState2.HasFlag(MoreStatusFlags.OnFootOnPlanet)) { statusData.OnFootOnPlanet = true; }
+                if (curState2.HasFlag(MoreStatusFlags.AimDownSight)) { statusData.AimDownSight = true; }
+                if (curState2.HasFlag(MoreStatusFlags.LowOxygen)) { statusData.LowOxygen = true; }
+                if (curState2.HasFlag(MoreStatusFlags.LowHealth)) { statusData.LowHealth = true; }
+                if (curState2.HasFlag(MoreStatusFlags.Cold)) { statusData.Cold = true; }
+                if (curState2.HasFlag(MoreStatusFlags.Hot)) { statusData.Hot = true; }
+                if (curState2.HasFlag(MoreStatusFlags.VeryCold)) { statusData.VeryCold = true; }
+                if (curState2.HasFlag(MoreStatusFlags.VeryHot)) { statusData.VeryHot = true; }
+
                 if (currentStatusData.Flags != 0) {
                     statusData.SystemPips = currentStatusData.Pips.System;
                     statusData.EnginePips = currentStatusData.Pips.Engine;
@@ -69,15 +85,24 @@ namespace EliteFIPServer {
                     statusData.FireGroup = currentStatusData.Firegroup;
                     statusData.GuiFocus = currentStatusData.GuiFocus.ToString();
                     statusData.FuelMain = currentStatusData.Fuel.FuelMain;
-                    statusData.FuelResovoir = currentStatusData.Fuel.FuelReservoir;
+                    statusData.FuelReservoir = currentStatusData.Fuel.FuelReservoir;
                     statusData.Cargo = currentStatusData.Cargo;
                     statusData.LegalState = currentStatusData.LegalState;
                     statusData.Altitude = currentStatusData.Altitude;
                     statusData.Heading = currentStatusData.Heading;
                     statusData.BodyName = currentStatusData.BodyName;
                     statusData.PlanetRadius = currentStatusData.PlanetRadius;
-                    
+                    statusData.Balance = currentStatusData.Balance;
+                    statusData.DestinationSystem = currentStatusData.Destination.System;
+                    statusData.DestinationBody = currentStatusData.Destination.Body;
+                    statusData.DestinationName = currentStatusData.Destination.Name;
+                    statusData.Oxygen = currentStatusData.Oxygen;
+                    statusData.Health = currentStatusData.Health;
+                    statusData.Temperature = currentStatusData.Temperature;
+                    statusData.SelectedWeapon = currentStatusData.SelectedWeapon;
+                    statusData.Gravity = currentStatusData.Gravity;
                 }
+
                 Log.Instance.Info("Sending Status to worker {status}", statusData.ToString());
                 Caller.GameDataEvent(GameEventType.Status, statusData);
             }            

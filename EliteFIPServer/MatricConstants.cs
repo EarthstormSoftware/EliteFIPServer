@@ -39,6 +39,24 @@ namespace EliteFIPServer {
         public static string FSDJUMP = "FsdJump";
         public static string SRVHIGHBEAM = "SrvHighBeam";
 
+        // Extended Status data from Odyssey
+        public static string ONFOOT = "OnFoot";
+        public static string INTAXI = "InTaxi";
+        public static string INMULTICREW = "InMulticrew";
+        public static string ONFOOTINSTATION = "OnFootInStation";
+        public static string ONFOOTONPLANET = "OnFootOnPlanet";
+        public static string AIMDOWNSIGHT = "AimDownSight";
+        public static string LOWOXYGEN = "LowOxygen";
+        public static string LOWHEALTH = "LowHealth";
+        public static string COLD = "Cold";
+        public static string HOT = "Hot";
+        public static string VERYCOLD = "VeryCold";
+        public static string VERYHOT = "VeryHot";
+
+        // Pure text data
+        public static string FUELRESERVOIR = "FuelReservoir";
+
+
         // Status Text Displays
         public static string STATUS = "Status";
         public static string STATUS_LABEL = "StatusLabel";

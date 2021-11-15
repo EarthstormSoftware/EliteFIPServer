@@ -6,10 +6,11 @@
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject>EliteFIPServer.Program</StartupObject>
     <Authors>Earthstorm Software</Authors>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
-    <Version>1.2.0</Version>
+    <AssemblyVersion>2.1.0.0</AssemblyVersion>
+    <FileVersion>2.1.0.0</FileVersion>
+    <Version>2.1.0</Version>
     <Platforms>AnyCPU;x64</Platforms>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,7 +22,7 @@
 
   <ItemGroup>
     <Reference Include="EliteFIPProtocol">
-      <HintPath>..\..\EliteFIPProtocol\EliteFIPProtocol\bin\Release\net5.0\EliteFIPProtocol.dll</HintPath>
+      <HintPath>..\..\EliteFIPProtocol\EliteFIPProtocol\bin\Release\net6.0\EliteFIPProtocol.dll</HintPath>
     </Reference>
     <Reference Include="EliteJournalReader">
       <HintPath>..\..\EliteJournalReader\EliteJournalReader\bin\Release\net50\EliteJournalReader.dll</HintPath>
@@ -67,6 +68,13 @@
 
   <ItemGroup>
     <Folder Include="api\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

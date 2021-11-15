@@ -9,7 +9,7 @@ This allows Matric to reflect the current game state in the UI, with particular 
 screen display rather than a traditional keyboard increases immersion and lowers the requirement to remember
 all the many key bindings you might need.
 
-Current build is available here: [v2.0.0](https://github.com/EarthstormSoftware/EliteFIPServer/releases/tag/v2.0.0)
+Current build is available here: [v2.1.0](https://github.com/EarthstormSoftware/EliteFIPServer/releases/tag/v2.1.0)
 
 If you are upgrading from a previous section, please double check the Runtime Pre-requisities and any upgrade notes as they might change from version to version.
 
@@ -114,6 +114,9 @@ See Usage Instructions for how to enable this.
 For use with multi-position switches. All simple toggle controls support use of a 2-way multiposition switch, with position 1 being off and 2 being on.
 Specific controls supporting more than 2-way switches might be added later - if you have a specific use case, please contact the developer.
 
+#### Slider (sld) 
+Used to create Guages. Specific values will depend on the button.
+
 #### Text (txt)
 A flat text field, used for lables and text information like target data. These are special cases and information is provided below.
 
@@ -165,24 +168,29 @@ To indicate if Landing Gear is deployed or not, set the Name field for the contr
 To have a flashing warning when Landing gear is deployed, set the Name field for the control in the Matric editor to: wrnLandingGear
 When using a 2-way Multi-position switch for Landing gear, set the Name field for the control in the Matric editor to: swtLandingGear
 
+### Sliders and Text Fields
 
-### Text Displays
+Elite Data Point | Base Matric Button Name | Slider | Text | Notes
+-------------- | ----------- | ----------- | -------------- | -----------
+Fuel (Reservoir) | FuelReservoir | x | x | Slider is a percentage, text is actual value from game. 
+Target data (Ship type, Faction, Rank etc)   | Target |  | x | Custom panel showing target information in one Matric button
+Target labels  | TargetLabel |  | x | Fixed label for Target panel
+Status data (Legal state, Cargo weight, Fuel etc)   | Status  |  | x | Custom panel showing status information in one Matric button
+Status labels  | StatusLabel|  | x | Fixed label for Status panel
 
-These displays require a text button, of sufficient width and height to display the full text. If the text button
+
+Text displays require a text button, of sufficient width and height to display the full text. If the text button
 is not large enough for the content, the behaviour is 'undefined'.
-Text size is per standard Matric setting, but each field is defined on a new line. 
-The labels match the target field.
-
-Elite Information | Matric Button name
--------------- | -----------
-Target data (Ship type, Faction, Rank etc)   | txtTarget
-Target labels  | txtTargetLabel
-Status data (Legal state, Cargo weight, Fuel etc)   | txtStatus
-Status labels  | txtStatusLabel
+Text size is per standard Matric setting, but for text which combines multiple Elite data points in one display,  eeach field is defined on a new line. 
 
 
 ---
 # Change History
+
+### v2.1.0
+- Added Odyssey status fields 
+- Added Slider capability and first 'guage' 
+
 ### v2.0.0
 - Refactored code to simplify adding new features
 - Updated .NET to 6.0 (current Long Term Support version)
