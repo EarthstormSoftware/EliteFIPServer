@@ -1,17 +1,13 @@
 ﻿using Matric.Integration;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EliteFIPServer {
 
     class MatricButton {
 
-        public string ButtonName { get; } 
-        public string ButtonLabel { get; set; } 
-        public bool IsButton { get; }        
+        public string ButtonName { get; }
+        public string ButtonLabel { get; set; }
+        public bool IsButton { get; }
         public bool IsIndicator { get; }
         public bool IsWarning { get; }
         public bool IsSwitch { get; }
@@ -20,15 +16,15 @@ namespace EliteFIPServer {
         public bool IsPanel { get; }
         public string OffText { get; set; }
         public string OnText { get; set; }
-        public bool ButtonState { get; set; }        
+        public bool ButtonState { get; set; }
         public int SwitchPosition { get; set; }
         public int SliderPosition { get; set; }
         public bool UpdateButtonText { get; set; }
-        
+
         public bool GameState { get; set; }
 
 
-        public MatricButton(string buttonName, string buttonLabel, bool isButton = true, bool isIndicator = true, bool isWarning = true , bool isSwitch = true, bool isSlider = false, bool isText = false, bool isPanel = false, 
+        public MatricButton(string buttonName, string buttonLabel, bool isButton = true, bool isIndicator = true, bool isWarning = true, bool isSwitch = true, bool isSlider = false, bool isText = false, bool isPanel = false,
             string offText = "", string onText = "", bool buttonState = false, int switchPosition = 1, int sliderPosition = 0, bool updateButtonText = false, bool gameState = false) {
             ButtonName = buttonName;
             ButtonLabel = buttonLabel;
@@ -48,14 +44,14 @@ namespace EliteFIPServer {
             GameState = gameState;
         }
 
-       public void SetDefaultButtonState() {
+        public void SetDefaultButtonState() {
             ButtonState = false;
             GameState = false;
             SwitchPosition = 1;
             SliderPosition = 0;
             if (IsText) {
                 OffText = "";
-            } 
+            }
         }
 
         public void UpdateMatricState(Matric.Integration.Matric matric, string ClientId) {

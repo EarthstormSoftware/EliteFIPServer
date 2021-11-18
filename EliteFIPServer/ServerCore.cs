@@ -1,13 +1,12 @@
-﻿using EliteFIPServer.Logging;
+﻿using EliteFIPProtocol;
+using EliteFIPServer.Logging;
+using EliteJournalReader;
+using EliteJournalReader.Events;
 using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using EliteJournalReader;
-using EliteJournalReader.Events;
-using EliteFIPProtocol;
-
 
 namespace EliteFIPServer {
 
@@ -25,11 +24,11 @@ namespace EliteFIPServer {
     }
 
     public struct GameEventTrigger {
-        public GameEventType GameEvent { get; set; }       
+        public GameEventType GameEvent { get; set; }
         public Object EventData { get; set; }
 
         public GameEventTrigger(GameEventType gameEvent, Object eventData) {
-            GameEvent = gameEvent;            
+            GameEvent = gameEvent;
             EventData = eventData;
         }
     }
@@ -40,7 +39,7 @@ namespace EliteFIPServer {
         private EDFIPServerConsole ServerConsole;
 
         // Server States
-        private CoreState ServerCoreState { get; set; }        
+        private CoreState ServerCoreState { get; set; }
 
         // Game Event Worker
         private CancellationTokenSource GameDataWorkerCTS;
@@ -60,12 +59,16 @@ namespace EliteFIPServer {
 
         // Event Handling
         private StatusEventHandler StatusEventHandler;
-        private TargetEventHandler  TargetEventHandler;
+        private TargetEventHandler TargetEventHandler;
 
         // Matric Integration
-        private MatricIntegration matricapi = new MatricIntegration();        
+        private MatricIntegration matricapi = new MatricIntegration();
 
-        public ServerCore (EDFIPServerConsole serverConsole) {
+        // Panel Server        
+        private CancellationTokenSource PanelServerCTS;
+        private Task PanelServerTask;
+
+        public ServerCore(EDFIPServerConsole serverConsole) {
             ServerConsole = serverConsole;
 
             // Set up the Journal feeds to be passed to clients
@@ -90,7 +93,7 @@ namespace EliteFIPServer {
             if (Properties.Settings.Default.ImmediateStart == true) {
                 this.Start();
             }
-            
+
         }
 
         public void Start() {
@@ -99,7 +102,7 @@ namespace EliteFIPServer {
 
             // Start Game Data Worker Thread
             Log.Instance.Info("Starting Game data worker");
-            GameDataWorkerCTS = new CancellationTokenSource();            
+            GameDataWorkerCTS = new CancellationTokenSource();
             GameDataTask = new Task(new Action(GameDataWorkerThread), GameDataWorkerCTS.Token);
             GameDataTask.ContinueWith(GameDataWorkerThreadEnded);
             GameDataTask.Start();
@@ -110,6 +113,12 @@ namespace EliteFIPServer {
 
             // Start Matric Flashing Lights thread
             matricapi.StartMatricFlashWorker();
+
+            // Start Panel Server Thread
+            Log.Instance.Info("Starting Panel Server");
+            PanelServerCTS = new CancellationTokenSource();
+            //PanelServerTask = PanelServer.RunAsync(PanelServerCTS.Token);
+            //PanelServerTask.ContinueWith(PanelServerThreadEnded);
 
             ServerCoreState = CoreState.Started;
             ServerConsole.UpdateServerStatus(ServerCoreState);
@@ -129,6 +138,9 @@ namespace EliteFIPServer {
 
             // Stop Matric Flashing Lights thread
             matricapi.StopMatricFlashWorker();
+
+            // Stop Panel Server
+            //PanelServerCTS.Cancel();
 
             ServerCoreState = CoreState.Stopped;
             ServerConsole.UpdateServerStatus(ServerCoreState);
@@ -159,11 +171,11 @@ namespace EliteFIPServer {
 
                     } else if (gameEventTrigger.GameEvent == GameEventType.Status) {
                         currentStatus = gameEventTrigger.EventData as StatusData;
-                        Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));                        
+                        Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));
 
                     } else if (gameEventTrigger.GameEvent == GameEventType.Target) {
                         currentTarget = gameEventTrigger.EventData as ShipTargetedData;
-                        Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));                        
+                        Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));
                     }
                     // Update Matric state
                     if (matricapi.IsConnected()) {
@@ -191,6 +203,13 @@ namespace EliteFIPServer {
             GameEventTrigger newStatusEvent = new GameEventTrigger(eventType, evt);
             GameDataQueue.Enqueue(newStatusEvent);
             GameDataWorkerWait.Set();
+        }
+
+        private void PanelServerThreadEnded(Task task) {
+            if (task.Exception != null) {
+                Log.Instance.Info("Panel Server Thread Exception: {exception}", task.Exception.ToString());
+            }
+            Log.Instance.Info("Panel Server Thread ended");
         }
 
         public CoreState GetState() {

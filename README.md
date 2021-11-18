@@ -189,7 +189,7 @@ Text size is per standard Matric setting, but for text which combines multiple E
 
 ### v2.1.0
 - Added Odyssey status fields 
-- Added Slider capability and first 'guage' 
+- Added Slider capability and first 'gauge' 
 
 ### v2.0.0
 - Refactored code to simplify adding new features

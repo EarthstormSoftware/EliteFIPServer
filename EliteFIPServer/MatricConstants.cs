@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EliteFIPServer {
+﻿namespace EliteFIPServer {
     class MatricConstants {
-        
+
         // Status Data
         public static string DOCKED = "Docked";
         public static string LANDED = "Landed";

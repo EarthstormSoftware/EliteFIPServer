@@ -43,5 +43,5 @@ namespace EliteFIPServer.Logging {
                 LogManager.DisableLogging();
             }
         }
-    }    
+    }
 }

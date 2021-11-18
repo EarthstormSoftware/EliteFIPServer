@@ -1,21 +1,10 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using EliteFIPServer.Logging;
+using System;
 using System.Windows.Forms;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Net.Sockets;
-using System.Net;
-using System.Text;
-using System.Diagnostics;
-using System.Linq;
-using System.IO;
-using System.Text.Json;
-using Microsoft.Extensions.Logging;
-using EliteFIPServer.Logging;
 
 namespace EliteFIPServer {
 
-    public partial class EDFIPServerConsole : Form {    
+    public partial class EDFIPServerConsole : Form {
 
         private delegate void SafeCallDelegate(string text);
         private ServerCore ServerCore;
@@ -25,13 +14,13 @@ namespace EliteFIPServer {
         }
 
         private void MainForm_Load(object sender, EventArgs e) {
-            
+
             if (Properties.Settings.Default.EnableLog == true) {
                 Log.LogEnabled(true);
             } else {
                 Log.LogEnabled(false);
             }
-            lblServerState.Text = CoreState.Stopped.ToString();            
+            lblServerState.Text = CoreState.Stopped.ToString();
             ServerCore = new ServerCore(this);
         }
 
@@ -59,7 +48,7 @@ namespace EliteFIPServer {
         }
 
         public void UpdateStatusText(string text) {
-            if (lblServerState.InvokeRequired) {                
+            if (lblServerState.InvokeRequired) {
                 var d = new SafeCallDelegate(UpdateStatusText);
                 lblServerState.Invoke(d, new object[] { text });
             } else {
@@ -71,7 +60,7 @@ namespace EliteFIPServer {
             if (btnStartStop.InvokeRequired) {
                 var d = new SafeCallDelegate(UpdateButtonText);
                 btnStartStop.Invoke(d, new object[] { text });
-            } else {                
+            } else {
                 btnStartStop.Text = text;
             }
         }

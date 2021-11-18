@@ -1,9 +1,9 @@
-﻿using System;
-using System.Text.Json;
-using EliteFIPProtocol;
-using EliteJournalReader.Events;
+﻿using EliteFIPProtocol;
 using EliteFIPServer.Logging;
+using EliteJournalReader.Events;
+using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace EliteFIPServer {
 
@@ -21,11 +21,11 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Handling Target Event: {targetevent}", currentTargetData.ToString());
             ShipTargetedData targetData = new ShipTargetedData();
-            
+
 
             TimeSpan dataAge = DateTime.UtcNow.Subtract(currentTargetData.Timestamp);
             Log.Instance.Info("Target data age: {targetage}", dataAge.ToString());
-            if (dataAge.TotalMinutes < 5) {             
+            if (dataAge.TotalMinutes < 5) {
                 targetData.LastUpdate = currentTargetData.Timestamp;
                 targetData.TargetLocked = currentTargetData.TargetLocked;
                 if (targetData.TargetLocked == true) {
@@ -40,7 +40,7 @@ namespace EliteFIPServer {
                     } else {
                         targetData.Ship = currentTargetData.Ship_Localised;
                     }
-                    
+
                     targetData.ScanStage = currentTargetData.ScanStage;
                     if (targetData.ScanStage >= 1) {
                         targetData.PilotName = currentTargetData.PilotName_Localised;
@@ -74,9 +74,9 @@ namespace EliteFIPServer {
             ShipMap.Add("mamba", "Mamba");
         }
 
-        
+
         public static FIPPacket CreateFIPPacket(ShipTargetedData targetData) {
-            
+
             GameData gameData = new GameData();
             gameData.Type = GameEventType.Status.ToString();
             gameData.Data = JsonSerializer.Serialize(targetData);

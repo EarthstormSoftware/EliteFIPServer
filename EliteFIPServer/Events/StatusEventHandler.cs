@@ -1,15 +1,15 @@
-﻿using System;
-using System.Text.Json;
-using EliteFIPProtocol;
-using EliteJournalReader.Events;
+﻿using EliteFIPProtocol;
 using EliteFIPServer.Logging;
+using EliteJournalReader.Events;
+using System;
+using System.Text.Json;
 
 namespace EliteFIPServer {
 
     class StatusEventHandler {
 
         private IGameDataEvent Caller;
-        
+
         public StatusEventHandler(IGameDataEvent caller) {
             Caller = caller;
         }
@@ -21,7 +21,7 @@ namespace EliteFIPServer {
 
             if (currentStatusData != null) {
 
-                
+
                 statusData.LastUpdate = DateTime.Now;
 
                 // Original Status Flags
@@ -47,7 +47,7 @@ namespace EliteFIPServer {
                 if (curState.HasFlag(StatusFlags.FsdCooldown)) { statusData.FsdCooldown = true; }
                 if (curState.HasFlag(StatusFlags.LowFuel)) { statusData.LowFuel = true; }
                 if (curState.HasFlag(StatusFlags.Overheating)) { statusData.Overheating = true; }
-                if (curState.HasFlag(StatusFlags.HasLatLong)) { 
+                if (curState.HasFlag(StatusFlags.HasLatLong)) {
                     statusData.HasLatLong = true;
                     statusData.Latitude = currentStatusData.Latitude;
                     statusData.Longitude = currentStatusData.Longitude;
@@ -55,7 +55,7 @@ namespace EliteFIPServer {
                 if (curState.HasFlag(StatusFlags.IsInDanger)) { statusData.InDanger = true; }
                 if (curState.HasFlag(StatusFlags.BeingInterdicted)) { statusData.BeingInterdicted = true; }
                 if (curState.HasFlag(StatusFlags.InMainShip)) { statusData.InMainShip = true; }
-                if (curState.HasFlag(StatusFlags.InFighter)) { statusData.InFighter = true; }                
+                if (curState.HasFlag(StatusFlags.InFighter)) { statusData.InFighter = true; }
                 if (curState.HasFlag(StatusFlags.HudInAnalysisMode)) { statusData.HudAnalysisMode = true; }
                 if (curState.HasFlag(StatusFlags.NightVision)) { statusData.NightVision = true; }
                 if (curState.HasFlag(StatusFlags.FsdJump)) { statusData.FsdJump = true; }
@@ -105,11 +105,11 @@ namespace EliteFIPServer {
 
                 Log.Instance.Info("Sending Status to worker {status}", statusData.ToString());
                 Caller.GameDataEvent(GameEventType.Status, statusData);
-            }            
+            }
         }
 
         public static FIPPacket CreateFIPPacket(StatusData statusData) {
-            
+
             GameData gameData = new GameData();
             gameData.Type = GameEventType.Status.ToString();
             gameData.Data = JsonSerializer.Serialize(statusData);

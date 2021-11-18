@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-using Matric.Integration;
+﻿using EliteFIPProtocol;
 using EliteFIPServer.Logging;
-using EliteFIPProtocol;
-using System.Text.Json;
+using Matric.Integration;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.IO;
-using Newtonsoft.Json;
 
 namespace EliteFIPServer {
     public class MatricIntegration {
 
         public static List<ClientInfo> ConnectedClients = new List<ClientInfo>();
         private static Dictionary<string, MatricButton> MatricButtonList = CreateButtonList();
-            
+
         private string AppName = "Elite FIP Server";
         private static string CLIENT_ID;
         private static Matric.Integration.Matric matric;
@@ -33,10 +31,10 @@ namespace EliteFIPServer {
             // For reference:
             // public MatricButton(string buttonName, string buttonLabel, bool isButton = true, bool isIndicator = true, bool isWarning = true , bool isSwitch = true, bool isSlider = false, bool isText = false, bool isPanel = false, 
             //                     string offText = "Off", string onText = "On", bool buttonState = false, int switchPosition = 1, int sliderPosition = 0)
-                                   
-            templist.Add(new MatricButton(MatricConstants.DOCKED, "Docked", isButton: false, isSwitch: false ));
+
+            templist.Add(new MatricButton(MatricConstants.DOCKED, "Docked", isButton: false, isSwitch: false));
             templist.Add(new MatricButton(MatricConstants.LANDED, "Landed", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.LANDINGGEAR, "Landing Gear", offText: "Landing Gear", onText:"Landing Gear"));
+            templist.Add(new MatricButton(MatricConstants.LANDINGGEAR, "Landing Gear", offText: "Landing Gear", onText: "Landing Gear"));
             templist.Add(new MatricButton(MatricConstants.SHIELDS, "Shields", isButton: false, isSwitch: false));
             templist.Add(new MatricButton(MatricConstants.SUPERCRUISE, "Supercruise", offText: "Supercruise", onText: "Supercruise"));
             templist.Add(new MatricButton(MatricConstants.FLIGHTASSIST, "Flight Assist", offText: "Flight Assist", onText: "Flight Assist"));
@@ -80,15 +78,15 @@ namespace EliteFIPServer {
 
             templist.Add(new MatricButton(MatricConstants.FUELRESERVOIR, "Fuel Reservoir", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isSlider: true, isText: true));
 
-            templist.Add(new MatricButton(MatricConstants.STATUS, "Status", isButton: false, isIndicator: false, isWarning:false, isSwitch:false, isText: true));
+            templist.Add(new MatricButton(MatricConstants.STATUS, "Status", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
             templist.Add(new MatricButton(MatricConstants.STATUS_LABEL, "Ship Status:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
 
             templist.Add(new MatricButton(MatricConstants.TARGET, "Target", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
-            templist.Add(new MatricButton(MatricConstants.TARGET_LABEL , "Target Info:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
+            templist.Add(new MatricButton(MatricConstants.TARGET_LABEL, "Target Info:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
 
             foreach (MatricButton button in templist) {
                 buttonlist.Add(button.ButtonName, button);
-            }            
+            }
             return buttonlist;
         }
 
@@ -109,8 +107,8 @@ namespace EliteFIPServer {
                         MatricButtonList[buttonConfig.ButtonName].OffText = buttonConfig.OffText;
                         MatricButtonList[buttonConfig.ButtonName].OnText = buttonConfig.OnText;
                         MatricButtonList[buttonConfig.ButtonName].UpdateButtonText = buttonConfig.UpdateButtonText;
-                        Log.Instance.Info("Button updated: {name}, Offtext: {offtext}, Ontext: {Ontext},UpdateButtonText: {updatebuttontext}", 
-                            MatricButtonList[buttonConfig.ButtonName].ButtonName, MatricButtonList[buttonConfig.ButtonName].OffText, MatricButtonList[buttonConfig.ButtonName].OnText,MatricButtonList[buttonConfig.ButtonName].UpdateButtonText);
+                        Log.Instance.Info("Button updated: {name}, Offtext: {offtext}, Ontext: {Ontext},UpdateButtonText: {updatebuttontext}",
+                            MatricButtonList[buttonConfig.ButtonName].ButtonName, MatricButtonList[buttonConfig.ButtonName].OffText, MatricButtonList[buttonConfig.ButtonName].OnText, MatricButtonList[buttonConfig.ButtonName].UpdateButtonText);
                     }
                 }
             } catch {
@@ -119,30 +117,30 @@ namespace EliteFIPServer {
 
 
             matric.OnConnectedClientsReceived += Matric_OnConnectedClientsReceived;
-            matric.GetConnectedClients();              
+            matric.GetConnectedClients();
         }
 
-    public static void Matric_OnConnectedClientsReceived(object source, List<ClientInfo> clients) {
+        public static void Matric_OnConnectedClientsReceived(object source, List<ClientInfo> clients) {
             Log.Instance.Info("Matric client list updated");
 
             // If we get a client list (even empty) from Matric, we know we have connectivity
             verifiedMatricConnection = true;
             ConnectedClients = clients;
-            
+
             // Matric version 2 supports use of 'null' Client IDs, in which case the updates are set to all Clients. 
             // Previous logic to select first client, and store the ID for reuse is removed in favour of updating all.
             // But we can still log connected clients for info.
             CLIENT_ID = null;
-            if (ConnectedClients.Count == 0) {                
+            if (ConnectedClients.Count == 0) {
                 Log.Instance.Info("No clients connected");
-            } else {                
+            } else {
                 foreach (ClientInfo clientInfo in ConnectedClients) {
                     Log.Instance.Info("Client name: {name}, IP: {ip}, ID: {id}", clientInfo.Name, clientInfo.IP, clientInfo.Id);
                 }
             }
         }
 
-        public List<ClientInfo> GetConnectedClients() {            
+        public List<ClientInfo> GetConnectedClients() {
             return ConnectedClients;
         }
 
@@ -151,10 +149,10 @@ namespace EliteFIPServer {
         }
 
         public void UpdateStatus(StatusData currentStatus) {
-            
-            if (currentStatus != null) {                
+
+            if (currentStatus != null) {
                 Log.Instance.Info("Setting Matric state using: {gamestate}", System.Text.Json.JsonSerializer.Serialize(currentStatus));
-                                                               
+
                 // Handle Indicators / Warnings first
                 if (MatricButtonList.ContainsKey(MatricConstants.DOCKED)) { MatricButtonList[MatricConstants.DOCKED].GameState = currentStatus.Docked; }
                 if (MatricButtonList.ContainsKey(MatricConstants.LANDED)) { MatricButtonList[MatricConstants.LANDED].GameState = currentStatus.Landed; }
@@ -177,7 +175,7 @@ namespace EliteFIPServer {
                 if (MatricButtonList.ContainsKey(MatricConstants.INTAXI)) { MatricButtonList[MatricConstants.INTAXI].GameState = currentStatus.InTaxi; }
                 if (MatricButtonList.ContainsKey(MatricConstants.INMULTICREW)) { MatricButtonList[MatricConstants.INMULTICREW].GameState = currentStatus.InMulticrew; }
                 if (MatricButtonList.ContainsKey(MatricConstants.ONFOOTINSTATION)) { MatricButtonList[MatricConstants.ONFOOTINSTATION].GameState = currentStatus.OnFootInStation; }
-                if (MatricButtonList.ContainsKey(MatricConstants.ONFOOTONPLANET)) { MatricButtonList[MatricConstants.ONFOOTONPLANET].GameState = currentStatus.OnFootOnPlanet; }                
+                if (MatricButtonList.ContainsKey(MatricConstants.ONFOOTONPLANET)) { MatricButtonList[MatricConstants.ONFOOTONPLANET].GameState = currentStatus.OnFootOnPlanet; }
                 if (MatricButtonList.ContainsKey(MatricConstants.LOWOXYGEN)) { MatricButtonList[MatricConstants.LOWOXYGEN].GameState = currentStatus.LowOxygen; }
                 if (MatricButtonList.ContainsKey(MatricConstants.LOWHEALTH)) { MatricButtonList[MatricConstants.LOWHEALTH].GameState = currentStatus.LowHealth; }
                 if (MatricButtonList.ContainsKey(MatricConstants.COLD)) { MatricButtonList[MatricConstants.COLD].GameState = currentStatus.Cold; }
@@ -187,51 +185,51 @@ namespace EliteFIPServer {
 
 
                 // Buttons and switches need extra TLC
-                if (MatricButtonList.ContainsKey(MatricConstants.LANDINGGEAR)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.LANDINGGEAR)) {
                     MatricButtonList[MatricConstants.LANDINGGEAR].GameState = currentStatus.LandingGearDown;
                     MatricButtonList[MatricConstants.LANDINGGEAR].SwitchPosition = currentStatus.LandingGearDown ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.SUPERCRUISE)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.SUPERCRUISE)) {
                     MatricButtonList[MatricConstants.SUPERCRUISE].GameState = currentStatus.Supercruise;
                     MatricButtonList[MatricConstants.SUPERCRUISE].SwitchPosition = currentStatus.Supercruise ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.FLIGHTASSIST)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.FLIGHTASSIST)) {
                     MatricButtonList[MatricConstants.FLIGHTASSIST].GameState = currentStatus.FlightAssistOff;
                     MatricButtonList[MatricConstants.FLIGHTASSIST].SwitchPosition = currentStatus.FlightAssistOff ? 0 : 1;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.HARDPOINTS)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.HARDPOINTS)) {
                     MatricButtonList[MatricConstants.HARDPOINTS].GameState = currentStatus.HardpointsDeployed;
                     MatricButtonList[MatricConstants.HARDPOINTS].SwitchPosition = currentStatus.HardpointsDeployed ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.LIGHTS)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.LIGHTS)) {
                     MatricButtonList[MatricConstants.LIGHTS].GameState = currentStatus.LightsOn;
                     MatricButtonList[MatricConstants.LIGHTS].SwitchPosition = currentStatus.LightsOn ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.CARGOSCOOP)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.CARGOSCOOP)) {
                     MatricButtonList[MatricConstants.CARGOSCOOP].GameState = currentStatus.CargoScoopDeployed;
                     MatricButtonList[MatricConstants.CARGOSCOOP].SwitchPosition = currentStatus.CargoScoopDeployed ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.SILENTRUNNING)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.SILENTRUNNING)) {
                     MatricButtonList[MatricConstants.SILENTRUNNING].GameState = currentStatus.SilentRunning;
                     MatricButtonList[MatricConstants.SILENTRUNNING].SwitchPosition = currentStatus.SilentRunning ? 1 : 0;
-                }                                               
-                if (MatricButtonList.ContainsKey(MatricConstants.SRVHANDBRAKE)) { 
+                }
+                if (MatricButtonList.ContainsKey(MatricConstants.SRVHANDBRAKE)) {
                     MatricButtonList[MatricConstants.SRVHANDBRAKE].GameState = currentStatus.SrvHandbrake;
                     MatricButtonList[MatricConstants.SRVHANDBRAKE].SwitchPosition = currentStatus.SrvHandbrake ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.SRVTURRET)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.SRVTURRET)) {
                     MatricButtonList[MatricConstants.SRVTURRET].GameState = currentStatus.SrvTurret;
                     MatricButtonList[MatricConstants.SRVTURRET].SwitchPosition = currentStatus.SrvTurret ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.SRVDRIVEASSIST)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.SRVDRIVEASSIST)) {
                     MatricButtonList[MatricConstants.SRVDRIVEASSIST].GameState = currentStatus.SrvDriveAssist;
                     MatricButtonList[MatricConstants.SRVDRIVEASSIST].SwitchPosition = currentStatus.SrvDriveAssist ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.HUDMODE)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.HUDMODE)) {
                     MatricButtonList[MatricConstants.HUDMODE].GameState = currentStatus.HudAnalysisMode;
                     MatricButtonList[MatricConstants.HUDMODE].SwitchPosition = currentStatus.HudAnalysisMode ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.NIGHTVISION)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.NIGHTVISION)) {
                     MatricButtonList[MatricConstants.NIGHTVISION].GameState = currentStatus.NightVision;
                     MatricButtonList[MatricConstants.NIGHTVISION].SwitchPosition = currentStatus.NightVision ? 1 : 0;
                 }
@@ -239,12 +237,12 @@ namespace EliteFIPServer {
                     MatricButtonList[MatricConstants.FSDJUMP].GameState = currentStatus.FsdJump;
                     MatricButtonList[MatricConstants.FSDJUMP].SwitchPosition = currentStatus.FsdJump ? 1 : 0;
                 }
-                if (MatricButtonList.ContainsKey(MatricConstants.SRVHIGHBEAM)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.SRVHIGHBEAM)) {
                     MatricButtonList[MatricConstants.SRVHIGHBEAM].GameState = currentStatus.SrvHighBeam;
                     MatricButtonList[MatricConstants.SRVHIGHBEAM].SwitchPosition = currentStatus.SrvHighBeam ? 1 : 0;
                 }
 
-                if (MatricButtonList.ContainsKey(MatricConstants.AIMDOWNSIGHT)) { 
+                if (MatricButtonList.ContainsKey(MatricConstants.AIMDOWNSIGHT)) {
                     MatricButtonList[MatricConstants.AIMDOWNSIGHT].GameState = currentStatus.AimDownSight;
                     MatricButtonList[MatricConstants.AIMDOWNSIGHT].SwitchPosition = currentStatus.AimDownSight ? 1 : 0;
                 }
@@ -259,8 +257,8 @@ namespace EliteFIPServer {
                     } else if (Math.Round((decimal)currentStatus.FuelReservoir, 2) <= 0) {
                         MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = 0;
                     } else {
-                        MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = (int)Math.Round((decimal)currentStatus.FuelReservoir, 2)*100;
-                    }                        
+                        MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = (int)Math.Round((decimal)currentStatus.FuelReservoir, 2) * 100;
+                    }
                 }
 
 
@@ -276,7 +274,7 @@ namespace EliteFIPServer {
                     if (button != null) {
                         button.UpdateMatricState(matric, CLIENT_ID);
                     }
-                }                                                               
+                }
             }
         }
 
@@ -302,11 +300,11 @@ namespace EliteFIPServer {
 
         private static string FormatTargetText(ShipTargetedData targetData) {
 
-            String displayText = "";          
+            String displayText = "";
             if (targetData != null) {
-                                                
+
                 if (targetData.TargetLocked == true) {
-                    string bountyText = targetData.Bounty == 0 ? "" : targetData.Bounty.ToString();                    
+                    string bountyText = targetData.Bounty == 0 ? "" : targetData.Bounty.ToString();
                     var targetTemplate = $"<table>" +
                         $"<tr><td>{targetData.Ship}</td></tr>" +
                         $"<tr><td>{targetData.PilotName}</td></tr>" +
@@ -317,7 +315,7 @@ namespace EliteFIPServer {
                         $"</table>";
                     displayText = targetTemplate;
                 } else {
-                    displayText = "<table><tr><td>No target selected</td></tr></table>";                   
+                    displayText = "<table><tr><td>No target selected</td></tr></table>";
                 }
             }
             return displayText;
@@ -361,7 +359,7 @@ namespace EliteFIPServer {
                 } else {
                     statusTemplate = statusTemplate + $"<tr><td>{statusData.LegalState}</td></tr>";
                 }
-                
+
                 statusTemplate = statusTemplate + $"<tr><td><br></td></tr>";
                 statusTemplate = statusTemplate + $"<tr><td>{statusData.Cargo.ToString()}</td></tr>";
                 statusTemplate = statusTemplate + $"<tr><td>{Math.Round((decimal)statusData.FuelMain, 2).ToString()}</td></tr>";
@@ -405,8 +403,8 @@ namespace EliteFIPServer {
             MatricFlashWorkerCTS.Cancel();
         }
 
-        private void MatricFlashWorkerThread() {            
-            Log.Instance.Info("Matric Flash Worker Thread started");           
+        private void MatricFlashWorkerThread() {
+            Log.Instance.Info("Matric Flash Worker Thread started");
 
             CancellationToken token = MatricFlashWorkerCTS.Token;
             while (token.IsCancellationRequested == false) {
@@ -415,7 +413,7 @@ namespace EliteFIPServer {
                     if (button != null && button.IsWarning && button.GameState) {
                         buttons.Add(new SetButtonsVisualStateArgs(null, button.ButtonState ? "off" : "on", MatricConstants.WRN + button.ButtonName));
                         button.ButtonState = !button.ButtonState;
-                    }                                        
+                    }
                 }
                 if (buttons.Count > 0) {
                     matric.SetButtonsVisualState(CLIENT_ID, buttons);
@@ -430,6 +428,6 @@ namespace EliteFIPServer {
                 Log.Instance.Info("Matric Flash Worker Thread Exception: {exception}", task.Exception.ToString());
             }
             Log.Instance.Info("Matric Flash Worker Thread ended");
-        }        
+        }
     }
 }
