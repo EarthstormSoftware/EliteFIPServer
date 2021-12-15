@@ -1,6 +1,4 @@
 ﻿using EliteFIPServer.Logging;
-using System;
-using System.Windows.Forms;
 
 namespace EliteFIPServer {
 
@@ -20,29 +18,29 @@ namespace EliteFIPServer {
             } else {
                 Log.LogEnabled(false);
             }
-            lblServerState.Text = CoreState.Stopped.ToString();
+            lblServerState.Text = State.Stopped.ToString();
             ServerCore = new ServerCore(this);
         }
 
         private void btnStartStop_Click(object sender, EventArgs e) {
 
-            if (ServerCore.GetState() == CoreState.Stopped) {
+            if (ServerCore.GetState() == State.Stopped) {
                 ServerCore.Start();
                 btnStartStop.Text = "Stop";
 
-            } else if (ServerCore.GetState() == CoreState.Started) {
+            } else if (ServerCore.GetState() == State.Started) {
                 ServerCore.Stop();
                 btnStartStop.Text = "Start";
             }
         }
 
 
-        public void UpdateServerStatus(CoreState serverState) {
-            if (serverState == CoreState.Stopped) {
-                UpdateStatusText(CoreState.Stopped.ToString());
+        public void UpdateServerStatus(State serverState) {
+            if (serverState == State.Stopped) {
+                UpdateStatusText(State.Stopped.ToString());
                 UpdateButtonText("Start");
-            } else if (serverState == CoreState.Started) {
-                UpdateStatusText(CoreState.Started.ToString());
+            } else if (serverState == State.Started) {
+                UpdateStatusText(State.Started.ToString());
                 UpdateButtonText("Stop");
             }
         }
@@ -71,7 +69,7 @@ namespace EliteFIPServer {
             settings.Dispose();
         }
 
-        public CoreState GetServerState() {
+        public State GetServerState() {
             return ServerCore.GetState();
         }
 

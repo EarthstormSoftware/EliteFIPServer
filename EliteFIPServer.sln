@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EliteFIPServer", "EliteFIPS
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B518BBDD-052B-43A1-831A-AF00F23B7D5B}"
 	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
+		EliteFIPServer\PanelServer.md = EliteFIPServer\PanelServer.md
 	EndProjectSection
 EndProject
 Global

@@ -14,5 +14,11 @@
     <Setting Name="ImmediateStart" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="EnablePanelServer" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="PanelServerPort" Type="System.String" Scope="User">
+      <Value Profile="(Default)">4545</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

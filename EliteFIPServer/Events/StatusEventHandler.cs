@@ -1,11 +1,10 @@
 ﻿using EliteFIPProtocol;
 using EliteFIPServer.Logging;
 using EliteJournalReader.Events;
-using System;
 using System.Text.Json;
 
 namespace EliteFIPServer {
-
+    
     class StatusEventHandler {
 
         private IGameDataEvent Caller;

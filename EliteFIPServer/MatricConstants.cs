@@ -48,6 +48,7 @@
         public static string VERYHOT = "VeryHot";
 
         // Pure text data
+        public static string FUELMAIN = "FuelMain";
         public static string FUELRESERVOIR = "FuelReservoir";
 
 

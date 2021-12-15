@@ -1,0 +1,14 @@
+﻿body {
+    background-color:black;
+}
+
+td {
+    color:orange;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+td.red {
+    color: orange;
+}
+
+

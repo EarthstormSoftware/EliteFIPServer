@@ -1,8 +1,6 @@
 ﻿using EliteFIPProtocol;
 using EliteFIPServer.Logging;
 using EliteJournalReader.Events;
-using System;
-using System.Collections.Generic;
 using System.Text.Json;
 
 namespace EliteFIPServer {
@@ -72,6 +70,7 @@ namespace EliteFIPServer {
             ShipMap.Add("vulture", "Vulture");
             ShipMap.Add("python", "Python");
             ShipMap.Add("mamba", "Mamba");
+            ShipMap.Add("orca", "Orca");
         }
 
 

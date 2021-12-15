@@ -30,7 +30,7 @@ Aside from various libraries which VS will highlight if missing, and which are a
 EliteFIPServer requires the following:
 
 - [EliteJournalReader](https://github.com/MagicMau/EliteJournalReader)
-- [EliteFIPProtocol](https://github.com/EarthstormSoftware/EliteFIPProtoco)
+- [EliteFIPProtocol](https://github.com/EarthstormSoftware/EliteFIPProtocol)
 - [MatricIntegration.dll](https://matricapp.com)
 
 ---
@@ -60,6 +60,9 @@ of data manually with the buttom in the main screen.
 In the 'Settings' panel the Enable Logging option will enable or disable logging. By default logging is turned 
 off. When enabled, the log is located in the User AppData\Roaming\EliteFIPServer folder.
 For example: c:\Users\MyUserName\AppData\Roaming\EliteFIPServer
+
+### Enable Panel Server
+See [Panel server](EliteFIPServer/PanelServer.md) for more information
 
 ### Enable Custom Button Text
 To have Elite FIP server change button text when game state changes, you have to update the ButtonTextConfig.json file in the same folder
@@ -186,6 +189,9 @@ Text size is per standard Matric setting, but for text which combines multiple E
 
 ---
 # Change History
+
+### v2.2.0
+- Added Panel Server
 
 ### v2.1.0
 - Added Odyssey status fields 

@@ -2,11 +2,6 @@
 using EliteFIPServer.Logging;
 using Matric.Integration;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EliteFIPServer {
     public class MatricIntegration {
@@ -76,6 +71,7 @@ namespace EliteFIPServer {
             templist.Add(new MatricButton(MatricConstants.VERYCOLD, "Very Cold", isButton: false, isSwitch: false));
             templist.Add(new MatricButton(MatricConstants.VERYHOT, "Very Hot", isButton: false, isSwitch: false));
 
+            templist.Add(new MatricButton(MatricConstants.FUELMAIN, "Main Fuel", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isSlider: false, isText: true));
             templist.Add(new MatricButton(MatricConstants.FUELRESERVOIR, "Fuel Reservoir", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isSlider: true, isText: true));
 
             templist.Add(new MatricButton(MatricConstants.STATUS, "Status", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
@@ -94,7 +90,11 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Connecting to Matric");
             if (matric == null) {
-                matric = new Matric.Integration.Matric(AppName);
+                try {
+                    matric = new Matric.Integration.Matric(AppName);
+                } catch (Exception e) {
+                    Log.Instance.Info("Matric Exception: {exception}", e.ToString());
+                }
             }
 
             // Refesh Button Text Config 
@@ -248,6 +248,10 @@ namespace EliteFIPServer {
                 }
 
                 // Handle Sliders and text fields
+                if (MatricButtonList.ContainsKey(MatricConstants.FUELMAIN)) {
+                    MatricButtonList[MatricConstants.FUELMAIN].OffText = Math.Round((decimal)currentStatus.FuelReservoir, 2).ToString();                    
+                }
+
                 if (MatricButtonList.ContainsKey(MatricConstants.FUELRESERVOIR)) {
                     MatricButtonList[MatricConstants.FUELRESERVOIR].OffText = Math.Round((decimal)currentStatus.FuelReservoir, 2).ToString();
 

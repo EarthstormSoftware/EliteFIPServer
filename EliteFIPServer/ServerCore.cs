@@ -2,15 +2,14 @@
 using EliteFIPServer.Logging;
 using EliteJournalReader;
 using EliteJournalReader.Events;
-using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
+using EliteFIPServer.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace EliteFIPServer {
 
-    public enum CoreState {
+    public enum State {
         Stopped,
         Starting,
         Started,
@@ -18,6 +17,7 @@ namespace EliteFIPServer {
     }
 
     public enum GameEventType {
+        Empty,
         Status,
         Target,
         ServerStop
@@ -25,7 +25,7 @@ namespace EliteFIPServer {
 
     public struct GameEventTrigger {
         public GameEventType GameEvent { get; set; }
-        public Object EventData { get; set; }
+        public object EventData { get; set; }
 
         public GameEventTrigger(GameEventType gameEvent, Object eventData) {
             GameEvent = gameEvent;
@@ -33,20 +33,19 @@ namespace EliteFIPServer {
         }
     }
 
-    public class ServerCore : IGameDataEvent {
+    public class ServerCore : IGameDataEvent {        
 
         // Reference to Primary UI 
         private EDFIPServerConsole ServerConsole;
 
         // Server States
-        private CoreState ServerCoreState { get; set; }
+        private State ServerCoreState { get; set; }
 
         // Game Event Worker
         private CancellationTokenSource GameDataWorkerCTS;
         private Task GameDataTask;
-        private CoreState GameDataWorkerState { get; set; }
-        ConcurrentQueue<GameEventTrigger> GameDataQueue = new ConcurrentQueue<GameEventTrigger>();
-        private static EventWaitHandle GameDataWorkerWait;
+        private State GameDataWorkerState { get; set; }
+        BlockingCollection<GameEventTrigger> GameDataQueue = new BlockingCollection<GameEventTrigger>(Constants.MaxGameDataQueueSize);
 
         // Game State Handling
         private string JournalFileFolder;
@@ -67,17 +66,19 @@ namespace EliteFIPServer {
         // Panel Server        
         private CancellationTokenSource PanelServerCTS;
         private Task PanelServerTask;
+        private bool PanelServerStarted = false;
+        private GameDataUpdateController GameDataUpdateController;
 
         public ServerCore(EDFIPServerConsole serverConsole) {
-            ServerConsole = serverConsole;
+            ServerConsole = serverConsole;            
 
             // Set up the Journal feeds to be passed to clients
             var userHome = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
             JournalFileFolder = userHome + Constants.GameStateFolder;
             Log.Instance.Info("Tracking game data from folder: {journalfilefolder}", JournalFileFolder);
             StatusWatcher = new StatusWatcher(JournalFileFolder);
-            JournalWatcher = new JournalWatcher(JournalFileFolder);
-            GameDataWorkerWait = new EventWaitHandle(false, EventResetMode.AutoReset);
+            JournalWatcher = new JournalWatcher(JournalFileFolder); 
+
 
             // Add events to watch list
             StatusEventHandler = new StatusEventHandler(this);
@@ -98,7 +99,7 @@ namespace EliteFIPServer {
 
         public void Start() {
             Log.Instance.Info("Server Core starting");
-            ServerCoreState = CoreState.Starting;
+            ServerCoreState = State.Starting;
 
             // Start Game Data Worker Thread
             Log.Instance.Info("Starting Game data worker");
@@ -115,19 +116,63 @@ namespace EliteFIPServer {
             matricapi.StartMatricFlashWorker();
 
             // Start Panel Server Thread
-            Log.Instance.Info("Starting Panel Server");
-            PanelServerCTS = new CancellationTokenSource();
-            //PanelServerTask = PanelServer.RunAsync(PanelServerCTS.Token);
-            //PanelServerTask.ContinueWith(PanelServerThreadEnded);
+            if (Properties.Settings.Default.EnablePanelServer == true)
+            {
+                Log.Instance.Info("Starting Panel Server");
+                try
+                {
+                    var panelServerUrl = "http://*:" + Properties.Settings.Default.PanelServerPort;
+                    var panelServerBuilder = WebApplication.CreateBuilder(Program.GetArgs());
+                    
+                    panelServerBuilder.Services.AddMvcCore().AddMvcOptions(options => options.EnableEndpointRouting=false);
+                    panelServerBuilder.Services.AddCors(cors => cors.AddPolicy("CorsPolicy", builder => {
+                        builder
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials()
+                            .WithOrigins(panelServerUrl);
+                    }));
+                    panelServerBuilder.Services.AddControllers().AddNewtonsoftJson();
+                    panelServerBuilder.Services.AddSignalR();                    
+                    var panelServer = panelServerBuilder.Build();
 
-            ServerCoreState = CoreState.Started;
+                    if (panelServer.Environment.IsDevelopment())
+                    {
+                        panelServer.UseDeveloperExceptionPage();
+                    }
+                                       
+                    Log.Instance.Info("Listening on {panelserverurl}", panelServerUrl);
+                    panelServer.Urls.Add(panelServerUrl);
+                    panelServer.UseStaticFiles();
+                    panelServer.UseRouting();
+                    panelServer.UseMvc();
+                    panelServer.UseCors("CorsPolicy");
+
+                    panelServer.MapHub<GameDataUpdateHub>("/gamedataupdatehub");
+                    var hubContext = panelServer.Services.GetService(typeof(IHubContext<GameDataUpdateHub>)) as IHubContext<GameDataUpdateHub>;
+                    GameDataUpdateController = new GameDataUpdateController(hubContext);
+
+                    
+                    PanelServerCTS = new CancellationTokenSource();
+                    PanelServerTask = panelServer.RunAsync(PanelServerCTS.Token);
+                    PanelServerTask.ContinueWith(PanelServerThreadEnded);
+                    PanelServerStarted = true;
+                }
+                catch (Exception ex)
+                {
+                    Log.Instance.Error("Exception: {exception}", ex.ToString());
+                    PanelServerStarted = false;
+                }
+            }
+
+            ServerCoreState = State.Started;
             ServerConsole.UpdateServerStatus(ServerCoreState);
             Log.Instance.Info("Server Core started");
         }
 
         public void Stop() {
             Log.Instance.Info("Server Core stopping");
-            ServerCoreState = CoreState.Stopping;
+            ServerCoreState = State.Stopping;
             // Isssue the cancel to signal worker threads to end, and send stop message
             GameDataWorkerCTS.Cancel();
             GameDataEvent(GameEventType.ServerStop, null);
@@ -140,58 +185,76 @@ namespace EliteFIPServer {
             matricapi.StopMatricFlashWorker();
 
             // Stop Panel Server
-            //PanelServerCTS.Cancel();
+            if (PanelServerStarted) {
+                PanelServerCTS.Cancel();
+            }
 
-            ServerCoreState = CoreState.Stopped;
+            GameDataQueue.CompleteAdding();
+            ServerCoreState = State.Stopped;
             ServerConsole.UpdateServerStatus(ServerCoreState);
             Log.Instance.Info("Server Core stopped");
         }
 
         private void GameDataWorkerThread() {
-            GameDataWorkerState = CoreState.Started;
+            
+            GameDataWorkerState = State.Started;
             Log.Instance.Info("Game Data Worker Thread started");
 
             DateTime lastSuccessfulUpdate = DateTime.Today;
 
-            CancellationToken token = GameDataWorkerCTS.Token;
-            while (token.IsCancellationRequested == false) {
+            CancellationToken cToken = GameDataWorkerCTS.Token;
+            while (cToken.IsCancellationRequested == false) {
                 // Update Matric state
                 if (matricapi.IsConnected()) {
                     Log.Instance.Info("Updating Matric state");
-                    matricapi.UpdateStatus(currentStatus);
+                    matricapi.UpdateStatus(currentStatus);                    
                     matricapi.UpdateTarget(currentTarget);
                 }
-                while (!GameDataQueue.IsEmpty) {
-                    GameDataQueue.TryDequeue(out GameEventTrigger gameEventTrigger);
-                    Log.Instance.Info("Game data event received");
 
-                    if (gameEventTrigger.GameEvent == GameEventType.ServerStop) {
-                        Log.Instance.Info("Server stop event received");
-                        break;
+                while (!GameDataQueue.IsCompleted) {
 
-                    } else if (gameEventTrigger.GameEvent == GameEventType.Status) {
-                        currentStatus = gameEventTrigger.EventData as StatusData;
-                        Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));
+                    GameEventTrigger gameEventTrigger = new GameEventTrigger(GameEventType.Empty, null);
+                    try {
+                        gameEventTrigger = GameDataQueue.Take(cToken);
+                    } catch (InvalidOperationException) { }
 
-                    } else if (gameEventTrigger.GameEvent == GameEventType.Target) {
-                        currentTarget = gameEventTrigger.EventData as ShipTargetedData;
-                        Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));
+                    if (gameEventTrigger.GameEvent != GameEventType.Empty) {
+                        Log.Instance.Info("Game data event received");
+
+                        if (gameEventTrigger.GameEvent == GameEventType.ServerStop) {
+                            Log.Instance.Info("Server stop event received");
+                            break;
+
+                        }
+                        else if (gameEventTrigger.GameEvent == GameEventType.Status) {
+                            currentStatus = new StatusData();
+                            currentStatus = gameEventTrigger.EventData as StatusData;
+                            string statusJSON = JsonSerializer.Serialize(currentStatus);
+                            Log.Instance.Info("Current State: {gamestate}", statusJSON);                            
+                            if (PanelServerStarted) { GameDataUpdateController.SendStatusUpdate(currentStatus); }                                                    
+
+                        }
+                        else if (gameEventTrigger.GameEvent == GameEventType.Target) {
+                            currentTarget = new ShipTargetedData();
+                            currentTarget = gameEventTrigger.EventData as ShipTargetedData;
+                            Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));
+                            if (PanelServerStarted) { GameDataUpdateController.SendTargetUpdate(currentTarget); }
+                        }
+                        // Update Matric state
+                        if (matricapi.IsConnected()) {
+                            Log.Instance.Info("Updating Matric state");
+                            matricapi.UpdateStatus(currentStatus);
+                            matricapi.UpdateTarget(currentTarget);
+                        }                        
                     }
-                    // Update Matric state
-                    if (matricapi.IsConnected()) {
-                        Log.Instance.Info("Updating Matric state");
-                        matricapi.UpdateStatus(currentStatus);
-                        matricapi.UpdateTarget(currentTarget);
-                    }
+                    Log.Instance.Info("Game Data Worker Thread waiting for new work");
                 }
-                Log.Instance.Info("Game Data Worker Thread waiting for new work");
-                GameDataWorkerWait.WaitOne();
             }
             Log.Instance.Info("Game Data Worker Thread ending");
         }
 
         private void GameDataWorkerThreadEnded(Task task) {
-            GameDataWorkerState = CoreState.Stopped;
+            GameDataWorkerState = State.Stopped;
             if (task.Exception != null) {
                 Log.Instance.Info("GameData Worker Thread Exception: {exception}", task.Exception.ToString());
             }
@@ -201,8 +264,8 @@ namespace EliteFIPServer {
         public void GameDataEvent(GameEventType eventType, Object evt) {
 
             GameEventTrigger newStatusEvent = new GameEventTrigger(eventType, evt);
-            GameDataQueue.Enqueue(newStatusEvent);
-            GameDataWorkerWait.Set();
+            CancellationToken cToken = GameDataWorkerCTS.Token;
+            GameDataQueue.Add(newStatusEvent,cToken);            
         }
 
         private void PanelServerThreadEnded(Task task) {
@@ -212,16 +275,12 @@ namespace EliteFIPServer {
             Log.Instance.Info("Panel Server Thread ended");
         }
 
-        public CoreState GetState() {
+        public State GetState() {
             return ServerCoreState;
         }
 
         public MatricIntegration GetMatricApi() {
             return matricapi;
-        }
-
-        public StatusData GetCurrentStatus() {
-            return currentStatus;
         }
     }
 }

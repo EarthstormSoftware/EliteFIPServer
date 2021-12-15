@@ -1,8 +1,6 @@
 ﻿using EliteFIPServer.Logging;
 using Matric.Integration;
-using System;
 using System.ComponentModel;
-using System.Windows.Forms;
 
 namespace EliteFIPServer {
     public partial class Settings : Form {
@@ -25,6 +23,8 @@ namespace EliteFIPServer {
             Log.Instance.Info("Saving settings");
             Properties.Settings.Default.ImmediateStart = chkImmediateStart.Checked;
             Properties.Settings.Default.EnableLog = chkEnableLog.Checked;
+            Properties.Settings.Default.EnablePanelServer = chkEnablePanelServer.Checked;   
+            Properties.Settings.Default.PanelServerPort = txtPanelServerPort.Text;
             Properties.Settings.Default.Save();
 
             // Update log setting
@@ -49,8 +49,10 @@ namespace EliteFIPServer {
         private void loadSettings() {
             chkImmediateStart.Checked = Properties.Settings.Default.ImmediateStart;
             chkEnableLog.Checked = Properties.Settings.Default.EnableLog;
+            chkEnablePanelServer.Checked = Properties.Settings.Default.EnablePanelServer;
+            txtPanelServerPort.Text = Properties.Settings.Default.PanelServerPort;
 
-            if (Caller.GetServerState() == CoreState.Started) {
+            if (Caller.GetServerState() == State.Started) {
                 BindingList<ClientInfo> activeClients = new BindingList<ClientInfo>(Caller.GetMatricApi().GetConnectedClients());
                 BindingSource dgvSource = new BindingSource(activeClients, null);
                 dgvActiveClients.DataSource = dgvSource;

@@ -31,13 +31,16 @@ namespace EliteFIPServer {
             this.chkEnableLog = new System.Windows.Forms.CheckBox();
             this.lblActiveClients = new System.Windows.Forms.Label();
             this.dgvActiveClients = new System.Windows.Forms.DataGridView();
+            this.chkEnablePanelServer = new System.Windows.Forms.CheckBox();
+            this.txtPanelServerPort = new System.Windows.Forms.TextBox();
+            this.lblPanelServerPort = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvActiveClients)).BeginInit();
             this.SuspendLayout();
             // 
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(86, 135);
+            this.btnCancel.Location = new System.Drawing.Point(86, 182);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 6;
@@ -46,7 +49,7 @@ namespace EliteFIPServer {
             // 
             // btnRevert
             // 
-            this.btnRevert.Location = new System.Drawing.Point(167, 135);
+            this.btnRevert.Location = new System.Drawing.Point(167, 182);
             this.btnRevert.Name = "btnRevert";
             this.btnRevert.Size = new System.Drawing.Size(75, 23);
             this.btnRevert.TabIndex = 7;
@@ -57,7 +60,7 @@ namespace EliteFIPServer {
             // btnSave
             // 
             this.btnSave.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnSave.Location = new System.Drawing.Point(602, 135);
+            this.btnSave.Location = new System.Drawing.Point(602, 182);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 1;
@@ -88,7 +91,7 @@ namespace EliteFIPServer {
             // lblActiveClients
             // 
             this.lblActiveClients.AutoSize = true;
-            this.lblActiveClients.Location = new System.Drawing.Point(86, 204);
+            this.lblActiveClients.Location = new System.Drawing.Point(86, 251);
             this.lblActiveClients.Name = "lblActiveClients";
             this.lblActiveClients.Size = new System.Drawing.Size(79, 15);
             this.lblActiveClients.TabIndex = 12;
@@ -100,7 +103,7 @@ namespace EliteFIPServer {
             this.dgvActiveClients.AllowUserToDeleteRows = false;
             this.dgvActiveClients.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             this.dgvActiveClients.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvActiveClients.Location = new System.Drawing.Point(180, 204);
+            this.dgvActiveClients.Location = new System.Drawing.Point(180, 251);
             this.dgvActiveClients.Name = "dgvActiveClients";
             this.dgvActiveClients.ReadOnly = true;
             this.dgvActiveClients.RowTemplate.Height = 25;
@@ -108,11 +111,41 @@ namespace EliteFIPServer {
             this.dgvActiveClients.Size = new System.Drawing.Size(509, 136);
             this.dgvActiveClients.TabIndex = 13;
             // 
+            // chkEnablePanelServer
+            // 
+            this.chkEnablePanelServer.AutoSize = true;
+            this.chkEnablePanelServer.Location = new System.Drawing.Point(86, 91);
+            this.chkEnablePanelServer.Name = "chkEnablePanelServer";
+            this.chkEnablePanelServer.Size = new System.Drawing.Size(128, 19);
+            this.chkEnablePanelServer.TabIndex = 15;
+            this.chkEnablePanelServer.Text = "Enable Panel Server";
+            this.chkEnablePanelServer.UseVisualStyleBackColor = true;
+            // 
+            // txtPanelServerPort
+            // 
+            this.txtPanelServerPort.Location = new System.Drawing.Point(270, 89);
+            this.txtPanelServerPort.MaxLength = 5;
+            this.txtPanelServerPort.Name = "txtPanelServerPort";
+            this.txtPanelServerPort.Size = new System.Drawing.Size(55, 23);
+            this.txtPanelServerPort.TabIndex = 16;
+            // 
+            // lblPanelServerPort
+            // 
+            this.lblPanelServerPort.AutoSize = true;
+            this.lblPanelServerPort.Location = new System.Drawing.Point(232, 92);
+            this.lblPanelServerPort.Name = "lblPanelServerPort";
+            this.lblPanelServerPort.Size = new System.Drawing.Size(32, 15);
+            this.lblPanelServerPort.TabIndex = 17;
+            this.lblPanelServerPort.Text = "Port:";
+            // 
             // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(805, 491);
+            this.Controls.Add(this.lblPanelServerPort);
+            this.Controls.Add(this.txtPanelServerPort);
+            this.Controls.Add(this.chkEnablePanelServer);
             this.Controls.Add(this.dgvActiveClients);
             this.Controls.Add(this.lblActiveClients);
             this.Controls.Add(this.chkEnableLog);
@@ -138,5 +171,8 @@ namespace EliteFIPServer {
         private System.Windows.Forms.CheckBox chkEnableLog;
         private System.Windows.Forms.Label lblActiveClients;
         private System.Windows.Forms.DataGridView dgvActiveClients;
+        private CheckBox chkEnablePanelServer;
+        private TextBox txtPanelServerPort;
+        private Label lblPanelServerPort;
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EliteFIPServer {
+﻿namespace EliteFIPServer {
     interface IGameDataEvent {
         void GameDataEvent(GameEventType eventType, Object evt);
     }
