@@ -77,29 +77,28 @@ namespace EliteFIPServer {
                 if (curState2.HasFlag(MoreStatusFlags.VeryHot)) { statusData.VeryHot = true; }
 
                 if (currentStatusData.Flags != 0) {
-                    statusData.SystemPips = currentStatusData.Pips.System;
-                    statusData.EnginePips = currentStatusData.Pips.Engine;
-                    statusData.WeaponPips = currentStatusData.Pips.Weapons;
-
-                    statusData.FireGroup = currentStatusData.Firegroup;
-                    statusData.GuiFocus = currentStatusData.GuiFocus.ToString();
-                    statusData.FuelMain = currentStatusData.Fuel.FuelMain;
-                    statusData.FuelReservoir = currentStatusData.Fuel.FuelReservoir;
-                    statusData.Cargo = currentStatusData.Cargo;
-                    statusData.LegalState = currentStatusData.LegalState;
-                    statusData.Altitude = currentStatusData.Altitude;
-                    statusData.Heading = currentStatusData.Heading;
-                    statusData.BodyName = currentStatusData.BodyName;
-                    statusData.PlanetRadius = currentStatusData.PlanetRadius;
-                    statusData.Balance = currentStatusData.Balance;
-                    statusData.DestinationSystem = currentStatusData.Destination.System;
-                    statusData.DestinationBody = currentStatusData.Destination.Body;
-                    statusData.DestinationName = currentStatusData.Destination.Name;
-                    statusData.Oxygen = currentStatusData.Oxygen;
-                    statusData.Health = currentStatusData.Health;
-                    statusData.Temperature = currentStatusData.Temperature;
-                    statusData.SelectedWeapon = currentStatusData.SelectedWeapon;
-                    statusData.Gravity = currentStatusData.Gravity;
+                    if (currentStatusData.Pips.System != null) {statusData.SystemPips = currentStatusData.Pips.System;}
+                    if (currentStatusData.Pips.Engine != null) {statusData.EnginePips = currentStatusData.Pips.Engine;}
+                    if (currentStatusData.Pips.Weapons != null) {statusData.WeaponPips = currentStatusData.Pips.Weapons;}
+                    if (currentStatusData.Firegroup != null) {statusData.FireGroup = currentStatusData.Firegroup;}
+                    if (currentStatusData.GuiFocus != null) { statusData.GuiFocus = currentStatusData.GuiFocus.ToString(); }
+                    if (currentStatusData.Fuel != null) { statusData.FuelMain = currentStatusData.Fuel.FuelMain; }
+                    if (currentStatusData.Fuel != null) { statusData.FuelReservoir = currentStatusData.Fuel.FuelReservoir; }
+                    if (currentStatusData.Cargo != null) { statusData.Cargo = currentStatusData.Cargo; }
+                    if (currentStatusData.LegalState != null) { statusData.LegalState = currentStatusData.LegalState; }
+                    if (currentStatusData.Altitude != null) { statusData.Altitude = currentStatusData.Altitude; }
+                    if (currentStatusData.Heading != null) { statusData.Heading = currentStatusData.Heading; }
+                    if (currentStatusData.BodyName != null) { statusData.BodyName = currentStatusData.BodyName; }
+                    if (currentStatusData.PlanetRadius != null) { statusData.PlanetRadius = currentStatusData.PlanetRadius; }
+                    if (currentStatusData.Balance != null) { statusData.Balance = currentStatusData.Balance; }
+                    if (currentStatusData.Destination.System != null) { statusData.DestinationSystem = currentStatusData.Destination.System; }
+                    if (currentStatusData.Destination.Body != null) { statusData.DestinationBody = currentStatusData.Destination.Body; }
+                    if (currentStatusData.Destination.Name != null) { statusData.DestinationName = currentStatusData.Destination.Name; }
+                    if (currentStatusData.Oxygen != null) { statusData.Oxygen = currentStatusData.Oxygen; }
+                    if (currentStatusData.Health != null) { statusData.Health = currentStatusData.Health; }
+                    if (currentStatusData.Temperature != null) { statusData.Temperature = currentStatusData.Temperature; }
+                    if (currentStatusData.SelectedWeapon != null) { statusData.SelectedWeapon = currentStatusData.SelectedWeapon; }
+                    if (currentStatusData.Gravity != null) { statusData.Gravity = currentStatusData.Gravity; }                     
                 }
 
                 Log.Instance.Info("Sending Status to worker {status}", statusData.ToString());
