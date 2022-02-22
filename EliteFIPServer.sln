@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EliteFIPServer", "EliteFIPServer\EliteFIPServer.csproj", "{E3CBFD55-D0CA-4ADF-82F4-B5ABA91A43EB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B518BBDD-052B-43A1-831A-AF00F23B7D5B}"
-	ProjectSection(SolutionItems) = preProject
-		EliteFIPServer\PanelServer.md = EliteFIPServer\PanelServer.md
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

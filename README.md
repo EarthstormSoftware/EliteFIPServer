@@ -17,7 +17,10 @@ If you are upgrading from a previous section, please double check the Runtime Pr
 
 ## Runtime Pre-requisites
 - Elite FIP Server is a .NET 6.0 application and requires the appropriate [runtime](https://dotnet.microsoft.com/download/dotnet/6.0/runtime) 
-  to be installed 
+  to be installed.  
+  
+  For v2.x releases and later, you need both the .NET Desktop Runtime (Run desktop apps). For v3.x releases and later, you **also** 
+  need the ASP/NET Core Hosting Bundle (Run server apps).
 
 - [Matric v2.x and the MatricIntegration.dll](https://matricapp.com)  
   Elite FIP Server supports integration with Matric v2.x via the MatricIntegration.dll provided in the Matric installation folder. 
@@ -190,8 +193,8 @@ Text size is per standard Matric setting, but for text which combines multiple E
 ---
 # Change History
 
-### v2.2.0
-- Added Panel Server
+### v3.0.0
+- Added Panel Server (which requires )
 
 ### v2.1.0
 - Added Odyssey status fields 
