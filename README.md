@@ -160,6 +160,19 @@ HUD Mode | HudMode | x | x | x | x
 Night Vision  | NightVision | x | x | x | x  
 FSD Jump*     | FsdJump | x | x | x | x  
 SRV High Beam | SrvHighBeam | x | x | x | x  
+ | | | | |   
+On Foot | OnFoot | x | x | | 
+In Taxi | InTaxi | x | x | | 
+In Multicrew | InMulticrew | x | x | | 
+On Foot (Station) | OnFootInStation | x | x | | 
+On Foot (Planet) | OnFootOnPlanet | x | x | | 
+Aim Down Sight | AimDownSight | x | x | x | x 
+Low Oxygen | LowOxygen | x | x | | 
+Low Health | LowHealth | x | x | | 
+Cold | Cold | x | x | | 
+Hot | Hot | x | x | | 
+Very Cold | VeryCold | x | x | | 
+Very Hot | VeryHot | x | x | | 
 
 
 \* Unlike the other indicators Shields and Flight Assist are typically 'active' and you want to be warned/informed if they are not. 
