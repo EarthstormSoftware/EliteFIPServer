@@ -86,12 +86,12 @@ namespace EliteFIPServer {
             return buttonlist;
         }
 
-        public void Connect() {
+        public void Connect(int MatricApiPort) {
 
             Log.Instance.Info("Connecting to Matric");
             if (matric == null) {
                 try {
-                    matric = new Matric.Integration.Matric(AppName);
+                    matric = new Matric.Integration.Matric(AppName, "", MatricApiPort);
                 } catch (Exception e) {
                     Log.Instance.Info("Matric Exception: {exception}", e.ToString());
                 }

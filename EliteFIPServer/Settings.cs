@@ -25,6 +25,7 @@ namespace EliteFIPServer {
             Properties.Settings.Default.EnableLog = chkEnableLog.Checked;
             Properties.Settings.Default.EnablePanelServer = chkEnablePanelServer.Checked;   
             Properties.Settings.Default.PanelServerPort = txtPanelServerPort.Text;
+            Properties.Settings.Default.MatricApiPort = (int)numMatricApiPort.Value;
             Properties.Settings.Default.Save();
 
             // Update log setting
@@ -34,7 +35,7 @@ namespace EliteFIPServer {
                 Log.LogEnabled(false);
             }
 
-            Caller.GetMatricApi().Connect();
+            Caller.GetMatricApi().Connect(Properties.Settings.Default.MatricApiPort);
 
         }
 
@@ -51,6 +52,7 @@ namespace EliteFIPServer {
             chkEnableLog.Checked = Properties.Settings.Default.EnableLog;
             chkEnablePanelServer.Checked = Properties.Settings.Default.EnablePanelServer;
             txtPanelServerPort.Text = Properties.Settings.Default.PanelServerPort;
+            numMatricApiPort.Value = Properties.Settings.Default.MatricApiPort;
 
             if (Caller.GetServerState() == State.Started) {
                 BindingList<ClientInfo> activeClients = new BindingList<ClientInfo>(Caller.GetMatricApi().GetConnectedClients());
