@@ -11,4 +11,10 @@ td.red {
     color: orange;
 }
 
+.row {
+    display: flex;
+}
 
+.column {
+    flex: 50%;
+}

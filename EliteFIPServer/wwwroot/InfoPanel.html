@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Elite Dangerous Information Panel</title>
+    <link rel="stylesheet" type="text/css" href="DefaultPanelStyles.css"/>
+</head>
+
+<body>
+    <div class="row">
+        <div class="column">
+            <table>
+                <tr>
+                    <td>Nearest Body:</td>
+                    <td id="BodyName">Unknown</td>
+                <tr>
+                    <td>Legal state:</td>
+                    <td id="LegalState">Unknown</td>
+                </tr>
+                <tr><td><br></td></tr>
+                <tr>
+                    <td>Cargo:</td>
+                    <td id="Cargo">Unknown</td>
+                </tr>
+                <tr>
+                    <td>Main fuel:</td>
+                    <td id="FuelMain">Unknown</td>
+                </tr>
+                <tr>
+                    <td>Fuel revervoir:</td>
+                    <td id="FuelReservoir">Unknown</td>
+                </tr>
+            </table>
+        </div>
+        <div class="column">
+            <table>
+                <tr>
+                    <td>Ship:</td>
+                    <td id="Ship"></td>
+                </tr>
+                <tr>
+                    <td>Pilot name:</td>
+                    <td id="PilotName"></td>
+                </tr>
+                <tr>
+                    <td>Pilot rank:</td>
+                    <td id="PilotRank"></td>
+                </tr>
+                <tr>
+                    <td>Faction:</td>
+                    <td id="Faction"></td>
+                </tr>
+                <tr>
+                    <td>Legal status:</td>
+                    <td id="LegalStatus"></td>
+                </tr>
+                <tr>
+                    <td>Bounty:</td>
+                    <td id="Bounty"></td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+
+    <script src="/js/signalr/dist/browser/signalr.js"></script>
+    <script src="/js/InfoPanel.js"></script>
+</body>
+</html>
