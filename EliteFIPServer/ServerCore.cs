@@ -88,7 +88,7 @@ namespace EliteFIPServer {
             JournalWatcher.GetEvent<ShipTargetedEvent>().Fired += TargetEventHandler.HandleEvent;
 
             // Start Matric Integration
-            matricapi.Connect();
+            matricapi.Connect(Properties.Settings.Default.MatricApiPort);
 
             // If Immediate start is enabled, start the server
             if (Properties.Settings.Default.ImmediateStart == true) {

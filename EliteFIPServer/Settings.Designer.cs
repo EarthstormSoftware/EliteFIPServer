@@ -34,7 +34,10 @@ namespace EliteFIPServer {
             this.chkEnablePanelServer = new System.Windows.Forms.CheckBox();
             this.txtPanelServerPort = new System.Windows.Forms.TextBox();
             this.lblPanelServerPort = new System.Windows.Forms.Label();
+            this.lblMatricAPIPort = new System.Windows.Forms.Label();
+            this.numMatricApiPort = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.dgvActiveClients)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMatricApiPort)).BeginInit();
             this.SuspendLayout();
             // 
             // btnCancel
@@ -132,17 +135,40 @@ namespace EliteFIPServer {
             // lblPanelServerPort
             // 
             this.lblPanelServerPort.AutoSize = true;
-            this.lblPanelServerPort.Location = new System.Drawing.Point(232, 92);
+            this.lblPanelServerPort.Location = new System.Drawing.Point(232, 91);
             this.lblPanelServerPort.Name = "lblPanelServerPort";
             this.lblPanelServerPort.Size = new System.Drawing.Size(32, 15);
             this.lblPanelServerPort.TabIndex = 17;
             this.lblPanelServerPort.Text = "Port:";
+            // 
+            // lblMatricAPIPort
+            // 
+            this.lblMatricAPIPort.AutoSize = true;
+            this.lblMatricAPIPort.Location = new System.Drawing.Point(86, 127);
+            this.lblMatricAPIPort.Name = "lblMatricAPIPort";
+            this.lblMatricAPIPort.Size = new System.Drawing.Size(151, 15);
+            this.lblMatricAPIPort.TabIndex = 18;
+            this.lblMatricAPIPort.Text = "Matric Integration API Port:";
+            // 
+            // numMatricApiPort
+            // 
+            this.numMatricApiPort.Location = new System.Drawing.Point(243, 125);
+            this.numMatricApiPort.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.numMatricApiPort.Name = "numMatricApiPort";
+            this.numMatricApiPort.Size = new System.Drawing.Size(85, 23);
+            this.numMatricApiPort.TabIndex = 19;
             // 
             // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(805, 491);
+            this.Controls.Add(this.numMatricApiPort);
+            this.Controls.Add(this.lblMatricAPIPort);
             this.Controls.Add(this.lblPanelServerPort);
             this.Controls.Add(this.txtPanelServerPort);
             this.Controls.Add(this.chkEnablePanelServer);
@@ -157,6 +183,7 @@ namespace EliteFIPServer {
             this.Text = "Settings";
             this.Load += new System.EventHandler(this.Settings_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvActiveClients)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMatricApiPort)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -174,5 +201,7 @@ namespace EliteFIPServer {
         private CheckBox chkEnablePanelServer;
         private TextBox txtPanelServerPort;
         private Label lblPanelServerPort;
+        private Label lblMatricAPIPort;
+        private NumericUpDown numMatricApiPort;
     }
 }
