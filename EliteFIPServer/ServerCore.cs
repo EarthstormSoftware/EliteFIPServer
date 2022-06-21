@@ -19,8 +19,7 @@ namespace EliteFIPServer {
     public enum GameEventType {
         Empty,
         Status,
-        Target,
-        ServerStop
+        Target         
     }
 
     public struct GameEventTrigger {
@@ -173,9 +172,9 @@ namespace EliteFIPServer {
         public void Stop() {
             Log.Instance.Info("Server Core stopping");
             ServerCoreState = State.Stopping;
-            // Isssue the cancel to signal worker threads to end, and send stop message
+            // Isssue the cancel to signal worker threads to end
             GameDataWorkerCTS.Cancel();
-            GameDataEvent(GameEventType.ServerStop, null);
+           
 
             // Stop tracking game events
             StatusWatcher.StopWatching();
@@ -221,12 +220,7 @@ namespace EliteFIPServer {
                     if (gameEventTrigger.GameEvent != GameEventType.Empty) {
                         Log.Instance.Info("Game data event received");
 
-                        if (gameEventTrigger.GameEvent == GameEventType.ServerStop) {
-                            Log.Instance.Info("Server stop event received");
-                            break;
-
-                        }
-                        else if (gameEventTrigger.GameEvent == GameEventType.Status) {
+                        if (gameEventTrigger.GameEvent == GameEventType.Status) {
                             currentStatus = new StatusData();
                             currentStatus = gameEventTrigger.EventData as StatusData;
                             string statusJSON = JsonSerializer.Serialize(currentStatus);
