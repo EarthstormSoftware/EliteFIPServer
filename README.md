@@ -9,7 +9,7 @@ This allows Matric to reflect the current game state in the UI, with particular 
 screen display rather than a traditional keyboard increases immersion and lowers the requirement to remember
 all the many key bindings you might need.
 
-Current build is available here: [v2.1.0](https://github.com/EarthstormSoftware/EliteFIPServer/releases/tag/v2.1.0)
+Current build is available here: [v3.0.0](https://github.com/EarthstormSoftware/EliteFIPServer/releases/tag/v3.0.0)
 
 If you are upgrading from a previous section, please double check the Runtime Pre-requisities and any upgrade notes as they might change from version to version.
 
@@ -90,7 +90,7 @@ any settings (which triggers a reload of the config file).
 ## Upgrading from v1.x
 - The Elite FIP Server ZIP file no longer contains the MatricIntegration.dll file, this file must be copied to the Elite FIP Server folder manually.
 
-- Elite FIP Server v2.x includes changes that will cause some Matric decks/existing buttons to not function as expected.
+- Elite FIP Server v2.x and later include changes that will cause some Matric decks/existing buttons to not function as expected.
 When upgrading from v1, please review the button name information below and change your buttons in Matric accordingly.
 
 ---
@@ -194,7 +194,7 @@ Text size is per standard Matric setting, but for text which combines multiple E
 # Change History
 
 ### v3.0.0
-- Added Panel Server (which requires )
+- Added Panel Server 
 
 ### v2.1.0
 - Added Odyssey status fields 

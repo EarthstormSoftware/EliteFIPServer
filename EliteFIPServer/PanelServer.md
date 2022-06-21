@@ -56,6 +56,7 @@ Panel Description | Panel FileName
 -------------- | ----------- 
 Status Panel (Misc Navigation Information) | StatusPanel.html 
 Target Panel (Information on currently targeted ship) | TargetPanel.html
+Info Panel (Status & Target Panels combined) | InfoPanel.html
 
 ## Customising Panels
 
