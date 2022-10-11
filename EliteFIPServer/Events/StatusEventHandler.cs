@@ -55,6 +55,7 @@ namespace EliteFIPServer {
                 if (curState.HasFlag(StatusFlags.BeingInterdicted)) { statusData.BeingInterdicted = true; }
                 if (curState.HasFlag(StatusFlags.InMainShip)) { statusData.InMainShip = true; }
                 if (curState.HasFlag(StatusFlags.InFighter)) { statusData.InFighter = true; }
+                if (curState.HasFlag(StatusFlags.InSRV)) { statusData.InSRV = true; }
                 if (curState.HasFlag(StatusFlags.HudInAnalysisMode)) { statusData.HudAnalysisMode = true; }
                 if (curState.HasFlag(StatusFlags.NightVision)) { statusData.NightVision = true; }
                 if (curState.HasFlag(StatusFlags.FsdJump)) { statusData.FsdJump = true; }
