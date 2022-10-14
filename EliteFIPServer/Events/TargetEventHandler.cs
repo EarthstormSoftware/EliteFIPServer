@@ -1,48 +1,43 @@
-﻿using EliteFIPProtocol;
+﻿using EliteAPI.Abstractions.Events;
+using EliteFIPProtocol;
 using EliteFIPServer.Logging;
-using EliteJournalReader.Events;
 using System.Text.Json;
 
 namespace EliteFIPServer {
 
     class TargetEventHandler {
 
-        private IGameDataEvent Caller;
-        private Dictionary<string, string> ShipMap = new Dictionary<string, string>();
+        private IGameDataEvent Caller;        
 
         public TargetEventHandler(IGameDataEvent caller) {
             Caller = caller;
-            PopulateShipMap();
         }
 
-        public void HandleEvent(object sender, ShipTargetedEvent.ShipTargetedEventArgs currentTargetData) {
+        public void HandleEvent(EliteAPI.Events.ShipTargetedEvent currentTargetData, EventContext context) {
 
-            Log.Instance.Info("Handling Target Event: {targetevent}", currentTargetData.ToString());
+            Log.Instance.Info("Handling ShipTargetedEvent");
+            Log.Instance.Info("Targetlock: {istargetlocked}, Scanstage: {scanstage}", currentTargetData.IsTargetLocked.ToString(), currentTargetData.ScanStage.ToString());
             ShipTargetedData targetData = new ShipTargetedData();
-
 
             TimeSpan dataAge = DateTime.UtcNow.Subtract(currentTargetData.Timestamp);
             Log.Instance.Info("Target data age: {targetage}", dataAge.ToString());
             if (dataAge.TotalMinutes < 5) {
                 targetData.LastUpdate = currentTargetData.Timestamp;
-                targetData.TargetLocked = currentTargetData.TargetLocked;
+                targetData.TargetLocked = currentTargetData.IsTargetLocked;
                 if (targetData.TargetLocked == true) {
-                    if (String.IsNullOrEmpty(currentTargetData.Ship_Localised)) {
-                        string mappedShip = "";
-                        if (ShipMap.TryGetValue(currentTargetData.Ship, out mappedShip)) {
-                            targetData.Ship = mappedShip;
-                        } else {
-                            targetData.Ship = currentTargetData.Ship;
-                        }
-
-                    } else {
-                        targetData.Ship = currentTargetData.Ship_Localised;
-                    }
-
-                    targetData.ScanStage = currentTargetData.ScanStage;
+                    
+                    // Ensure ship name starts with a Uppercase letter to look nice for nonlocalised ships
+                    targetData.Ship = char.ToUpper(currentTargetData.Ship.ToString()[0]) + currentTargetData.Ship.ToString().Substring(1);
+                    
+                    // In ELiteAPI Scanstage is a long, in ELiteFIPProtocl it's an int.
+                    targetData.ScanStage = (int)currentTargetData.ScanStage;
                     if (targetData.ScanStage >= 1) {
-                        targetData.PilotName = currentTargetData.PilotName_Localised;
-                        targetData.PilotRank = currentTargetData.PilotRank.ToString();
+                        if (String.IsNullOrEmpty(currentTargetData.PilotName.ToString())) {
+                            targetData.PilotName = currentTargetData.PilotName.Symbol;
+                        } else {
+                            targetData.PilotName = currentTargetData.PilotName.ToString();
+                        }                        
+                        targetData.PilotRank = currentTargetData.PilotRank;
                     }
                     if (targetData.ScanStage >= 2) {
                         targetData.ShieldHealth = currentTargetData.ShieldHealth;
@@ -51,28 +46,19 @@ namespace EliteFIPServer {
                     if (targetData.ScanStage >= 3) {
                         targetData.Faction = currentTargetData.Faction;
                         targetData.LegalStatus = currentTargetData.LegalStatus;
-                        targetData.SubSystem = currentTargetData.SubSystem;
-                        targetData.SubSystemHealth = currentTargetData.SubSystemHealth;
+                        targetData.SubSystemHealth = currentTargetData.SubsystemHealth;
                         targetData.Bounty = currentTargetData.Bounty;
-                    }
+                        if (String.IsNullOrEmpty(currentTargetData.Subsystem.ToString())) {
+                            targetData.SubSystem = currentTargetData.Subsystem.Symbol;
+                        } else {
+                            targetData.SubSystem = currentTargetData.Subsystem.ToString();
+                        }
+                    }                                    
                 }
-                Log.Instance.Info("Sending target data to worker {target}", targetData.ToString());
+                Log.Instance.Info("Sending target data to worker");
                 Caller.GameDataEvent(GameEventType.Target, targetData);
             }
-        }
-
-        private void PopulateShipMap() {
-            ShipMap.Add("adder", "Adder");
-            ShipMap.Add("sidewinder", "Sidewinder");
-            ShipMap.Add("anaconda", "Anaconda");
-            ShipMap.Add("eagle", "Eagle");
-            ShipMap.Add("hauler", "Hauler");
-            ShipMap.Add("vulture", "Vulture");
-            ShipMap.Add("python", "Python");
-            ShipMap.Add("mamba", "Mamba");
-            ShipMap.Add("orca", "Orca");
-        }
-
+        }        
 
         public static FIPPacket CreateFIPPacket(ShipTargetedData targetData) {
 

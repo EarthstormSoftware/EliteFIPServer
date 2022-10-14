@@ -1,7 +1,7 @@
 ﻿using EliteFIPProtocol;
 using EliteFIPServer.Logging;
-using EliteJournalReader;
-using EliteJournalReader.Events;
+using EliteAPI;
+using EliteAPI.Abstractions;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using EliteFIPServer.Hubs;
@@ -47,9 +47,7 @@ namespace EliteFIPServer {
         BlockingCollection<GameEventTrigger> GameDataQueue = new BlockingCollection<GameEventTrigger>(Constants.MaxGameDataQueueSize);
 
         // Game State Handling
-        private string JournalFileFolder;
-        private StatusWatcher StatusWatcher;
-        private JournalWatcher JournalWatcher;
+        private IEliteDangerousApi EliteAPI;
 
         // Current State Information
         private StatusData currentStatus;
@@ -72,19 +70,21 @@ namespace EliteFIPServer {
             ServerConsole = serverConsole;            
 
             // Set up the Journal feeds to be passed to clients
-            var userHome = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
-            JournalFileFolder = userHome + Constants.GameStateFolder;
-            Log.Instance.Info("Tracking game data from folder: {journalfilefolder}", JournalFileFolder);
-            StatusWatcher = new StatusWatcher(JournalFileFolder);
-            JournalWatcher = new JournalWatcher(JournalFileFolder); 
+            //var userHome = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+            //var JournalFileFolder = userHome + Constants.GameStateFolder;
+            //var OptionsFileFolder = userHome + Constants.OptionsFolder;
+            //Log.Instance.Info("Tracking game data from folder: {journalfilefolder}", JournalFileFolder);
+            //Log.Instance.Info("Options folder: {optionsfilefolder}", OptionsFileFolder);
+
+            EliteAPI = EliteDangerousApi.Create();
 
 
             // Add events to watch list
             StatusEventHandler = new StatusEventHandler(this);
-            StatusWatcher.StatusUpdated += StatusEventHandler.HandleEvent;
-
+            EliteAPI.Events.On<EliteAPI.Events.Status.Ship.StatusEvent>(StatusEventHandler.HandleEvent);
+                        
             TargetEventHandler = new TargetEventHandler(this);
-            JournalWatcher.GetEvent<ShipTargetedEvent>().Fired += TargetEventHandler.HandleEvent;
+            EliteAPI.Events.On<EliteAPI.Events.ShipTargetedEvent>(TargetEventHandler.HandleEvent);
 
             // Start Matric Integration
             matricapi.Connect(Properties.Settings.Default.MatricApiPort);
@@ -108,9 +108,8 @@ namespace EliteFIPServer {
             GameDataTask.Start();
 
             // Start tracking game events
-            StatusWatcher.StartWatching();
-            JournalWatcher.StartWatching();
-
+            EliteAPI.StartAsync();
+            
             // Start Matric Flashing Lights thread
             matricapi.StartMatricFlashWorker();
 
@@ -174,11 +173,10 @@ namespace EliteFIPServer {
             ServerCoreState = State.Stopping;
             // Isssue the cancel to signal worker threads to end
             GameDataWorkerCTS.Cancel();
-           
+
 
             // Stop tracking game events
-            StatusWatcher.StopWatching();
-            JournalWatcher.StopWatching();
+            EliteAPI.StopAsync();
 
             // Stop Matric Flashing Lights thread
             matricapi.StopMatricFlashWorker();

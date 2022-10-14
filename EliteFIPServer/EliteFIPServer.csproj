@@ -22,6 +22,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="EliteAPI">
+      <HintPath>..\..\EliteAPI\EliteAPI\bin\Release\net6.0\EliteAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="EliteAPI.Abstractions">
+      <HintPath>..\..\EliteAPI\EliteAPI\bin\Release\net6.0\EliteAPI.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="EliteAPI.Events">
+      <HintPath>..\..\EliteAPI\EliteAPI\bin\Release\net6.0\EliteAPI.Events.dll</HintPath>
+    </Reference>
     <Reference Include="EliteFIPProtocol">
       <HintPath>..\..\EliteFIPProtocol\EliteFIPProtocol\bin\Release\net6.0\EliteFIPProtocol.dll</HintPath>
     </Reference>
