@@ -7,10 +7,6 @@ td {
     font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
-td.red {
-    color: orange;
-}
-
 .row {
     display: flex;
 }

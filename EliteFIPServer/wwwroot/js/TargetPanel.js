@@ -24,9 +24,9 @@ connection.on("TargetData", function (TargetData) {
             if (data.LegalStatus != null) {
                 var legalStatusCell = document.getElementById("LegalStatus");
                 if (data.LegalStatus == "Wanted") {
-                    legalStatusCell.setAttribute("class", "red");
+                    legalStatusCell.style.color = 'red';
                 } else {
-                    legalStatusCell.removeAttribute("class");
+                    legalStatusCell.style.color = 'orange';
                 }
                 document.getElementById("LegalStatus").innerHTML = data.LegalStatus
             };
