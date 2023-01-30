@@ -38,10 +38,10 @@ namespace EliteFIPServer.Logging {
 
         public static void LogEnabled(bool newState) {
             if (newState == true && LogManager.IsLoggingEnabled() == false) {
-                LogManager.EnableLogging();
+                LogManager.ResumeLogging();
             }
             if (newState == false && LogManager.IsLoggingEnabled() == true) {
-                LogManager.DisableLogging();
+                LogManager.SuspendLogging();
             }
         }
     }
