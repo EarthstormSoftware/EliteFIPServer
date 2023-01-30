@@ -27,5 +27,10 @@ namespace EliteFIPServer
             string targetJSON = JsonSerializer.Serialize(targetData);
             _hubContext.Clients.All.SendAsync("TargetData", targetJSON);
         }
+
+        public void SendLocationUpdate(LocationData locationData) {
+            string locationJSON = JsonSerializer.Serialize(locationData);
+            _hubContext.Clients.All.SendAsync("LocationData", locationJSON);
+        }
     }
 }

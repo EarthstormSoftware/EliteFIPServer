@@ -22,7 +22,9 @@ namespace EliteFIPServer {
     public enum GameEventType {
         Empty,
         Status,
-        Target         
+        Target,
+        Location,
+        Navigation
     }
 
     public struct GameEventTrigger {
@@ -55,10 +57,13 @@ namespace EliteFIPServer {
         // Current State Information
         private StatusData currentStatus;
         private ShipTargetedData currentTarget;
+        private LocationData currentLocation;
+        private NavigationData currentNavigation;
 
         // Event Handling
         private StatusEventHandler StatusEventHandler;
         private TargetEventHandler TargetEventHandler;
+        private LocationEventHandler LocationEventHandler;
 
         // Matric Integration
         private MatricIntegration matricapi = new MatricIntegration();
@@ -88,6 +93,9 @@ namespace EliteFIPServer {
                         
             TargetEventHandler = new TargetEventHandler(this);
             EliteAPI.Events.On<EliteAPI.Events.ShipTargetedEvent>(TargetEventHandler.HandleEvent);
+
+            LocationEventHandler = new LocationEventHandler(this);
+            EliteAPI.Events.On<EliteAPI.Events.LocationEvent>(LocationEventHandler.HandleEvent);
 
             // Start Matric Integration
             matricapi.Connect(Properties.Settings.Default.MatricApiPort);
@@ -234,6 +242,12 @@ namespace EliteFIPServer {
                             currentTarget = gameEventTrigger.EventData as ShipTargetedData;
                             Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));
                             if (PanelServerStarted) { GameDataUpdateController.SendTargetUpdate(currentTarget); }
+                        } 
+                        else if (gameEventTrigger.GameEvent == GameEventType.Location) {
+                            currentLocation = new LocationData();
+                            currentLocation = gameEventTrigger.EventData as LocationData;
+                            Log.Instance.Info("Current Location: {location}", JsonSerializer.Serialize(currentLocation));
+                            if (PanelServerStarted) { GameDataUpdateController.SendLocationUpdate(currentLocation); }
                         }
                         // Update Matric state
                         if (matricapi.IsConnected()) {
