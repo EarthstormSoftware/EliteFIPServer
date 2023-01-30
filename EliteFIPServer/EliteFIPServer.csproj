@@ -17,8 +17,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="NLog" Version="4.7.13" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="NLog" Version="5.1.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,9 +33,6 @@
     </Reference>
     <Reference Include="EliteFIPProtocol">
       <HintPath>..\..\EliteFIPProtocol\EliteFIPProtocol\bin\Release\net6.0\EliteFIPProtocol.dll</HintPath>
-    </Reference>
-    <Reference Include="EliteJournalReader">
-      <HintPath>..\..\EliteJournalReader\EliteJournalReader\bin\Release\net50\EliteJournalReader.dll</HintPath>
     </Reference>
     <Reference Include="MatricIntegration">
       <HintPath>C:\Program Files\Ex Machina\MATRIC Desktop\MatricIntegration.dll</HintPath>
