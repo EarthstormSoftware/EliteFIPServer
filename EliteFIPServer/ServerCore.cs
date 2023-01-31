@@ -58,12 +58,15 @@ namespace EliteFIPServer {
         private StatusData currentStatus;
         private ShipTargetedData currentTarget;
         private LocationData currentLocation;
-        private NavigationData currentNavigation;
+        private NavigationData currentNavRoute;
 
         // Event Handling
         private StatusEventHandler StatusEventHandler;
         private TargetEventHandler TargetEventHandler;
         private LocationEventHandler LocationEventHandler;
+        private FSDJumpEventHandler FSDJumpEventHandler;
+        private NavRouteEventHandler NavRouteEventHandler;
+        private NavRouteClearEventHandler NavRouteClearEventHandler;
 
         // Matric Integration
         private MatricIntegration matricapi = new MatricIntegration();
@@ -96,6 +99,16 @@ namespace EliteFIPServer {
 
             LocationEventHandler = new LocationEventHandler(this);
             EliteAPI.Events.On<EliteAPI.Events.LocationEvent>(LocationEventHandler.HandleEvent);
+
+            FSDJumpEventHandler = new FSDJumpEventHandler(this);
+            EliteAPI.Events.On<EliteAPI.Events.FsdJumpEvent>(FSDJumpEventHandler.HandleEvent);
+
+            NavRouteEventHandler = new NavRouteEventHandler(this);
+            EliteAPI.Events.On<EliteAPI.Events.Status.NavRoute.NavRouteEvent>(NavRouteEventHandler.HandleEvent);
+
+            NavRouteClearEventHandler = new NavRouteClearEventHandler(this);
+            EliteAPI.Events.On<EliteAPI.Events.Status.NavRoute.NavRouteClearEvent>(NavRouteClearEventHandler.HandleEvent);
+
 
             // Start Matric Integration
             matricapi.Connect(Properties.Settings.Default.MatricApiPort);
@@ -248,6 +261,12 @@ namespace EliteFIPServer {
                             currentLocation = gameEventTrigger.EventData as LocationData;
                             Log.Instance.Info("Current Location: {location}", JsonSerializer.Serialize(currentLocation));
                             if (PanelServerStarted) { GameDataUpdateController.SendLocationUpdate(currentLocation); }
+                        }
+                        else if (gameEventTrigger.GameEvent == GameEventType.Navigation) {
+                            currentNavRoute = new NavigationData();
+                            currentNavRoute = gameEventTrigger.EventData as NavigationData;
+                            Log.Instance.Info("Current Route: {route}", JsonSerializer.Serialize(currentNavRoute));
+                            if (PanelServerStarted) { GameDataUpdateController.SendNavRouteUpdate(currentNavRoute); }
                         }
                         // Update Matric state
                         if (matricapi.IsConnected()) {

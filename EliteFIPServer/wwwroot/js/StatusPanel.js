@@ -16,6 +16,15 @@ connection.on("StatusData", function (StatusData) {
     }
 });
 
+connection.on("LocationData", function (LocationData) {
+
+    var data = JSON.parse(LocationData);
+    if (data != null) {
+        console.log(data);
+        if (data.SystemName != null) { document.getElementById("SystemName").innerHTML = data.SystemName };
+    }
+});
+
 connection.start().catch(function (err) {
     return console.error(err.toString());
 });
