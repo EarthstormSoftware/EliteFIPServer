@@ -19,7 +19,8 @@ namespace EliteFIPServer {
             NavigationData navigationData = new NavigationData();
 
             navigationData.LastUpdate = DateTime.Now;
-            if (currentNavRouteData.Stops != null) {
+            if (currentNavRouteData.Stops.Count() != 0) {
+                navigationData.NavRouteActive = true;
                 foreach (EliteAPI.Events.Status.NavRoute.NavRouteStop navRouteStop in currentNavRouteData.Stops) {
                     NavigationData.NavRouteStop navStop = new NavigationData.NavRouteStop();
                     navStop.SystemId = navRouteStop.Address;
@@ -27,10 +28,10 @@ namespace EliteFIPServer {
                     navStop.Class = navRouteStop.Class;
                     navigationData.Stops.Add(navStop);
                 }
-            }
-            Log.Instance.Info("Sending NavigationData to worker");
-            Caller.GameDataEvent(GameEventType.Location, navigationData);
-            
+            } else {
+                navigationData.NavRouteActive = false;
+            }           
+            Caller.GameDataEvent(GameEventType.Navigation, navigationData);            
         }
     }
 }

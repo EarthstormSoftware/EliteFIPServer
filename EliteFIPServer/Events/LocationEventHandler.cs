@@ -20,9 +20,8 @@ namespace EliteFIPServer {
 
             locationData.LastUpdate = DateTime.Now;
             locationData.SystemId = currentLocationData.SystemAddress;
-            locationData.SystemName = currentLocationData.StarSystem;            
-
-            Log.Instance.Info("Sending Location to worker");
+            locationData.SystemName = currentLocationData.StarSystem;
+            
             Caller.GameDataEvent(GameEventType.Location, locationData);
             
         }

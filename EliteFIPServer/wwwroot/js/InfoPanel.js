@@ -68,19 +68,21 @@ connection.on("NavRouteData", function (NavRouteData) {
     var data = JSON.parse(NavRouteData);
     if (data != null) {
         console.log(data);
-        string routeList = ""
-        if (data.NavRouteActive && data.Stops != null) {
-            Stops.forEach(v => {
-                routeList = routeList + "<td>" + v.SystemName + "</td >"
-                console.log(v.SystemName);
+        if (data.NavRouteActive = true && data.Stops.length > 0) {
+            console.log("Processing " + data.Stops.length + " stops");
+            var routestring = ""
+            for (var index in data.Stops) {                
+                 routestring += "<td>" + data.Stops[index].SystemName + " ->";
             }
-            );
+            document.getElementById("NavRoute").innerHTML += routestring.slice(0,-3) + "</td >"
+
         } else {
-            document.getElementById("NavRoute").innerHTML = ""
+            document.getElementById("NavRoute").innerHTML = "<td>None</td >"
         }
-        if (data.SystemName != null) { document.getElementById("SystemName").innerHTML = data.SystemName };
+        console.log("HTML: " + document.getElementById("NavRoute").innerHTML);
     }
 });
+
 
 connection.start().catch(function (err) {
     return console.error(err.toString());

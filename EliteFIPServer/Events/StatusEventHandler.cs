@@ -15,7 +15,7 @@ namespace EliteFIPServer {
 
         public void HandleEvent(EliteAPI.Events.Status.Ship.StatusEvent currentStatusData, EventContext context) {
 
-            Log.Instance.Info("Handling Status Event: {statusevent}", currentStatusData.ToString());
+            Log.Instance.Info("Handling Status Event");
             StatusData statusData = new StatusData();           
 
             statusData.LastUpdate = DateTime.Now;
@@ -97,8 +97,6 @@ namespace EliteFIPServer {
 
 
             }           
-
-            Log.Instance.Info("Sending Status to worker {status}", statusData.ToString());
             Caller.GameDataEvent(GameEventType.Status, statusData);
             
         }

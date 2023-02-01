@@ -17,10 +17,11 @@ namespace EliteFIPServer {
             Log.Instance.Info("Handling NavRouteClear Event");
             NavigationData navigationData = new NavigationData();
 
-            navigationData.LastUpdate = DateTime.Now;            
+            navigationData.LastUpdate = DateTime.Now;
+            navigationData.NavRouteActive = false;
 
             Log.Instance.Info("Sending NavigationData to worker");
-            Caller.GameDataEvent(GameEventType.Location, navigationData);
+            Caller.GameDataEvent(GameEventType.Navigation, navigationData);
             
         }
     }

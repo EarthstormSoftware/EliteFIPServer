@@ -244,9 +244,8 @@ namespace EliteFIPServer {
 
                         if (gameEventTrigger.GameEvent == GameEventType.Status) {
                             currentStatus = new StatusData();
-                            currentStatus = gameEventTrigger.EventData as StatusData;
-                            string statusJSON = JsonSerializer.Serialize(currentStatus);
-                            Log.Instance.Info("Current State: {gamestate}", statusJSON);                            
+                            currentStatus = gameEventTrigger.EventData as StatusData;                            
+                            Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));                            
                             if (PanelServerStarted) { GameDataUpdateController.SendStatusUpdate(currentStatus); }                                                    
 
                         }
