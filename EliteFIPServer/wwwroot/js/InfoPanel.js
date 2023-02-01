@@ -68,6 +68,16 @@ connection.on("NavRouteData", function (NavRouteData) {
     var data = JSON.parse(NavRouteData);
     if (data != null) {
         console.log(data);
+        string routeList = ""
+        if (data.NavRouteActive && data.Stops != null) {
+            Stops.forEach(v => {
+                routeList = routeList + "<td>" + v.SystemName + "</td >"
+                console.log(v.SystemName);
+            }
+            );
+        } else {
+            document.getElementById("NavRoute").innerHTML = ""
+        }
         if (data.SystemName != null) { document.getElementById("SystemName").innerHTML = data.SystemName };
     }
 });
