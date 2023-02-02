@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EDFIPServerConsole));
             this.btnStartStop = new System.Windows.Forms.Button();
             this.lblServerStatusLabel = new System.Windows.Forms.Label();
             this.lblServerState = new System.Windows.Forms.Label();
@@ -96,6 +97,7 @@
             this.Controls.Add(this.lblServerStatusLabel);
             this.Controls.Add(this.btnStartStop);
             this.Controls.Add(this.mnuMain);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(430, 235);

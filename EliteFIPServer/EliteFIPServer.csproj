@@ -13,7 +13,15 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Images\EliteFIPServerIcon256.ico</ApplicationIcon>
+    <Title>Elite Dangerous FIP Server</Title>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Images\EliteFIPServerIcon256.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.2" />

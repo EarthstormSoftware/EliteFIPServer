@@ -24,6 +24,7 @@ namespace EliteFIPServer {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Settings));
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnRevert = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
@@ -179,6 +180,7 @@ namespace EliteFIPServer {
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnRevert);
             this.Controls.Add(this.btnCancel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Settings";
             this.Text = "Settings";
             this.Load += new System.EventHandler(this.Settings_Load);
