@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject>EliteFIPServer.Program</StartupObject>
     <Authors>Earthstorm Software</Authors>
-    <AssemblyVersion>3.0.23035.3</AssemblyVersion>
+    <AssemblyVersion>3.0.23035.9</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>    
     <Platforms>AnyCPU;x64</Platforms>
     <PackageReadmeFile>README.md</PackageReadmeFile>
