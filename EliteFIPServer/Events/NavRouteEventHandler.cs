@@ -18,8 +18,8 @@ namespace EliteFIPServer {
             Log.Instance.Info("Handling NavRoute Event");
             NavigationData navigationData = new NavigationData();
 
-            navigationData.LastUpdate = DateTime.Now;
-            if (currentNavRouteData.Stops.Count() != 0) {
+            navigationData.LastUpdate = DateTime.Now;            
+            if ((currentNavRouteData.Stops != null) && (currentNavRouteData.Stops.Count() != 0)) {
                 navigationData.NavRouteActive = true;
                 foreach (EliteAPI.Events.Status.NavRoute.NavRouteStop navRouteStop in currentNavRouteData.Stops) {
                     NavigationData.NavRouteStop navStop = new NavigationData.NavRouteStop();

@@ -221,62 +221,55 @@ namespace EliteFIPServer {
             GameDataWorkerState = State.Started;
             Log.Instance.Info("Game Data Worker Thread started");
 
-            DateTime lastSuccessfulUpdate = DateTime.Today;
+            DateTime lastSuccessfulUpdate = DateTime.Today;                        
 
             CancellationToken cToken = GameDataWorkerCTS.Token;
-            while (cToken.IsCancellationRequested == false) {
-                // Update Matric state
-                if (matricapi.IsConnected()) {
-                    Log.Instance.Info("Updating Matric state");
-                    matricapi.UpdateStatus(currentStatus);                    
-                    matricapi.UpdateTarget(currentTarget);
-                }
+            
 
-                while (!GameDataQueue.IsCompleted) {
+            while (cToken.IsCancellationRequested == false && !GameDataQueue.IsCompleted) {
 
-                    GameEventTrigger gameEventTrigger = new GameEventTrigger(GameEventType.Empty, null);
-                    try {
-                        gameEventTrigger = GameDataQueue.Take(cToken);
-                    } catch (InvalidOperationException) { }
+                GameEventTrigger gameEventTrigger = new GameEventTrigger(GameEventType.Empty, null);
+                try {
+                    gameEventTrigger = GameDataQueue.Take(cToken);
+                } catch (InvalidOperationException) { }
 
-                    if (gameEventTrigger.GameEvent != GameEventType.Empty) {
-                        Log.Instance.Info("Game data event received");
+                if (gameEventTrigger.GameEvent != GameEventType.Empty) {
+                    Log.Instance.Info("Game data event received");
 
-                        if (gameEventTrigger.GameEvent == GameEventType.Status) {
-                            currentStatus = new StatusData();
-                            currentStatus = gameEventTrigger.EventData as StatusData;                            
-                            Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));                            
-                            if (PanelServerStarted) { GameDataUpdateController.SendStatusUpdate(currentStatus); }                                                    
+                    if (gameEventTrigger.GameEvent == GameEventType.Status) {
+                        currentStatus = new StatusData();
+                        currentStatus = gameEventTrigger.EventData as StatusData;                            
+                        Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));                            
+                        if (PanelServerStarted) { GameDataUpdateController.SendStatusUpdate(currentStatus); }                                                    
 
-                        }
-                        else if (gameEventTrigger.GameEvent == GameEventType.Target) {
-                            currentTarget = new ShipTargetedData();
-                            currentTarget = gameEventTrigger.EventData as ShipTargetedData;
-                            Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));
-                            if (PanelServerStarted) { GameDataUpdateController.SendTargetUpdate(currentTarget); }
-                        } 
-                        else if (gameEventTrigger.GameEvent == GameEventType.Location) {
-                            currentLocation = new LocationData();
-                            currentLocation = gameEventTrigger.EventData as LocationData;
-                            Log.Instance.Info("Current Location: {location}", JsonSerializer.Serialize(currentLocation));
-                            if (PanelServerStarted) { GameDataUpdateController.SendLocationUpdate(currentLocation); }
-                        }
-                        else if (gameEventTrigger.GameEvent == GameEventType.Navigation) {
-                            currentNavRoute = new NavigationData();
-                            currentNavRoute = gameEventTrigger.EventData as NavigationData;
-                            Log.Instance.Info("Current Route: {route}", JsonSerializer.Serialize(currentNavRoute));
-                            if (PanelServerStarted) { GameDataUpdateController.SendNavRouteUpdate(currentNavRoute); }
-                        }
-                        // Update Matric state
-                        if (matricapi.IsConnected()) {
-                            Log.Instance.Info("Updating Matric state");
-                            matricapi.UpdateStatus(currentStatus);
-                            matricapi.UpdateTarget(currentTarget);
-                        }                        
                     }
-                    Log.Instance.Info("Game Data Worker Thread waiting for new work");
+                    else if (gameEventTrigger.GameEvent == GameEventType.Target) {
+                        currentTarget = new ShipTargetedData();
+                        currentTarget = gameEventTrigger.EventData as ShipTargetedData;
+                        Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));
+                        if (PanelServerStarted) { GameDataUpdateController.SendTargetUpdate(currentTarget); }
+                    } 
+                    else if (gameEventTrigger.GameEvent == GameEventType.Location) {
+                        currentLocation = new LocationData();
+                        currentLocation = gameEventTrigger.EventData as LocationData;
+                        Log.Instance.Info("Current Location: {location}", JsonSerializer.Serialize(currentLocation));
+                        if (PanelServerStarted) { GameDataUpdateController.SendLocationUpdate(currentLocation); }
+                    }
+                    else if (gameEventTrigger.GameEvent == GameEventType.Navigation) {
+                        currentNavRoute = new NavigationData();
+                        currentNavRoute = gameEventTrigger.EventData as NavigationData;
+                        Log.Instance.Info("Current Route: {route}", JsonSerializer.Serialize(currentNavRoute));
+                        if (PanelServerStarted) { GameDataUpdateController.SendNavRouteUpdate(currentNavRoute); }
+                    }
+                    // Update Matric state
+                    if (matricapi.IsConnected()) {
+                        Log.Instance.Info("Updating Matric state");
+                        matricapi.UpdateStatus(currentStatus);
+                        matricapi.UpdateTarget(currentTarget);
+                    }                        
                 }
-            }
+                Log.Instance.Info("Game Data Worker Thread waiting for new work");
+            }           
             Log.Instance.Info("Game Data Worker Thread ending");
         }
 
@@ -309,5 +302,6 @@ namespace EliteFIPServer {
         public MatricIntegration GetMatricApi() {
             return matricapi;
         }
+
     }
 }

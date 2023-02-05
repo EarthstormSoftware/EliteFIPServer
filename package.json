@@ -1,0 +1,23 @@
+{
+  "name": "elitefipserver",
+  "version": "1.0.0",
+  "description": "Elite FIP Server is a .NET app which uses [EliteJournalReader](https://github.com/MagicMau/EliteJournalReader) to \r read Elite Dangerous game information, and then feed it to [Matric](https://matricapp.com) via the Matric \r Integration API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EarthstormSoftware/EliteFIPServer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EarthstormSoftware/EliteFIPServer/issues"
+  },
+  "homepage": "https://github.com/EarthstormSoftware/EliteFIPServer#readme",
+  "dependencies": {
+    "@microsoft/signalr": "^7.0.2"
+  }
+}

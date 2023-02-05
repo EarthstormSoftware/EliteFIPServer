@@ -1,6 +1,10 @@
 ﻿"use strict";
 
-var connection = new signalR.HubConnectionBuilder().withUrl("/gamedataupdatehub", {skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets}).build();
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/gamedataupdatehub", { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets })
+    .withAutomaticReconnect()
+    .build();
+
 const roundAccurately = (number, decimalPlaces) => Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces);
 
 connection.on("TargetData", function (TargetData) {

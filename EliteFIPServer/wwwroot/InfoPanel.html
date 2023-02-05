@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -67,14 +67,19 @@
         </div>
     </div>
     <div class="row">
-        <p>Current Route</p>
-        <table>            
-            <tr id="NavRoute">
-            </tr>
-        </table>
+        <div class="column">
+            <table>
+                <tr>
+                    <td>Current Route:</td>
+                </tr>
+                <tr>
+                    <td id="NavRoute">No route available</td>
+                </tr>
+            </table>
+        </div>
     </div>
 
-    <script src="/js/signalr/dist/browser/signalr.js"></script>
+    <script src="/js/signalr/signalr.js"></script>
     <script src="/js/InfoPanel.js"></script>
 </body>
 </html>

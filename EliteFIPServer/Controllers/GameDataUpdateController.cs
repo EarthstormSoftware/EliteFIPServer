@@ -2,7 +2,6 @@
 using EliteFIPServer.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
 
 namespace EliteFIPServer
 {

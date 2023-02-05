@@ -1,6 +1,10 @@
 ﻿"use strict";
 
-var connection = new signalR.HubConnectionBuilder().withUrl("/gamedataupdatehub", { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets }).build();
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/gamedataupdatehub", { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets })
+    .withAutomaticReconnect()
+    .build();
+
 const roundAccurately = (number, decimalPlaces) => Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces);
 
 connection.on("StatusData", function (StatusData) {
@@ -72,12 +76,12 @@ connection.on("NavRouteData", function (NavRouteData) {
             console.log("Processing " + data.Stops.length + " stops");
             var routestring = ""
             for (var index in data.Stops) {                
-                 routestring += "<td>" + data.Stops[index].SystemName + " ->";
+                 routestring += data.Stops[index].SystemName + " > ";
             }
-            document.getElementById("NavRoute").innerHTML += routestring.slice(0,-3) + "</td >"
+            document.getElementById("NavRoute").innerHTML = routestring.slice(0, -3);
 
         } else {
-            document.getElementById("NavRoute").innerHTML = "<td>None</td >"
+            document.getElementById("NavRoute").innerHTML = "No route available"
         }
         console.log("HTML: " + document.getElementById("NavRoute").innerHTML);
     }

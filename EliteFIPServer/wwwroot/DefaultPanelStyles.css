@@ -1,4 +1,4 @@
-﻿body {
+body {
     background-color:black;
 }
 
@@ -9,6 +9,7 @@ td {
 
 .row {
     display: flex;
+    margin-top: 2em;
 }
 
 .column {
