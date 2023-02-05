@@ -302,6 +302,5 @@ namespace EliteFIPServer {
         public MatricIntegration GetMatricApi() {
             return matricapi;
         }
-
     }
 }
