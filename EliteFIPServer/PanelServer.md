@@ -46,7 +46,7 @@ If the Panel Server is running, you will see:
 To display the Panels, simply use a web browser, or other suitable client (Matric iFrame for example) and target the appropriate HTML page in the \{Elite FIP Server Folder\}\\wwwroot folder.
 
 For example:  
-http://192.168.169.100:4545/StatusPanel.html
+http://192.168.169.100:4545/InfoPanel.html
 
 ## Available Panels
 
@@ -71,5 +71,7 @@ Panel Server Data Update Name | Elite FIP Protocol Data
 -------------- | ----------- 
 StatusData  | StatusData
 TargetData | ShipTargetedData
+LocationData | LocationData
+NavRouteData | NavigationData
 
 Note that some data points might only be available in specific versions of the game (for example some only in ED:Odyssey)

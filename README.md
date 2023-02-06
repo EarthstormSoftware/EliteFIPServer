@@ -1,15 +1,16 @@
 # EliteFIPServer
 
-Elite FIP Server is a .NET app which uses [EliteJournalReader](https://github.com/MagicMau/EliteJournalReader) to 
-read Elite Dangerous game information, and then feed it to [Matric](https://matricapp.com) via the Matric 
-Integration API.
+Elite FIP Server is a .NET app which uses [EliteAPI](https://github.com/Somfic/EliteAPI) to 
+read Elite Dangerous game information, and feed it to [Matric](https://matricapp.com) via the Matric 
+Integration API. It also makes some game data available via a self-hosted web server, allowing the data 
+to be viewed via browser, and the display of that data to be customised.
 
-This allows Matric to reflect the current game state in the UI, with particular respect to button/toggle state 
-(such as Landing Gear or Lights), but also other information like current target data. Using a custom touch
+The integration with Matric allows Matric to reflect the current game state in the UI, with particular respect to button/toggle state 
+(such as Landing Gear or Lights), and also other information like current target data. Using a custom touch
 screen display rather than a traditional keyboard increases immersion and lowers the requirement to remember
 all the many key bindings you might need.
 
-Current build is available here: [v3.0.0](https://github.com/EarthstormSoftware/EliteFIPServer/releases/tag/v3.0.0)
+Current build is available [here](https://github.com/EarthstormSoftware/EliteFIPServer/releases/)
 
 If you are upgrading from a previous section, please double check the Runtime Pre-requisities and any upgrade notes as they might change from version to version.
 
@@ -19,7 +20,7 @@ If you are upgrading from a previous section, please double check the Runtime Pr
 - Elite FIP Server is a .NET 6.0 application and requires the appropriate [runtime](https://dotnet.microsoft.com/download/dotnet/6.0/runtime) 
   to be installed.  
   
-  For v2.x releases and later, you need both the .NET Desktop Runtime (Run desktop apps). For v3.x releases and later, you **also** 
+  For v2.x releases and later, you need the .NET Desktop Runtime (Run desktop apps). For v3.x releases and later, you **also** 
   need the ASP/NET Core Hosting Bundle (Run server apps).
 
 - [Matric v2.x and the MatricIntegration.dll](https://matricapp.com)  
@@ -30,22 +31,25 @@ If you are upgrading from a previous section, please double check the Runtime Pr
 
 ## Build Pre-Requisites
 Aside from various libraries which VS will highlight if missing, and which are available via Nu Package Manager,
-EliteFIPServer requires the following:
+Elite FIP Server requires the following:
 
-- [EliteJournalReader](https://github.com/MagicMau/EliteJournalReader)
+- [EliteAPI](https://github.com/Somfic/EliteAPI)
 - [EliteFIPProtocol](https://github.com/EarthstormSoftware/EliteFIPProtocol)
 - [MatricIntegration.dll](https://matricapp.com)
+
+Older versions of Elite FIP server, used the EliteJournalReader project to provide in-game events.
 
 ---
 
 ## Usage
 Use at own risk :)
-1. Either Download the zip file and uncompress it to a suitable location, or build from source
+1. Either use the provided installer package and install to a suitable location, or build from source
 2. Copy the MatricIntegration.dll file from the Matric installtion folder to the Elite FIP Server folder
 3. Start Matric and connect a client.
 4. Enable API Integration in Matric (Settings > API Integration > Enable 3rd party integration). Please note that PIN authorisation is no longer supported.
-5. Run the EliteFIPServer.exe file
+5. Run the EliteFIPServer.exe file - a shortcut will be placed on the desktop if you used the installer
 6. By default, the server will connect to Matric and start parsing game data
+7. You can customise port settings and enable the Panel Server (to pubish data via the built-in  Web Server) in the settings panel as required
 
 ### Matric Authorisation
 Elite FIP Server v2 does not support Matric PIN authorisation. Please disable this in Matric.
@@ -206,6 +210,12 @@ Text size is per standard Matric setting, but for text which combines multiple E
 ---
 # Change History
 
+### v3.1.0
+- Added installer and application icons
+- Added first pass of Navigation Route and Location data to Panel Server
+- Changed data source from EliteJournalReader to EliteAPI
+- Bug fixes and various optimisations and quality of life improvements (inc. fixing InSrv state)
+
 ### v3.0.0
 - Added Panel Server 
 
@@ -236,8 +246,9 @@ Text size is per standard Matric setting, but for text which combines multiple E
 
 ---
 # Thanks to...
-- The developers and contributors to EliteJournalReader
+- Somfic and all the contributers to EliteAPI
 - AnarchyZG - the developer of Matric, both for the software and the support
+- The developers and contributors to EliteJournalReader
 -  The developers and contributors to all the other open tools and packages that made this feasible. 
 
 

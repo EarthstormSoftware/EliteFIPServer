@@ -29,6 +29,7 @@ Global
 		{333CC0C3-A32A-40D2-BC85-032584EBCB8D}.Debug|x64.ActiveCfg = Debug
 		{333CC0C3-A32A-40D2-BC85-032584EBCB8D}.Release|Any CPU.ActiveCfg = Release
 		{333CC0C3-A32A-40D2-BC85-032584EBCB8D}.Release|x64.ActiveCfg = Release
+		{333CC0C3-A32A-40D2-BC85-032584EBCB8D}.Release|x64.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
