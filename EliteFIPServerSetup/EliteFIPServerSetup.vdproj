@@ -27,12 +27,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_1459F7A83CC141719388987D8CEC9894"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_278E36EE029D4EB989FEEEF3CAC4C56E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -46,6 +40,12 @@
         "Entry"
         {
         "MsmKey" = "8:_7CA9F2209CD14285A92099B054B408E2"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7D498A6BF7734369A892752DAFC02247"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -70,12 +70,6 @@
         "Entry"
         {
         "MsmKey" = "8:_C813DC4386844416874118CFF0F3E63C"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_E9D98F850F864B29BD24EEA0410F6692"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -221,26 +215,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1459F7A83CC141719388987D8CEC9894"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\js\\signalr\\dist\\browser\\signalr.js"
-            "TargetName" = "8:signalr.js"
-            "Tag" = "8:"
-            "Folder" = "8:_A1EBB7B1264C40069A67991A7D8B81CB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_278E36EE029D4EB989FEEEF3CAC4C56E"
             {
             "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\TargetPanel.html"
@@ -287,6 +261,26 @@
             "TargetName" = "8:InfoPanel.html"
             "Tag" = "8:"
             "Folder" = "8:_A06A3372E9B74A189EC264D176A8D48B"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7D498A6BF7734369A892752DAFC02247"
+            {
+            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\js\\signalr\\signalr.js"
+            "TargetName" = "8:signalr.js"
+            "Tag" = "8:"
+            "Folder" = "8:_DD4A4EDC23764F1CB300B82AF89D3756"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -361,26 +355,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E9D98F850F864B29BD24EEA0410F6692"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\js\\signalr\\dist\\browser\\signalr.min.js"
-            "TargetName" = "8:signalr.min.js"
-            "Tag" = "8:"
-            "Folder" = "8:_A1EBB7B1264C40069A67991A7D8B81CB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
         }
         "FileType"
         {
@@ -435,28 +409,6 @@
                                     "Property" = "8:_5428F39F01EE494DBC2DA54C2769A30B"
                                         "Folders"
                                         {
-                                            "{9EF0B969-E518-4E46-987F-47570745A589}:_AE893EAB95D848FBB570A8D168772273"
-                                            {
-                                            "Name" = "8:dist"
-                                            "AlwaysCreate" = "11:FALSE"
-                                            "Condition" = "8:"
-                                            "Transitive" = "11:FALSE"
-                                            "Property" = "8:_1ED4D67AEC104839A90B306DF8FF9D27"
-                                                "Folders"
-                                                {
-                                                    "{9EF0B969-E518-4E46-987F-47570745A589}:_A1EBB7B1264C40069A67991A7D8B81CB"
-                                                    {
-                                                    "Name" = "8:browser"
-                                                    "AlwaysCreate" = "11:FALSE"
-                                                    "Condition" = "8:"
-                                                    "Transitive" = "11:FALSE"
-                                                    "Property" = "8:_DF9578526FB64FB496266B23E9FD8A7C"
-                                                        "Folders"
-                                                        {
-                                                        }
-                                                    }
-                                                }
-                                            }
                                         }
                                     }
                                 }
