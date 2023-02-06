@@ -15,55 +15,7 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_04AA30C2FA9D4CB5BF26099870686C1E"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_0E23A787748946E99FBD78B699231E67"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_278E36EE029D4EB989FEEEF3CAC4C56E"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_511D2939525D43B4AF4A6176AA5B50E1"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7CA9F2209CD14285A92099B054B408E2"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7D498A6BF7734369A892752DAFC02247"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_82766BCDA70A4905A9CC57387BA15F51"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_A9D5B9FAB08F46438C3932530D011BAC"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C514CBD967F648BFA486009B62FA0D67"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -175,172 +127,12 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_04AA30C2FA9D4CB5BF26099870686C1E"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\js\\TargetPanel.js"
-            "TargetName" = "8:TargetPanel.js"
-            "Tag" = "8:"
-            "Folder" = "8:_6210E13994BA45C395E0C89E0ECCB50D"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0E23A787748946E99FBD78B699231E67"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\DefaultPanelStyles.css"
-            "TargetName" = "8:DefaultPanelStyles.css"
-            "Tag" = "8:"
-            "Folder" = "8:_A06A3372E9B74A189EC264D176A8D48B"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_278E36EE029D4EB989FEEEF3CAC4C56E"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\TargetPanel.html"
-            "TargetName" = "8:TargetPanel.html"
-            "Tag" = "8:"
-            "Folder" = "8:_A06A3372E9B74A189EC264D176A8D48B"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_511D2939525D43B4AF4A6176AA5B50E1"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\StatusPanel.html"
-            "TargetName" = "8:StatusPanel.html"
-            "Tag" = "8:"
-            "Folder" = "8:_A06A3372E9B74A189EC264D176A8D48B"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7CA9F2209CD14285A92099B054B408E2"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\InfoPanel.html"
-            "TargetName" = "8:InfoPanel.html"
-            "Tag" = "8:"
-            "Folder" = "8:_A06A3372E9B74A189EC264D176A8D48B"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7D498A6BF7734369A892752DAFC02247"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\js\\signalr\\signalr.js"
-            "TargetName" = "8:signalr.js"
-            "Tag" = "8:"
-            "Folder" = "8:_DD4A4EDC23764F1CB300B82AF89D3756"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_82766BCDA70A4905A9CC57387BA15F51"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\js\\StatusPanel.js"
-            "TargetName" = "8:StatusPanel.js"
-            "Tag" = "8:"
-            "Folder" = "8:_6210E13994BA45C395E0C89E0ECCB50D"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A9D5B9FAB08F46438C3932530D011BAC"
             {
             "SourcePath" = "8:..\\EliteFIPServer\\Images\\EliteFIPServerIcon256.ico"
             "TargetName" = "8:EliteFIPServerIcon256.ico"
             "Tag" = "8:"
             "Folder" = "8:_BA42497DA5E14A918E5D5CF3C1DEEB0A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C514CBD967F648BFA486009B62FA0D67"
-            {
-            "SourcePath" = "8:..\\EliteFIPServer\\wwwroot\\\\js\\InfoPanel.js"
-            "TargetName" = "8:InfoPanel.js"
-            "Tag" = "8:"
-            "Folder" = "8:_6210E13994BA45C395E0C89E0ECCB50D"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -382,39 +174,6 @@
             "Property" = "8:TARGETDIR"
                 "Folders"
                 {
-                    "{9EF0B969-E518-4E46-987F-47570745A589}:_A06A3372E9B74A189EC264D176A8D48B"
-                    {
-                    "Name" = "8:wwwroot"
-                    "AlwaysCreate" = "11:FALSE"
-                    "Condition" = "8:"
-                    "Transitive" = "11:FALSE"
-                    "Property" = "8:_1F5AF8A530784A30B4200FF5B93764BB"
-                        "Folders"
-                        {
-                            "{9EF0B969-E518-4E46-987F-47570745A589}:_6210E13994BA45C395E0C89E0ECCB50D"
-                            {
-                            "Name" = "8:js"
-                            "AlwaysCreate" = "11:FALSE"
-                            "Condition" = "8:"
-                            "Transitive" = "11:FALSE"
-                            "Property" = "8:_EDBC045BDD214132B57C83FE5D74C22D"
-                                "Folders"
-                                {
-                                    "{9EF0B969-E518-4E46-987F-47570745A589}:_DD4A4EDC23764F1CB300B82AF89D3756"
-                                    {
-                                    "Name" = "8:signalr"
-                                    "AlwaysCreate" = "11:FALSE"
-                                    "Condition" = "8:"
-                                    "Transitive" = "11:FALSE"
-                                    "Property" = "8:_5428F39F01EE494DBC2DA54C2769A30B"
-                                        "Folders"
-                                        {
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
             "{1525181F-901A-416C-8A58-119130FE478E}:_D910368424AF49E79DF703FD79D3A54F"
@@ -445,7 +204,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Elite FIP Server "
         "ProductCode" = "8:{64696274-0CBC-4624-BE08-BD59F1A77B89}"
-        "PackageCode" = "8:{512B798C-94B8-4F3E-877D-45537EF55A4E}"
+        "PackageCode" = "8:{308B01B5-6AC8-4D2C-80E1-5C7CC1905319}"
         "UpgradeCode" = "8:{E2D8E278-91DE-4F6E-9C94-87815388CC79}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
