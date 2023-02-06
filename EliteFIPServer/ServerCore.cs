@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using EliteFIPServer;
 
 namespace EliteFIPServer {
 
@@ -117,7 +118,7 @@ namespace EliteFIPServer {
             if (Properties.Settings.Default.ImmediateStart == true) {
                 this.Start();
             }
-
+            ClientConnect.setServerCore(this);
         }
 
         public void Start() {
@@ -301,6 +302,13 @@ namespace EliteFIPServer {
 
         public MatricIntegration GetMatricApi() {
             return matricapi;
+        }
+
+        public void fullClientUpdate() {
+            if (currentStatus != null) { GameDataUpdateController.SendStatusUpdate(currentStatus); }
+            if (currentTarget != null) { GameDataUpdateController.SendTargetUpdate(currentTarget); }
+            if (currentLocation != null) { GameDataUpdateController.SendLocationUpdate(currentLocation); }
+            if (currentNavRoute != null) { GameDataUpdateController.SendNavRouteUpdate(currentNavRoute); }
         }
     }
 }

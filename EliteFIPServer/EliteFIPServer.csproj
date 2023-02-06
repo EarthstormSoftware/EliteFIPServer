@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject>EliteFIPServer.Program</StartupObject>
     <Authors>Earthstorm Software</Authors>
-    <AssemblyVersion>3.0.23035.19</AssemblyVersion>
+    <AssemblyVersion>3.0.23036.1</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>    
     <Platforms>AnyCPU;x64</Platforms>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -124,6 +124,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="wwwroot\js\signalr\dist\browser\signalr.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="wwwroot\js\signalr\signalr.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="wwwroot\js\StatusPanel.js">
