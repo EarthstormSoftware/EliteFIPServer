@@ -25,30 +25,6 @@ namespace EliteFIPServer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string MatricPin {
-            get {
-                return ((string)(this["MatricPin"]));
-            }
-            set {
-                this["MatricPin"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string MatricClient {
-            get {
-                return ((string)(this["MatricClient"]));
-            }
-            set {
-                this["MatricClient"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool EnableLog {
             get {
@@ -61,34 +37,22 @@ namespace EliteFIPServer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool ImmediateStart {
-            get {
-                return ((bool)(this["ImmediateStart"]));
-            }
-            set {
-                this["ImmediateStart"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool EnablePanelServer {
+        public bool AutostartPanelServer {
             get {
-                return ((bool)(this["EnablePanelServer"]));
+                return ((bool)(this["AutostartPanelServer"]));
             }
             set {
-                this["EnablePanelServer"] = value;
+                this["AutostartPanelServer"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("4545")]
-        public string PanelServerPort {
+        public int PanelServerPort {
             get {
-                return ((string)(this["PanelServerPort"]));
+                return ((int)(this["PanelServerPort"]));
             }
             set {
                 this["PanelServerPort"] = value;
@@ -104,6 +68,30 @@ namespace EliteFIPServer.Properties {
             }
             set {
                 this["MatricApiPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutostartMatricIntegration {
+            get {
+                return ((bool)(this["AutostartMatricIntegration"]));
+            }
+            set {
+                this["AutostartMatricIntegration"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public int MatricRetryInterval {
+            get {
+                return ((int)(this["MatricRetryInterval"]));
+            }
+            set {
+                this["MatricRetryInterval"] = value;
             }
         }
     }

@@ -4,7 +4,7 @@ using EliteFIPServer.Logging;
 using System.Text.Json;
 
 namespace EliteFIPServer {
-    
+
     class FSDJumpEventHandler {
 
         private IGameDataEvent Caller;
@@ -20,11 +20,11 @@ namespace EliteFIPServer {
 
             locationData.LastUpdate = DateTime.Now;
             locationData.SystemId = fsdJumpdataData.SystemAddress;
-            locationData.SystemName = fsdJumpdataData.StarSystem;            
+            locationData.SystemName = fsdJumpdataData.StarSystem;
 
             Log.Instance.Info("Sending Location to worker");
             Caller.GameDataEvent(GameEventType.Location, locationData);
-            
+
         }
 
         public static FIPPacket CreateFIPPacket(LocationData locationData) {

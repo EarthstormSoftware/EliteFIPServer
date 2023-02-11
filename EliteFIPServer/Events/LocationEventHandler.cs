@@ -1,10 +1,9 @@
 ﻿using EliteAPI.Abstractions.Events;
 using EliteFIPProtocol;
 using EliteFIPServer.Logging;
-using System.Text.Json;
 
 namespace EliteFIPServer {
-    
+
     class LocationEventHandler {
 
         private IGameDataEvent Caller;
@@ -21,9 +20,9 @@ namespace EliteFIPServer {
             locationData.LastUpdate = DateTime.Now;
             locationData.SystemId = currentLocationData.SystemAddress;
             locationData.SystemName = currentLocationData.StarSystem;
-            
+
             Caller.GameDataEvent(GameEventType.Location, locationData);
-            
+
         }
     }
 }

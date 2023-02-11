@@ -1,18 +1,17 @@
-﻿using EliteFIPProtocol;
-using EliteFIPServer.Logging;
-using EliteAPI;
+﻿using EliteAPI;
 using EliteAPI.Abstractions;
-using System.Collections.Concurrent;
-using System.Text.Json;
+using EliteFIPProtocol;
 using EliteFIPServer.Hubs;
-using Microsoft.AspNetCore.SignalR;
+using EliteFIPServer.Logging;
+using EliteFIPServer.MatricIntegration;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using EliteFIPServer;
+using System.Collections.Concurrent;
+using System.Text.Json;
 
 namespace EliteFIPServer {
-
     public enum State {
         Stopped,
         Starting,
@@ -38,13 +37,15 @@ namespace EliteFIPServer {
         }
     }
 
-    public class ServerCore : IGameDataEvent {        
+    public class ServerCore : IGameDataEvent {
 
         // Reference to Primary UI 
-        private EDFIPServerConsole ServerConsole;
+        private ServerConsole ServerConsole;
 
         // Server States
         private State ServerCoreState { get; set; }
+        private State MatricIntegrationState { get; set; }
+        private State PanelServerState { get; set; }
 
         // Game Event Worker
         private CancellationTokenSource GameDataWorkerCTS;
@@ -70,7 +71,7 @@ namespace EliteFIPServer {
         private NavRouteClearEventHandler NavRouteClearEventHandler;
 
         // Matric Integration
-        private MatricIntegration matricapi = new MatricIntegration();
+        private MatricApiClient matricapi = new MatricApiClient();
 
         // Panel Server        
         private CancellationTokenSource PanelServerCTS;
@@ -78,23 +79,16 @@ namespace EliteFIPServer {
         private bool PanelServerStarted = false;
         private GameDataUpdateController GameDataUpdateController;
 
-        public ServerCore(EDFIPServerConsole serverConsole) {
-            ServerConsole = serverConsole;            
-
-            // Set up the Journal feeds to be passed to clients
-            //var userHome = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
-            //var JournalFileFolder = userHome + Constants.GameStateFolder;
-            //var OptionsFileFolder = userHome + Constants.OptionsFolder;
-            //Log.Instance.Info("Tracking game data from folder: {journalfilefolder}", JournalFileFolder);
-            //Log.Instance.Info("Options folder: {optionsfilefolder}", OptionsFileFolder);
+        public ServerCore(ServerConsole serverConsole) {
+            ServerConsole = serverConsole;
+            ClientConnect.setServerCore(this);
 
             EliteAPI = EliteDangerousApi.Create();
-
 
             // Add events to watch list
             StatusEventHandler = new StatusEventHandler(this);
             EliteAPI.Events.On<EliteAPI.Events.Status.Ship.StatusEvent>(StatusEventHandler.HandleEvent);
-                        
+
             TargetEventHandler = new TargetEventHandler(this);
             EliteAPI.Events.On<EliteAPI.Events.ShipTargetedEvent>(TargetEventHandler.HandleEvent);
 
@@ -110,20 +104,13 @@ namespace EliteFIPServer {
             NavRouteClearEventHandler = new NavRouteClearEventHandler(this);
             EliteAPI.Events.On<EliteAPI.Events.Status.NavRoute.NavRouteClearEvent>(NavRouteClearEventHandler.HandleEvent);
 
-
-            // Start Matric Integration
-            matricapi.Connect(Properties.Settings.Default.MatricApiPort);
-
-            // If Immediate start is enabled, start the server
-            if (Properties.Settings.Default.ImmediateStart == true) {
-                this.Start();
-            }
-            ClientConnect.setServerCore(this);
+            this.Start();
         }
 
         public void Start() {
             Log.Instance.Info("Server Core starting");
             ServerCoreState = State.Starting;
+            ServerConsole.updateInfoText("Starting core server...");
 
             // Start Game Data Worker Thread
             Log.Instance.Info("Starting Game data worker");
@@ -132,21 +119,30 @@ namespace EliteFIPServer {
             GameDataTask.ContinueWith(GameDataWorkerThreadEnded);
             GameDataTask.Start();
 
+            // Start Matric Integration if set to autostart
+            if (Properties.Settings.Default.AutostartMatricIntegration) {
+                this.StartMatricIntegration();
+            }
+            // Start Matric Integration if set to autostart
+            if (Properties.Settings.Default.AutostartPanelServer) {
+                this.StartPanelServer();
+            }
+
+
             // Start tracking game events
             EliteAPI.StartAsync();
-            
+
             // Start Matric Flashing Lights thread
             matricapi.StartMatricFlashWorker();
 
             // Start Panel Server Thread
-            if (Properties.Settings.Default.EnablePanelServer == true)
-            {
+            if (Properties.Settings.Default.AutostartPanelServer == true) {
                 Log.Instance.Info("Starting Panel Server");
-                try
-                {
+                ServerConsole.updateInfoText("Starting panel server...");
+                try {
                     var panelServerUrl = "http://*:" + Properties.Settings.Default.PanelServerPort;
-                    var panelServerBuilder = WebApplication.CreateBuilder(Program.GetArgs());
-                    
+                    var panelServerBuilder = WebApplication.CreateBuilder(EliteFIPServerApplication.GetArgs());
+
                     panelServerBuilder.Services.AddMvcCore().AddMvcOptions(options => options.EnableEndpointRouting=false);
                     panelServerBuilder.Services.AddCors(cors => cors.AddPolicy("CorsPolicy", builder => {
                         builder
@@ -156,14 +152,13 @@ namespace EliteFIPServer {
                             .WithOrigins(panelServerUrl);
                     }));
                     panelServerBuilder.Services.AddControllers().AddNewtonsoftJson();
-                    panelServerBuilder.Services.AddSignalR();                    
+                    panelServerBuilder.Services.AddSignalR();
                     var panelServer = panelServerBuilder.Build();
 
-                    if (panelServer.Environment.IsDevelopment())
-                    {
+                    if (panelServer.Environment.IsDevelopment()) {
                         panelServer.UseDeveloperExceptionPage();
                     }
-                                       
+
                     Log.Instance.Info("Listening on {panelserverurl}", panelServerUrl);
                     panelServer.Urls.Add(panelServerUrl);
                     panelServer.UseStaticFiles();
@@ -175,26 +170,93 @@ namespace EliteFIPServer {
                     var hubContext = panelServer.Services.GetService(typeof(IHubContext<GameDataUpdateHub>)) as IHubContext<GameDataUpdateHub>;
                     GameDataUpdateController = new GameDataUpdateController(hubContext);
 
-                    
+
                     PanelServerCTS = new CancellationTokenSource();
                     PanelServerTask = panelServer.RunAsync(PanelServerCTS.Token);
                     PanelServerTask.ContinueWith(PanelServerThreadEnded);
                     PanelServerStarted = true;
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     Log.Instance.Error("Exception: {exception}", ex.ToString());
                     PanelServerStarted = false;
                 }
             }
 
             ServerCoreState = State.Started;
-            ServerConsole.UpdateServerStatus(ServerCoreState);
+            //ServerConsole.UpdateServerStatus(ServerCoreState);
             Log.Instance.Info("Server Core started");
+            ServerConsole.updateInfoText("");
+            ServerConsole.updateServerCoreState(true);
         }
+
+        public void StartMatricIntegration() {
+            Log.Instance.Info("Matric Integration starting");
+            MatricIntegrationState = State.Starting;            
+
+            // Start Matric Integration
+            matricapi.Connect(Properties.Settings.Default.MatricApiPort);
+
+            // Start Matric Flashing Lights thread
+            matricapi.StartMatricFlashWorker();
+
+            MatricIntegrationState = State.Started;                        
+            ServerConsole.updateMatricState(true);
+            Log.Instance.Info("Matric Integration started");
+        }
+
+        public void StartPanelServer() {
+            Log.Instance.Info("Panel Server starting");
+            PanelServerState = State.Starting;            
+
+            try {
+                var panelServerUrl = "http://*:" + Properties.Settings.Default.PanelServerPort;
+                var panelServerBuilder = WebApplication.CreateBuilder(EliteFIPServerApplication.GetArgs());
+
+                panelServerBuilder.Services.AddMvcCore().AddMvcOptions(options => options.EnableEndpointRouting=false);
+                panelServerBuilder.Services.AddCors(cors => cors.AddPolicy("CorsPolicy", builder => {
+                    builder
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()
+                        .WithOrigins(panelServerUrl);
+                }));
+                panelServerBuilder.Services.AddControllers().AddNewtonsoftJson();
+                panelServerBuilder.Services.AddSignalR();
+                var panelServer = panelServerBuilder.Build();
+
+                if (panelServer.Environment.IsDevelopment()) {
+                    panelServer.UseDeveloperExceptionPage();
+                }
+
+                Log.Instance.Info("Listening on {panelserverurl}", panelServerUrl);
+                panelServer.Urls.Add(panelServerUrl);
+                panelServer.UseStaticFiles();
+                panelServer.UseRouting();
+                panelServer.UseMvc();
+                panelServer.UseCors("CorsPolicy");
+
+                panelServer.MapHub<GameDataUpdateHub>("/gamedataupdatehub");
+                var hubContext = panelServer.Services.GetService(typeof(IHubContext<GameDataUpdateHub>)) as IHubContext<GameDataUpdateHub>;
+                GameDataUpdateController = new GameDataUpdateController(hubContext);
+
+
+                PanelServerCTS = new CancellationTokenSource();
+                PanelServerTask = panelServer.RunAsync(PanelServerCTS.Token);
+                PanelServerTask.ContinueWith(PanelServerThreadEnded);
+                PanelServerStarted = true;
+            } catch (Exception ex) {
+                Log.Instance.Error("Exception: {exception}", ex.ToString());
+                PanelServerStarted = false;
+            }
+            
+            PanelServerState = PanelServerStarted ? State.Started : State.Stopped;                                   
+            ServerConsole.updatePanelServerState(PanelServerStarted);
+            Log.Instance.Info("Panel start complete");
+        }
+
 
         public void Stop() {
             Log.Instance.Info("Server Core stopping");
+            ServerConsole.updateInfoText("Core server stopping...");
             ServerCoreState = State.Stopping;
             // Isssue the cancel to signal worker threads to end
             GameDataWorkerCTS.Cancel();
@@ -203,29 +265,57 @@ namespace EliteFIPServer {
             // Stop tracking game events
             EliteAPI.StopAsync();
 
+            // Stop Matric Integration
+            StopMatricIntegration();
+
+            // Stop Panel Server
+            StopPanelServer();
+
+            GameDataQueue.CompleteAdding();
+            ServerCoreState = State.Stopped;            
+            
+            ServerConsole.updateInfoText("");
+            ServerConsole.updateServerCoreState(false);
+            Log.Instance.Info("Server Core stopped");
+        }
+
+        public void StopMatricIntegration() {
+            Log.Instance.Info("Matric Integration stopping");
+            MatricIntegrationState = State.Stopping;            
+
             // Stop Matric Flashing Lights thread
             matricapi.StopMatricFlashWorker();
+
+            MatricIntegrationState = State.Stopped;                        
+            
+            ServerConsole.updateMatricState(false);
+            Log.Instance.Info("Matric Integration stopped");
+        }
+
+        public void StopPanelServer() {
+            Log.Instance.Info("Panel server stopping");
+            PanelServerState = State.Stopping;            
 
             // Stop Panel Server
             if (PanelServerStarted) {
                 PanelServerCTS.Cancel();
             }
-
-            GameDataQueue.CompleteAdding();
-            ServerCoreState = State.Stopped;
-            ServerConsole.UpdateServerStatus(ServerCoreState);
-            Log.Instance.Info("Server Core stopped");
+            
+            PanelServerState = State.Stopped;                    
+            
+            ServerConsole.updatePanelServerState(false);
+            Log.Instance.Info("Panel Server stopped");
         }
 
         private void GameDataWorkerThread() {
-            
+
             GameDataWorkerState = State.Started;
             Log.Instance.Info("Game Data Worker Thread started");
 
-            DateTime lastSuccessfulUpdate = DateTime.Today;                        
+            DateTime lastSuccessfulUpdate = DateTime.Today;
 
             CancellationToken cToken = GameDataWorkerCTS.Token;
-            
+
 
             while (cToken.IsCancellationRequested == false && !GameDataQueue.IsCompleted) {
 
@@ -239,24 +329,21 @@ namespace EliteFIPServer {
 
                     if (gameEventTrigger.GameEvent == GameEventType.Status) {
                         currentStatus = new StatusData();
-                        currentStatus = gameEventTrigger.EventData as StatusData;                            
-                        Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));                            
-                        if (PanelServerStarted) { GameDataUpdateController.SendStatusUpdate(currentStatus); }                                                    
+                        currentStatus = gameEventTrigger.EventData as StatusData;
+                        Log.Instance.Info("Current State: {gamestate}", JsonSerializer.Serialize(currentStatus));
+                        if (PanelServerStarted) { GameDataUpdateController.SendStatusUpdate(currentStatus); }
 
-                    }
-                    else if (gameEventTrigger.GameEvent == GameEventType.Target) {
+                    } else if (gameEventTrigger.GameEvent == GameEventType.Target) {
                         currentTarget = new ShipTargetedData();
                         currentTarget = gameEventTrigger.EventData as ShipTargetedData;
                         Log.Instance.Info("Current Target: {target}", JsonSerializer.Serialize(currentTarget));
                         if (PanelServerStarted) { GameDataUpdateController.SendTargetUpdate(currentTarget); }
-                    } 
-                    else if (gameEventTrigger.GameEvent == GameEventType.Location) {
+                    } else if (gameEventTrigger.GameEvent == GameEventType.Location) {
                         currentLocation = new LocationData();
                         currentLocation = gameEventTrigger.EventData as LocationData;
                         Log.Instance.Info("Current Location: {location}", JsonSerializer.Serialize(currentLocation));
                         if (PanelServerStarted) { GameDataUpdateController.SendLocationUpdate(currentLocation); }
-                    }
-                    else if (gameEventTrigger.GameEvent == GameEventType.Navigation) {
+                    } else if (gameEventTrigger.GameEvent == GameEventType.Navigation) {
                         currentNavRoute = new NavigationData();
                         currentNavRoute = gameEventTrigger.EventData as NavigationData;
                         Log.Instance.Info("Current Route: {route}", JsonSerializer.Serialize(currentNavRoute));
@@ -267,10 +354,10 @@ namespace EliteFIPServer {
                         Log.Instance.Info("Updating Matric state");
                         matricapi.UpdateStatus(currentStatus);
                         matricapi.UpdateTarget(currentTarget);
-                    }                        
+                    }
                 }
                 Log.Instance.Info("Game Data Worker Thread waiting for new work");
-            }           
+            }
             Log.Instance.Info("Game Data Worker Thread ending");
         }
 
@@ -286,7 +373,7 @@ namespace EliteFIPServer {
 
             GameEventTrigger newStatusEvent = new GameEventTrigger(eventType, evt);
             CancellationToken cToken = GameDataWorkerCTS.Token;
-            GameDataQueue.Add(newStatusEvent,cToken);            
+            GameDataQueue.Add(newStatusEvent, cToken);
         }
 
         private void PanelServerThreadEnded(Task task) {
@@ -300,7 +387,7 @@ namespace EliteFIPServer {
             return ServerCoreState;
         }
 
-        public MatricIntegration GetMatricApi() {
+        public MatricApiClient GetMatricApi() {
             return matricapi;
         }
 

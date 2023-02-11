@@ -20,16 +20,6 @@ namespace EliteFIPServer.Logging {
             LogManager.Configuration.AddTarget("sentinel", sentinelTarget);
             LogManager.Configuration.LoggingRules.Add(sentinelRule);
 
-            // Setup the logging view for Harvester - http://harvester.codeplex.com
-            /*
-            var harvesterTarget = new OutputDebugStringTarget() {
-                Name = "harvester",
-                Layout = "${log4jxmlevent:includeNLogData=false}"
-            };
-            var harvesterRule = new LoggingRule("*", LogLevel.Trace, harvesterTarget);
-            LogManager.Configuration.AddTarget("harvester", harvesterTarget);
-            LogManager.Configuration.LoggingRules.Add(harvesterRule);
-            */
 #endif
 
             LogManager.ReconfigExistingLoggers();

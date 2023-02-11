@@ -2,26 +2,23 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="EliteFIPServer.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="MatricPin" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="MatricClient" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="EnableLog" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="ImmediateStart" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="EnablePanelServer" Type="System.Boolean" Scope="User">
+    <Setting Name="AutostartPanelServer" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="PanelServerPort" Type="System.String" Scope="User">
+    <Setting Name="PanelServerPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4545</Value>
     </Setting>
     <Setting Name="MatricApiPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">50300</Value>
+    </Setting>
+    <Setting Name="AutostartMatricIntegration" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="MatricRetryInterval" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">30</Value>
     </Setting>
   </Settings>
 </SettingsFile>

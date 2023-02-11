@@ -1,6 +1,5 @@
 ﻿using Matric.Integration;
-
-namespace EliteFIPServer {
+namespace EliteFIPServer.MatricIntegration {
 
     class MatricButton {
 
@@ -57,11 +56,11 @@ namespace EliteFIPServer {
             List<SetButtonsVisualStateArgs> buttons = new List<SetButtonsVisualStateArgs>();
             List<SetControlsStateArgs> controls = new List<SetControlsStateArgs>();
 
-            this.AddToVisualList(buttons);
+            AddToVisualList(buttons);
             if (buttons.Count > 0) {
                 matric.SetButtonsVisualState(ClientId, buttons);
             }
-            this.AddToControlList(controls);
+            AddToControlList(controls);
             if (controls.Count > 0) {
                 matric.SetControlsState(ClientId, controls);
             }
@@ -101,8 +100,8 @@ namespace EliteFIPServer {
         }
 
         public void SetMatricStateToOff(Matric.Integration.Matric matric, string ClientId) {
-            this.SetDefaultButtonState();
-            this.UpdateMatricState(matric, ClientId);
+            SetDefaultButtonState();
+            UpdateMatricState(matric, ClientId);
         }
     }
 }

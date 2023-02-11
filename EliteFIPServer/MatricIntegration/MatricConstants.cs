@@ -1,4 +1,4 @@
-﻿namespace EliteFIPServer {
+﻿namespace EliteFIPServer.MatricIntegration {
     class MatricConstants {
 
         // Status Data

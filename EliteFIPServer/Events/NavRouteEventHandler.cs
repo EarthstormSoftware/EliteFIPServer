@@ -1,10 +1,9 @@
 ﻿using EliteAPI.Abstractions.Events;
 using EliteFIPProtocol;
 using EliteFIPServer.Logging;
-using System.Text.Json;
 
 namespace EliteFIPServer {
-    
+
     class NavRouteEventHandler {
 
         private IGameDataEvent Caller;
@@ -18,7 +17,7 @@ namespace EliteFIPServer {
             Log.Instance.Info("Handling NavRoute Event");
             NavigationData navigationData = new NavigationData();
 
-            navigationData.LastUpdate = DateTime.Now;            
+            navigationData.LastUpdate = DateTime.Now;
             if ((currentNavRouteData.Stops != null) && (currentNavRouteData.Stops.Count() != 0)) {
                 navigationData.NavRouteActive = true;
                 foreach (EliteAPI.Events.Status.NavRoute.NavRouteStop navRouteStop in currentNavRouteData.Stops) {
@@ -30,8 +29,8 @@ namespace EliteFIPServer {
                 }
             } else {
                 navigationData.NavRouteActive = false;
-            }           
-            Caller.GameDataEvent(GameEventType.Navigation, navigationData);            
+            }
+            Caller.GameDataEvent(GameEventType.Navigation, navigationData);
         }
     }
 }

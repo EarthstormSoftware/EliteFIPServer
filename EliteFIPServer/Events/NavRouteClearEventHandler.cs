@@ -3,7 +3,7 @@ using EliteFIPProtocol;
 using EliteFIPServer.Logging;
 
 namespace EliteFIPServer {
-    
+
     class NavRouteClearEventHandler {
 
         private IGameDataEvent Caller;
@@ -22,7 +22,7 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Sending NavigationData to worker");
             Caller.GameDataEvent(GameEventType.Navigation, navigationData);
-            
+
         }
     }
 }

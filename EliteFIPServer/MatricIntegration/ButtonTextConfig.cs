@@ -1,4 +1,4 @@
-﻿namespace EliteFIPServer {
+﻿namespace EliteFIPServer.MatricIntegration {
     internal class ButtonTextConfig {
         public string ButtonName { get; set; }
         public string OffText { get; set; }

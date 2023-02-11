@@ -117,4 +117,53 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="blocked256" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\blocked256.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="blocked32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\blocked32.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="blocked48" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\blocked48.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="disabled256" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\disabled256.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="disabled32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\disabled32.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="disabled48" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\disabled48.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="EliteFIPServerIcon256" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\elitefipservericon256.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="minus256" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\minus256.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="minus32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\minus32.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="minus48" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\minus48.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="no256" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\no256.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="no32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\no32.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="no48" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\no48.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="yes256" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\yes256.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="yes32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\yes32.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="yes48" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\yes48.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

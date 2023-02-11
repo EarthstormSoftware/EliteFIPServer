@@ -7,7 +7,7 @@ namespace EliteFIPServer {
 
     class TargetEventHandler {
 
-        private IGameDataEvent Caller;        
+        private IGameDataEvent Caller;
 
         public TargetEventHandler(IGameDataEvent caller) {
             Caller = caller;
@@ -25,10 +25,10 @@ namespace EliteFIPServer {
                 targetData.LastUpdate = currentTargetData.Timestamp;
                 targetData.TargetLocked = currentTargetData.IsTargetLocked;
                 if (targetData.TargetLocked == true) {
-                    
+
                     // Ensure ship name starts with a Uppercase letter to look nice for nonlocalised ships
                     targetData.Ship = char.ToUpper(currentTargetData.Ship.ToString()[0]) + currentTargetData.Ship.ToString().Substring(1);
-                    
+
                     // In ELiteAPI Scanstage is a long, in ELiteFIPProtocl it's an int.
                     targetData.ScanStage = (int)currentTargetData.ScanStage;
                     if (targetData.ScanStage >= 1) {
@@ -36,7 +36,7 @@ namespace EliteFIPServer {
                             targetData.PilotName = currentTargetData.PilotName.Symbol;
                         } else {
                             targetData.PilotName = currentTargetData.PilotName.ToString();
-                        }                        
+                        }
                         targetData.PilotRank = currentTargetData.PilotRank;
                     }
                     if (targetData.ScanStage >= 2) {
@@ -53,12 +53,12 @@ namespace EliteFIPServer {
                         } else {
                             targetData.SubSystem = currentTargetData.Subsystem.ToString();
                         }
-                    }                                    
+                    }
                 }
                 Log.Instance.Info("Sending target data to worker");
                 Caller.GameDataEvent(GameEventType.Target, targetData);
             }
-        }        
+        }
 
         public static FIPPacket CreateFIPPacket(ShipTargetedData targetData) {
 

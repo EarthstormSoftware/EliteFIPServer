@@ -4,7 +4,7 @@ using EliteFIPServer.Logging;
 using System.Text.Json;
 
 namespace EliteFIPServer {
-    
+
     class StatusEventHandler {
 
         private IGameDataEvent Caller;
@@ -16,7 +16,7 @@ namespace EliteFIPServer {
         public void HandleEvent(EliteAPI.Events.Status.Ship.StatusEvent currentStatusData, EventContext context) {
 
             Log.Instance.Info("Handling Status Event");
-            StatusData statusData = new StatusData();           
+            StatusData statusData = new StatusData();
 
             statusData.LastUpdate = DateTime.Now;
 
@@ -42,7 +42,7 @@ namespace EliteFIPServer {
                 statusData.FsdCharging = currentStatusData.FsdCharging;
                 statusData.FsdCooldown = currentStatusData.FsdCooldown;
                 statusData.LowFuel = currentStatusData.LowFuel;
-                statusData.Overheating = currentStatusData.Overheating;                
+                statusData.Overheating = currentStatusData.Overheating;
                 if (currentStatusData.HasLatLong) {
                     statusData.HasLatLong = true;
                     statusData.Latitude = currentStatusData.Latitude;
@@ -96,9 +96,9 @@ namespace EliteFIPServer {
                 statusData.Gravity = currentStatusData.Gravity;
 
 
-            }           
+            }
             Caller.GameDataEvent(GameEventType.Status, statusData);
-            
+
         }
 
         public static FIPPacket CreateFIPPacket(StatusData statusData) {

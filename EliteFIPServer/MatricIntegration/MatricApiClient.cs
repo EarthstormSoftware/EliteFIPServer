@@ -2,9 +2,10 @@
 using EliteFIPServer.Logging;
 using Matric.Integration;
 using Newtonsoft.Json;
+using System.IO;
 
-namespace EliteFIPServer {
-    public class MatricIntegration {
+namespace EliteFIPServer.MatricIntegration {
+    public class MatricApiClient {
 
         public static List<ClientInfo> ConnectedClients = new List<ClientInfo>();
         private static Dictionary<string, MatricButton> MatricButtonList = CreateButtonList();
@@ -92,6 +93,8 @@ namespace EliteFIPServer {
             if (matric == null) {
                 try {
                     matric = new Matric.Integration.Matric(AppName, "", MatricApiPort);
+                    matric.OnConnectedClientsReceived += Matric_OnConnectedClientsReceived;
+                    matric.OnError += Matric_OnError;
                 } catch (Exception e) {
                     Log.Instance.Info("Matric Exception: {exception}", e.ToString());
                 }
@@ -115,8 +118,6 @@ namespace EliteFIPServer {
                 Log.Instance.Info("Unable to refesh Button Text Config");
             }
 
-
-            matric.OnConnectedClientsReceived += Matric_OnConnectedClientsReceived;
             matric.GetConnectedClients();
         }
 
@@ -138,6 +139,11 @@ namespace EliteFIPServer {
                     Log.Instance.Info("Client name: {name}, IP: {ip}, ID: {id}", clientInfo.Name, clientInfo.IP, clientInfo.Id);
                 }
             }
+        }
+
+        private static void Matric_OnError(Exception ex) {
+            Log.Instance.Info("Matric Exception: {message}\r\n{exception}", ex.Message, ex.ToString());
+            verifiedMatricConnection = false;
         }
 
         public List<ClientInfo> GetConnectedClients() {
@@ -249,7 +255,7 @@ namespace EliteFIPServer {
 
                 // Handle Sliders and text fields
                 if (MatricButtonList.ContainsKey(MatricConstants.FUELMAIN)) {
-                    MatricButtonList[MatricConstants.FUELMAIN].OffText = Math.Round((decimal)currentStatus.FuelReservoir, 2).ToString();                    
+                    MatricButtonList[MatricConstants.FUELMAIN].OffText = Math.Round((decimal)currentStatus.FuelReservoir, 2).ToString();
                 }
 
                 if (MatricButtonList.ContainsKey(MatricConstants.FUELRESERVOIR)) {
@@ -304,7 +310,7 @@ namespace EliteFIPServer {
 
         private static string FormatTargetText(ShipTargetedData targetData) {
 
-            String displayText = "";
+            string displayText = "";
             if (targetData != null) {
 
                 if (targetData.TargetLocked == true) {
@@ -327,7 +333,7 @@ namespace EliteFIPServer {
 
         private static string FormatTargetLabel(ShipTargetedData targetData) {
 
-            String displayText = "";
+            string displayText = "";
             if (targetData != null) {
                 if (targetData.TargetLocked == true) {
                     var targetTemplate = $"<table>" +
@@ -349,16 +355,16 @@ namespace EliteFIPServer {
 
         private static string FormatStatusText(StatusData statusData) {
 
-            String displayText = "";
+            string displayText = "";
             if (statusData != null) {
                 var statusTemplate = $"<table>";
 
-                if (String.IsNullOrEmpty(statusData.BodyName) == true) {
+                if (string.IsNullOrEmpty(statusData.BodyName) == true) {
                     statusTemplate = statusTemplate + $"<tr><td>Not available</td></tr>";
                 } else {
                     statusTemplate = statusTemplate + $"<tr><td>{statusData.BodyName}</td></tr>";
                 }
-                if (String.IsNullOrEmpty(statusData.LegalState) == true) {
+                if (string.IsNullOrEmpty(statusData.LegalState) == true) {
                     statusTemplate = statusTemplate + $"<tr><td>Unknown</td></tr>";
                 } else {
                     statusTemplate = statusTemplate + $"<tr><td>{statusData.LegalState}</td></tr>";
@@ -376,7 +382,7 @@ namespace EliteFIPServer {
 
         private static string FormatStatusLabel(StatusData statusData) {
 
-            String displayText = "";
+            string displayText = "";
             if (statusData != null) {
                 var statusTemplate = $"<table>";
 
@@ -424,7 +430,7 @@ namespace EliteFIPServer {
                 }
                 Thread.Sleep(500);
             }
-            Log.Instance.Info("Game Data Worker Thread ending");
+            Log.Instance.Info("Matric Flash Worker Thread ending");
         }
 
         private void MatricFlashWorkerThreadEnded(Task task) {

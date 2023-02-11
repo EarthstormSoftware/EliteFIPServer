@@ -3,20 +3,22 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
-    <StartupObject>EliteFIPServer.Program</StartupObject>
+    <UseWindowsForms>False</UseWindowsForms>
+    <StartupObject>EliteFIPServer.EliteFIPServerApplication</StartupObject>
     <Authors>Earthstorm Software</Authors>
-    <AssemblyVersion>3.1.23037.7</AssemblyVersion>
+    <AssemblyVersion>3.1.23042.3</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>    
     <Platforms>AnyCPU;x64</Platforms>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationIcon>Images\EliteFIPServerIcon256.ico</ApplicationIcon>
     <Title>Elite Dangerous FIP Server</Title>
     <Description>Elite FIP Server</Description>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <Version>$(AssemblyVersion)</Version>
+    <UseWPF>True</UseWPF>
+    <NeutralLanguage>en-GB</NeutralLanguage>
+    <ApplicationIcon>Images\EliteFIPServerIcon256.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -81,27 +83,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="ButtonTextConfig.json">
+    <None Update="MatricIntegration\ButtonTextConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="NLog.config">
@@ -151,6 +146,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\blocked256.png" />
+    <Resource Include="Images\blocked32.png" />
+    <Resource Include="Images\blocked48.png" />
+    <Resource Include="Images\disabled256.png" />
+    <Resource Include="Images\disabled32.png" />
+    <Resource Include="Images\disabled48.png" />
+    <Resource Include="Images\minus256.png" />
+    <Resource Include="Images\minus32.png" />
+    <Resource Include="Images\minus48.png" />
+    <Resource Include="Images\no256.png" />
+    <Resource Include="Images\no32.png" />
+    <Resource Include="Images\no48.png" />
+    <Resource Include="Images\yes256.png" />
+    <Resource Include="Images\yes32.png" />
+    <Resource Include="Images\yes48.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Update="wwwroot\DefaultPanelStyles.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -175,6 +188,14 @@
     <Content Update="wwwroot\StatusPanel.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
