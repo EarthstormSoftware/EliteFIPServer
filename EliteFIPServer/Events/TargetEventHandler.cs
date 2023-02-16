@@ -59,17 +59,5 @@ namespace EliteFIPServer {
                 Caller.GameDataEvent(GameEventType.Target, targetData);
             }
         }
-
-        public static FIPPacket CreateFIPPacket(ShipTargetedData targetData) {
-
-            GameData gameData = new GameData();
-            gameData.Type = GameEventType.Status.ToString();
-            gameData.Data = JsonSerializer.Serialize(targetData);
-
-            FIPPacket packet = new FIPPacket();
-            packet.PacketType = PacketType.GameData.ToString();
-            packet.Payload = JsonSerializer.Serialize(gameData);
-            return packet;
-        }
     }
 }

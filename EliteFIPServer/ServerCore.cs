@@ -71,7 +71,7 @@ namespace EliteFIPServer {
         private NavRouteClearEventHandler NavRouteClearEventHandler;
 
         // Matric Integration
-        private MatricApiClient matricapi = new MatricApiClient();
+        private MatricApiClient matricapi;
 
         // Panel Server        
         private CancellationTokenSource PanelServerCTS;
@@ -84,6 +84,7 @@ namespace EliteFIPServer {
             ClientConnect.setServerCore(this);
 
             EliteAPI = EliteDangerousApi.Create();
+            matricapi = new MatricApiClient(this);
 
             // Add events to watch list
             StatusEventHandler = new StatusEventHandler(this);
@@ -128,58 +129,8 @@ namespace EliteFIPServer {
                 this.StartPanelServer();
             }
 
-
             // Start tracking game events
-            EliteAPI.StartAsync();
-
-            // Start Matric Flashing Lights thread
-            matricapi.StartMatricFlashWorker();
-
-            // Start Panel Server Thread
-            if (Properties.Settings.Default.AutostartPanelServer == true) {
-                Log.Instance.Info("Starting Panel Server");
-                ServerConsole.updateInfoText("Starting panel server...");
-                try {
-                    var panelServerUrl = "http://*:" + Properties.Settings.Default.PanelServerPort;
-                    var panelServerBuilder = WebApplication.CreateBuilder(EliteFIPServerApplication.GetArgs());
-
-                    panelServerBuilder.Services.AddMvcCore().AddMvcOptions(options => options.EnableEndpointRouting=false);
-                    panelServerBuilder.Services.AddCors(cors => cors.AddPolicy("CorsPolicy", builder => {
-                        builder
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials()
-                            .WithOrigins(panelServerUrl);
-                    }));
-                    panelServerBuilder.Services.AddControllers().AddNewtonsoftJson();
-                    panelServerBuilder.Services.AddSignalR();
-                    var panelServer = panelServerBuilder.Build();
-
-                    if (panelServer.Environment.IsDevelopment()) {
-                        panelServer.UseDeveloperExceptionPage();
-                    }
-
-                    Log.Instance.Info("Listening on {panelserverurl}", panelServerUrl);
-                    panelServer.Urls.Add(panelServerUrl);
-                    panelServer.UseStaticFiles();
-                    panelServer.UseRouting();
-                    panelServer.UseMvc();
-                    panelServer.UseCors("CorsPolicy");
-
-                    panelServer.MapHub<GameDataUpdateHub>("/gamedataupdatehub");
-                    var hubContext = panelServer.Services.GetService(typeof(IHubContext<GameDataUpdateHub>)) as IHubContext<GameDataUpdateHub>;
-                    GameDataUpdateController = new GameDataUpdateController(hubContext);
-
-
-                    PanelServerCTS = new CancellationTokenSource();
-                    PanelServerTask = panelServer.RunAsync(PanelServerCTS.Token);
-                    PanelServerTask.ContinueWith(PanelServerThreadEnded);
-                    PanelServerStarted = true;
-                } catch (Exception ex) {
-                    Log.Instance.Error("Exception: {exception}", ex.ToString());
-                    PanelServerStarted = false;
-                }
-            }
+            EliteAPI.StartAsync(); 
 
             ServerCoreState = State.Started;
             //ServerConsole.UpdateServerStatus(ServerCoreState);
@@ -190,17 +141,9 @@ namespace EliteFIPServer {
 
         public void StartMatricIntegration() {
             Log.Instance.Info("Matric Integration starting");
-            MatricIntegrationState = State.Starting;            
 
             // Start Matric Integration
-            matricapi.Connect(Properties.Settings.Default.MatricApiPort);
-
-            // Start Matric Flashing Lights thread
-            matricapi.StartMatricFlashWorker();
-
-            MatricIntegrationState = State.Started;                        
-            ServerConsole.updateMatricState(true);
-            Log.Instance.Info("Matric Integration started");
+            matricapi.Start();
         }
 
         public void StartPanelServer() {
@@ -281,15 +224,7 @@ namespace EliteFIPServer {
 
         public void StopMatricIntegration() {
             Log.Instance.Info("Matric Integration stopping");
-            MatricIntegrationState = State.Stopping;            
-
-            // Stop Matric Flashing Lights thread
-            matricapi.StopMatricFlashWorker();
-
-            MatricIntegrationState = State.Stopped;                        
-            
-            ServerConsole.updateMatricState(false);
-            Log.Instance.Info("Matric Integration stopped");
+            matricapi.Stop();
         }
 
         public void StopPanelServer() {
@@ -389,6 +324,14 @@ namespace EliteFIPServer {
 
         public MatricApiClient GetMatricApi() {
             return matricapi;
+        }
+
+        public void UpdateMatricApiClientState(State newState) {
+            MatricIntegrationState = newState;
+            if (newState == State.Started || newState == State.Stopped) {
+                ServerConsole.updateMatricState(newState == State.Started ? true : false);
+            }
+            
         }
 
         public void fullClientUpdate() {

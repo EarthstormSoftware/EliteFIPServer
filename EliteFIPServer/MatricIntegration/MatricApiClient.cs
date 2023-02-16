@@ -7,17 +7,23 @@ using System.IO;
 namespace EliteFIPServer.MatricIntegration {
     public class MatricApiClient {
 
+        private static ServerCore ServerCore;
+        
         public static List<ClientInfo> ConnectedClients = new List<ClientInfo>();
         private static Dictionary<string, MatricButton> MatricButtonList = CreateButtonList();
 
         private string AppName = "Elite FIP Server";
         private static string CLIENT_ID;
-        private static Matric.Integration.Matric matric;
-        private static bool verifiedMatricConnection = false;
+        private static Matric.Integration.Matric matric;        
+        private static State ApiClientState = State.Stopped;
 
         // Matric Flash Worker
         private CancellationTokenSource MatricFlashWorkerCTS;
         private Task MatricFlashWorkerTask;
+
+        public MatricApiClient(ServerCore serverCore) {
+            ServerCore = serverCore;
+        }
 
         private static Dictionary<string, MatricButton> CreateButtonList() {
             var buttonlist = new Dictionary<string, MatricButton>();
@@ -87,12 +93,13 @@ namespace EliteFIPServer.MatricIntegration {
             return buttonlist;
         }
 
-        public void Connect(int MatricApiPort) {
+        public void Start() {
 
             Log.Instance.Info("Connecting to Matric");
+            ApiClientState = State.Starting;            
             if (matric == null) {
                 try {
-                    matric = new Matric.Integration.Matric(AppName, "", MatricApiPort);
+                    matric = new Matric.Integration.Matric(AppName, "", Properties.Settings.Default.MatricApiPort);
                     matric.OnConnectedClientsReceived += Matric_OnConnectedClientsReceived;
                     matric.OnError += Matric_OnError;
                 } catch (Exception e) {
@@ -105,6 +112,7 @@ namespace EliteFIPServer.MatricIntegration {
             try {
                 string jsonButtonTextConfig = File.ReadAllText(Constants.ButtonTextConfigFilename);
                 var buttonTextConfigList = JsonConvert.DeserializeObject<List<ButtonTextConfig>>(jsonButtonTextConfig);
+                MatricButtonList.Clear();
                 foreach (ButtonTextConfig buttonConfig in buttonTextConfigList) {
                     if (MatricButtonList.ContainsKey(buttonConfig.ButtonName)) {
                         MatricButtonList[buttonConfig.ButtonName].OffText = buttonConfig.OffText;
@@ -118,14 +126,24 @@ namespace EliteFIPServer.MatricIntegration {
                 Log.Instance.Info("Unable to refesh Button Text Config");
             }
 
+            // Start Matric Flashing Lights thread
+            StartMatricFlashWorker();
+
             matric.GetConnectedClients();
+        }
+
+        public void Stop() {
+            Log.Instance.Info("Connecting to Matric");
+            ApiClientState = State.Starting;
+
         }
 
         public static void Matric_OnConnectedClientsReceived(object source, List<ClientInfo> clients) {
             Log.Instance.Info("Matric client list updated");
 
             // If we get a client list (even empty) from Matric, we know we have connectivity
-            verifiedMatricConnection = true;
+            ApiClientState = State.Started;
+            ServerCore.UpdateMatricApiClientState(ApiClientState);
             ConnectedClients = clients;
 
             // Matric version 2 supports use of 'null' Client IDs, in which case the updates are set to all Clients. 
@@ -143,7 +161,8 @@ namespace EliteFIPServer.MatricIntegration {
 
         private static void Matric_OnError(Exception ex) {
             Log.Instance.Info("Matric Exception: {message}\r\n{exception}", ex.Message, ex.ToString());
-            verifiedMatricConnection = false;
+            ApiClientState = State.Stopped;
+            ServerCore.UpdateMatricApiClientState(ApiClientState);
         }
 
         public List<ClientInfo> GetConnectedClients() {
@@ -151,7 +170,7 @@ namespace EliteFIPServer.MatricIntegration {
         }
 
         public bool IsConnected() {
-            return verifiedMatricConnection;
+            return ApiClientState == State.Started ? true : false;
         }
 
         public void UpdateStatus(StatusData currentStatus) {

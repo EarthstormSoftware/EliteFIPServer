@@ -98,10 +98,5 @@ namespace EliteFIPServer.MatricIntegration {
 
             return controls;
         }
-
-        public void SetMatricStateToOff(Matric.Integration.Matric matric, string ClientId) {
-            SetDefaultButtonState();
-            UpdateMatricState(matric, ClientId);
-        }
     }
 }
