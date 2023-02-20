@@ -95,7 +95,7 @@ namespace EliteFIPServer.MatricIntegration {
 
         public void Start() {
 
-            Log.Instance.Info("Connecting to Matric");
+            Log.Instance.Info("Starting Matric Integration");
             ApiClientState = State.Starting;            
             if (matric == null) {
                 try {
@@ -133,9 +133,11 @@ namespace EliteFIPServer.MatricIntegration {
         }
 
         public void Stop() {
-            Log.Instance.Info("Connecting to Matric");
-            ApiClientState = State.Starting;
-
+            Log.Instance.Info("Stopping Matric Integration");
+            ApiClientState = State.Stopping;
+            StopMatricFlashWorker();
+            MatricFlashWorkerTask.Wait();
+            matric = null;
         }
 
         public static void Matric_OnConnectedClientsReceived(object source, List<ClientInfo> clients) {
@@ -427,7 +429,7 @@ namespace EliteFIPServer.MatricIntegration {
         }
 
         public void StopMatricFlashWorker() {
-            // Start Matric Flash Thread
+            // Stop Matric Flash Thread
             Log.Instance.Info("Stopping Matric Flash Thread");
             MatricFlashWorkerCTS.Cancel();
         }
@@ -455,8 +457,12 @@ namespace EliteFIPServer.MatricIntegration {
         private void MatricFlashWorkerThreadEnded(Task task) {
             if (task.Exception != null) {
                 Log.Instance.Info("Matric Flash Worker Thread Exception: {exception}", task.Exception.ToString());
-            }
+            } 
             Log.Instance.Info("Matric Flash Worker Thread ended");
+            if (ApiClientState != State.Stopped) {
+                ApiClientState = State.Stopped;
+                ServerCore.UpdateMatricApiClientState(ApiClientState);
+            }
         }
     }
 }

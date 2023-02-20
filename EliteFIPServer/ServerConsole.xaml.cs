@@ -12,6 +12,10 @@ namespace EliteFIPServer {
     public partial class ServerConsole : Window {
 
         private ServerCore ServerCore;
+
+        private delegate void ImageSafeCallDelegate(Image target, bool newstate);
+        private delegate void ButtonSafeCallDelegate(Button target, bool newstate);
+
         private bool MatricIntegrationActive = false;
         private bool PanelServerActive = false;
         private List<ClientInfo> MatricClientList = new List<ClientInfo>();
@@ -108,26 +112,34 @@ namespace EliteFIPServer {
         }
 
         public void updateServerCoreState(bool newstate) {
-            setStatusImage(imgCoreServerStatus, newstate);
+            Dispatcher.Invoke(new Action(() => setStatusImage(imgCoreServerStatus, newstate)));
         }
 
         public void updateMatricState(bool newstate) {
-            setStatusImage(imgMatricStatus, newstate);
+            Dispatcher.Invoke(new Action(() => setStatusImage(imgMatricStatus, newstate)));
+            Dispatcher.Invoke(new Action(() => setButtonText(cmdMatric, newstate)));
             MatricIntegrationActive = newstate;
-            cmdMatric.Content = newstate ? "Stop" : "Start";
-            cmdMatric.IsEnabled = true;
         }
 
         public void updatePanelServerState(bool newstate) {
-            setStatusImage(imgPanelServerStatus, newstate);
+            Dispatcher.Invoke(new Action(() => setStatusImage(imgPanelServerStatus, newstate)));
+            Dispatcher.Invoke(new Action(() => setButtonText(cmdPanelServer, newstate)));
             PanelServerActive = newstate;
-            cmdPanelServer.Content = newstate ? "Stop" : "Start";
-            cmdPanelServer.IsEnabled = true;
         }
+
         public void updateInfoText(string newInfoText) {
+            Dispatcher.Invoke(new Action(() => setInfoText(newInfoText)));
+        }
+
+        private void setInfoText(string newInfoText) {
             txtInfoText.Text = newInfoText;
-        }   
-        
+        }
+
+        private void setButtonText(Button target, bool started) {
+            cmdMatric.Content = started ? "Stop" : "Start";
+            cmdMatric.IsEnabled = true;
+        }
+
         private void setStatusImage(Image target, bool started) {
             if (started) {
                 target.Source = new BitmapImage(new Uri("pack://application:,,,/Images/yes32.png"));
