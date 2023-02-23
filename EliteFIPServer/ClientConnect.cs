@@ -1,14 +1,14 @@
 ﻿namespace EliteFIPServer {
     public static class ClientConnect {
-        private static ServerCore serverCore;
+        private static EliteAPIIntegration DataProvider;
 
-        public static void setServerCore(ServerCore currentServerCore) {
-            serverCore = currentServerCore;
+        public static void SetDataProvider(EliteAPIIntegration currentDataProvider) {
+            DataProvider = currentDataProvider;
         }
 
-        public static void requestDataUpdate() {
-            if (serverCore != null) {
-                serverCore.fullClientUpdate();
+        public static void RequestDataUpdate() {
+            if (DataProvider != null) {
+                DataProvider.FullClientUpdate();
             }
         }
 

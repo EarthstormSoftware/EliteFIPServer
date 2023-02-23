@@ -3,89 +3,90 @@ using EliteFIPServer.Logging;
 using Matric.Integration;
 using Newtonsoft.Json;
 using System.IO;
+using System.Runtime.CompilerServices;
 
-namespace EliteFIPServer.MatricIntegration {
+namespace EliteFIPServer {
     public class MatricApiClient {
 
-        private static ServerCore ServerCore;
-        
-        public static List<ClientInfo> ConnectedClients = new List<ClientInfo>();
-        private static Dictionary<string, MatricButton> MatricButtonList = CreateButtonList();
+        public ComponentState CurrentState { get; private set; } = new ComponentState();
+
+        public List<ClientInfo> ConnectedClients = new List<ClientInfo>();
+        private Dictionary<string, MatricButton> MatricButtonList;
 
         private string AppName = "Elite FIP Server";
-        private static string CLIENT_ID;
-        private static Matric.Integration.Matric matric;        
-        private static State ApiClientState = State.Stopped;
+        private string CLIENT_ID;
+        private Matric.Integration.Matric matric;
+        
 
         // Matric Flash Worker
         private CancellationTokenSource MatricFlashWorkerCTS;
         private Task MatricFlashWorkerTask;
 
-        public MatricApiClient(ServerCore serverCore) {
-            ServerCore = serverCore;
+        public MatricApiClient() {
+            MatricButtonList = CreateButtonList();
         }
 
         private static Dictionary<string, MatricButton> CreateButtonList() {
             var buttonlist = new Dictionary<string, MatricButton>();
-            var templist = new List<MatricButton>();
 
             // Create Button List 
             // For reference:
             // public MatricButton(string buttonName, string buttonLabel, bool isButton = true, bool isIndicator = true, bool isWarning = true , bool isSwitch = true, bool isSlider = false, bool isText = false, bool isPanel = false, 
             //                     string offText = "Off", string onText = "On", bool buttonState = false, int switchPosition = 1, int sliderPosition = 0)
+            var templist = new List<MatricButton> {
+                new MatricButton(MatricConstants.DOCKED, "Docked", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.LANDED, "Landed", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.LANDINGGEAR, "Landing Gear", offText: "Landing Gear", onText: "Landing Gear"),
+                new MatricButton(MatricConstants.SHIELDS, "Shields", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.SUPERCRUISE, "Supercruise", offText: "Supercruise", onText: "Supercruise"),
+                new MatricButton(MatricConstants.FLIGHTASSIST, "Flight Assist", offText: "Flight Assist", onText: "Flight Assist"),
+                new MatricButton(MatricConstants.HARDPOINTS, "Hardpoints", offText: "Hardpoints", onText: "Hardpoints"),
+                new MatricButton(MatricConstants.INWING, "Wing", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.LIGHTS, "Lights", offText: "Lights", onText: "Lights"),
+                new MatricButton(MatricConstants.CARGOSCOOP, "Cargo Scoop", offText: "Cargo Scoop", onText: "Cargo Scoop"),
+                new MatricButton(MatricConstants.SILENTRUNNING, "Silent Running", offText: "Silent Running", onText: "Silent Running"),
+                new MatricButton(MatricConstants.SCOOPINGFUEL, "Scooping Fuel", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.SRVHANDBRAKE, "SRV Handbrake", offText: "SRV Handbrake", onText: "SRV Handbrake"),
+                new MatricButton(MatricConstants.SRVTURRET, "SRV Turret", offText: "SRV Turret", onText: "SRV Turret"),
+                new MatricButton(MatricConstants.SRVUNDERSHIP, "SRV Under Ship", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.SRVDRIVEASSIST, "SRV DriveAssist", offText: "SRV DriveAssist", onText: "SRV DriveAssist"),
+                new MatricButton(MatricConstants.FSDMASSLOCK, "Mass Locked", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.FSDCHARGE, "FSD Charging", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.FSDCOOLDOWN, "FSD Cooldown", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.LOWFUEL, "Low Fuel", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.OVERHEAT, "Overheat", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.INDANGER, "Danger", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.INTERDICTION, "Interdiction", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.INMAINSHIP, "In Main Ship", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.INFIGHTER, "In Fighter", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.INSRV, "In SRV", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.HUDMODE, "HUD Mode", offText: "Combat", onText: "Analysis"),
+                new MatricButton(MatricConstants.NIGHTVISION, "Night Vision", offText: "Night Vision", onText: "Night Vision"),
+                new MatricButton(MatricConstants.FSDJUMP, "FSD Jump", offText: "FSD Jump", onText: "FSD Jump"),
+                new MatricButton(MatricConstants.SRVHIGHBEAM, "SRV High Beam", offText: "SRV High Beam", onText: "SRV High Beam"),
 
-            templist.Add(new MatricButton(MatricConstants.DOCKED, "Docked", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.LANDED, "Landed", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.LANDINGGEAR, "Landing Gear", offText: "Landing Gear", onText: "Landing Gear"));
-            templist.Add(new MatricButton(MatricConstants.SHIELDS, "Shields", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.SUPERCRUISE, "Supercruise", offText: "Supercruise", onText: "Supercruise"));
-            templist.Add(new MatricButton(MatricConstants.FLIGHTASSIST, "Flight Assist", offText: "Flight Assist", onText: "Flight Assist"));
-            templist.Add(new MatricButton(MatricConstants.HARDPOINTS, "Hardpoints", offText: "Hardpoints", onText: "Hardpoints"));
-            templist.Add(new MatricButton(MatricConstants.INWING, "Wing", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.LIGHTS, "Lights", offText: "Lights", onText: "Lights"));
-            templist.Add(new MatricButton(MatricConstants.CARGOSCOOP, "Cargo Scoop", offText: "Cargo Scoop", onText: "Cargo Scoop"));
-            templist.Add(new MatricButton(MatricConstants.SILENTRUNNING, "Silent Running", offText: "Silent Running", onText: "Silent Running"));
-            templist.Add(new MatricButton(MatricConstants.SCOOPINGFUEL, "Scooping Fuel", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.SRVHANDBRAKE, "SRV Handbrake", offText: "SRV Handbrake", onText: "SRV Handbrake"));
-            templist.Add(new MatricButton(MatricConstants.SRVTURRET, "SRV Turret", offText: "SRV Turret", onText: "SRV Turret"));
-            templist.Add(new MatricButton(MatricConstants.SRVUNDERSHIP, "SRV Under Ship", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.SRVDRIVEASSIST, "SRV DriveAssist", offText: "SRV DriveAssist", onText: "SRV DriveAssist"));
-            templist.Add(new MatricButton(MatricConstants.FSDMASSLOCK, "Mass Locked", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.FSDCHARGE, "FSD Charging", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.FSDCOOLDOWN, "FSD Cooldown", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.LOWFUEL, "Low Fuel", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.OVERHEAT, "Overheat", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INDANGER, "Danger", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INTERDICTION, "Interdiction", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INMAINSHIP, "In Main Ship", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INFIGHTER, "In Fighter", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INSRV, "In SRV", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.HUDMODE, "HUD Mode", offText: "Combat", onText: "Analysis"));
-            templist.Add(new MatricButton(MatricConstants.NIGHTVISION, "Night Vision", offText: "Night Vision", onText: "Night Vision"));
-            templist.Add(new MatricButton(MatricConstants.FSDJUMP, "FSD Jump", offText: "FSD Jump", onText: "FSD Jump"));
-            templist.Add(new MatricButton(MatricConstants.SRVHIGHBEAM, "SRV High Beam", offText: "SRV High Beam", onText: "SRV High Beam"));
+                new MatricButton(MatricConstants.ONFOOT, "On Foot", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.INTAXI, "In Taxi", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.INMULTICREW, "In Multicrew", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.ONFOOTINSTATION, "On Foot In Station", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.ONFOOTONPLANET, "On Foot On Planet", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.AIMDOWNSIGHT, "Aim Down Sight", offText: "Sights", onText: "Sights"),
+                new MatricButton(MatricConstants.LOWOXYGEN, "Low Oxygen", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.LOWHEALTH, "Low Health", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.COLD, "Cold", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.HOT, "Hot", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.VERYCOLD, "Very Cold", isButton: false, isSwitch: false),
+                new MatricButton(MatricConstants.VERYHOT, "Very Hot", isButton: false, isSwitch: false),
 
-            templist.Add(new MatricButton(MatricConstants.ONFOOT, "On Foot", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INTAXI, "In Taxi", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.INMULTICREW, "In Multicrew", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.ONFOOTINSTATION, "On Foot In Station", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.ONFOOTONPLANET, "On Foot On Planet", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.AIMDOWNSIGHT, "Aim Down Sight", offText: "Sights", onText: "Sights"));
-            templist.Add(new MatricButton(MatricConstants.LOWOXYGEN, "Low Oxygen", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.LOWHEALTH, "Low Health", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.COLD, "Cold", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.HOT, "Hot", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.VERYCOLD, "Very Cold", isButton: false, isSwitch: false));
-            templist.Add(new MatricButton(MatricConstants.VERYHOT, "Very Hot", isButton: false, isSwitch: false));
+                new MatricButton(MatricConstants.FUELMAIN, "Main Fuel", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isSlider: false, isText: true),
+                new MatricButton(MatricConstants.FUELRESERVOIR, "Fuel Reservoir", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isSlider: true, isText: true),
 
-            templist.Add(new MatricButton(MatricConstants.FUELMAIN, "Main Fuel", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isSlider: false, isText: true));
-            templist.Add(new MatricButton(MatricConstants.FUELRESERVOIR, "Fuel Reservoir", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isSlider: true, isText: true));
+                new MatricButton(MatricConstants.STATUS, "Status", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true),
+                new MatricButton(MatricConstants.STATUS_LABEL, "Ship Status:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true),
 
-            templist.Add(new MatricButton(MatricConstants.STATUS, "Status", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
-            templist.Add(new MatricButton(MatricConstants.STATUS_LABEL, "Ship Status:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
-
-            templist.Add(new MatricButton(MatricConstants.TARGET, "Target", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
-            templist.Add(new MatricButton(MatricConstants.TARGET_LABEL, "Target Info:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true));
+                new MatricButton(MatricConstants.TARGET, "Target", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true),
+                new MatricButton(MatricConstants.TARGET_LABEL, "Target Info:", isButton: false, isIndicator: false, isWarning: false, isSwitch: false, isText: true)
+            };
 
             foreach (MatricButton button in templist) {
                 buttonlist.Add(button.ButtonName, button);
@@ -96,7 +97,8 @@ namespace EliteFIPServer.MatricIntegration {
         public void Start() {
 
             Log.Instance.Info("Starting Matric Integration");
-            ApiClientState = State.Starting;            
+            CurrentState.Set(RunState.Starting);
+
             if (matric == null) {
                 try {
                     matric = new Matric.Integration.Matric(AppName, "", Properties.Settings.Default.MatricApiPort);
@@ -107,12 +109,28 @@ namespace EliteFIPServer.MatricIntegration {
                 }
             }
 
+            // There is a possible timing window where an exception will occur after a connection attemot, but before we get here.
+            // In that event, matric integration will already have been stopped and matric set to null, so we need to guard against this
+            // but no further action need be triggered.
+            if (matric != null) {
+                matric.GetConnectedClients();
+            }
+        }
+
+        private void CompleteStart() {
+
+            // Start Matric Flash Thread
+            Log.Instance.Info("Starting Matric Flash Thread");
+            MatricFlashWorkerCTS = new CancellationTokenSource();
+            MatricFlashWorkerTask = new Task(new Action(MatricFlashWorkerThread), MatricFlashWorkerCTS.Token);
+            MatricFlashWorkerTask.ContinueWith(MatricFlashWorkerThreadEnded);
+            MatricFlashWorkerTask.Start();
+
             // Refesh Button Text Config 
             Log.Instance.Info("Refesh Button Text Config");
             try {
                 string jsonButtonTextConfig = File.ReadAllText(Constants.ButtonTextConfigFilename);
-                var buttonTextConfigList = JsonConvert.DeserializeObject<List<ButtonTextConfig>>(jsonButtonTextConfig);
-                MatricButtonList.Clear();
+                var buttonTextConfigList = JsonConvert.DeserializeObject<List<ButtonTextConfig>>(jsonButtonTextConfig);                
                 foreach (ButtonTextConfig buttonConfig in buttonTextConfigList) {
                     if (MatricButtonList.ContainsKey(buttonConfig.ButtonName)) {
                         MatricButtonList[buttonConfig.ButtonName].OffText = buttonConfig.OffText;
@@ -125,27 +143,42 @@ namespace EliteFIPServer.MatricIntegration {
             } catch {
                 Log.Instance.Info("Unable to refesh Button Text Config");
             }
-
-            // Start Matric Flashing Lights thread
-            StartMatricFlashWorker();
-
-            matric.GetConnectedClients();
+            CurrentState.Set(RunState.Started);
         }
 
         public void Stop() {
             Log.Instance.Info("Stopping Matric Integration");
-            ApiClientState = State.Stopping;
-            StopMatricFlashWorker();
-            MatricFlashWorkerTask.Wait();
+            if (CurrentState.State == RunState.Started) {
+                CurrentState.Set(RunState.Stopping);
+                MatricFlashWorkerCTS.Cancel();
+                MatricFlashWorkerTask.Wait();
+            }
             matric = null;
+            CurrentState.Set(RunState.Stopped);
         }
 
-        public static void Matric_OnConnectedClientsReceived(object source, List<ClientInfo> clients) {
+        public void UpdateGameState(GameEventType eventType, Object gameData) {
+            // Only update if Matric Integration is running
+            if (CurrentState.State == RunState.Started) {
+                if (eventType == GameEventType.Status) {
+                    StatusData currentStatus = gameData as StatusData;                   
+                    UpdateStatus(currentStatus);
+                    
+                } else if (eventType == GameEventType.Target) {
+                    ShipTargetedData currentTarget = gameData as ShipTargetedData;                   
+                    UpdateTarget(currentTarget);                    
+                }
+            }
+        }
+
+        public void Matric_OnConnectedClientsReceived(object source, List<ClientInfo> clients) {
             Log.Instance.Info("Matric client list updated");
 
             // If we get a client list (even empty) from Matric, we know we have connectivity
-            ApiClientState = State.Started;
-            ServerCore.UpdateMatricApiClientState(ApiClientState);
+            if (CurrentState.State == RunState.Starting) {
+                CompleteStart();                
+            }
+            
             ConnectedClients = clients;
 
             // Matric version 2 supports use of 'null' Client IDs, in which case the updates are set to all Clients. 
@@ -161,18 +194,44 @@ namespace EliteFIPServer.MatricIntegration {
             }
         }
 
-        private static void Matric_OnError(Exception ex) {
+        private void Matric_OnError(Exception ex) {
             Log.Instance.Info("Matric Exception: {message}\r\n{exception}", ex.Message, ex.ToString());
-            ApiClientState = State.Stopped;
-            ServerCore.UpdateMatricApiClientState(ApiClientState);
+            Stop();
         }
+
+        private void MatricFlashWorkerThread() {
+            Log.Instance.Info("Matric Flash Worker Thread started");
+
+            CancellationToken token = MatricFlashWorkerCTS.Token;
+            while (token.IsCancellationRequested == false) {
+                List<SetButtonsVisualStateArgs> buttons = new List<SetButtonsVisualStateArgs>();
+                foreach (MatricButton button in MatricButtonList.Values) {
+                    if (button != null && button.IsWarning && button.GameState) {
+                        buttons.Add(new SetButtonsVisualStateArgs(null, button.ButtonState ? "off" : "on", MatricConstants.WRN + button.ButtonName));
+                        button.ButtonState = !button.ButtonState;
+                    }
+                }
+                if (buttons.Count > 0) {
+                    matric.SetButtonsVisualState(CLIENT_ID, buttons);
+                }
+                Thread.Sleep(500);
+            }
+            Log.Instance.Info("Matric Flash Worker Thread ending");
+        }
+
+        private void MatricFlashWorkerThreadEnded(Task task) {
+            if (task.Exception != null) {
+                Log.Instance.Info("Matric Flash Worker Thread Exception: {exception}", task.Exception.ToString());
+            }
+            if (CurrentState.State != RunState.Stopping) {
+                Stop();
+            }            
+            Log.Instance.Info("Matric Flash Worker Thread ended");
+        }
+
 
         public List<ClientInfo> GetConnectedClients() {
             return ConnectedClients;
-        }
-
-        public bool IsConnected() {
-            return ApiClientState == State.Started ? true : false;
         }
 
         public void UpdateStatus(StatusData currentStatus) {
@@ -417,52 +476,6 @@ namespace EliteFIPServer.MatricIntegration {
                 displayText = statusTemplate;
             }
             return displayText;
-        }
-
-        public void StartMatricFlashWorker() {
-            // Start Matric Flash Thread
-            Log.Instance.Info("Starting Matric Flash Thread");
-            MatricFlashWorkerCTS = new CancellationTokenSource();
-            MatricFlashWorkerTask = new Task(new Action(MatricFlashWorkerThread), MatricFlashWorkerCTS.Token);
-            MatricFlashWorkerTask.ContinueWith(MatricFlashWorkerThreadEnded);
-            MatricFlashWorkerTask.Start();
-        }
-
-        public void StopMatricFlashWorker() {
-            // Stop Matric Flash Thread
-            Log.Instance.Info("Stopping Matric Flash Thread");
-            MatricFlashWorkerCTS.Cancel();
-        }
-
-        private void MatricFlashWorkerThread() {
-            Log.Instance.Info("Matric Flash Worker Thread started");
-
-            CancellationToken token = MatricFlashWorkerCTS.Token;
-            while (token.IsCancellationRequested == false) {
-                List<SetButtonsVisualStateArgs> buttons = new List<SetButtonsVisualStateArgs>();
-                foreach (MatricButton button in MatricButtonList.Values) {
-                    if (button != null && button.IsWarning && button.GameState) {
-                        buttons.Add(new SetButtonsVisualStateArgs(null, button.ButtonState ? "off" : "on", MatricConstants.WRN + button.ButtonName));
-                        button.ButtonState = !button.ButtonState;
-                    }
-                }
-                if (buttons.Count > 0) {
-                    matric.SetButtonsVisualState(CLIENT_ID, buttons);
-                }
-                Thread.Sleep(500);
-            }
-            Log.Instance.Info("Matric Flash Worker Thread ending");
-        }
-
-        private void MatricFlashWorkerThreadEnded(Task task) {
-            if (task.Exception != null) {
-                Log.Instance.Info("Matric Flash Worker Thread Exception: {exception}", task.Exception.ToString());
-            } 
-            Log.Instance.Info("Matric Flash Worker Thread ended");
-            if (ApiClientState != State.Stopped) {
-                ApiClientState = State.Stopped;
-                ServerCore.UpdateMatricApiClientState(ApiClientState);
-            }
         }
     }
 }

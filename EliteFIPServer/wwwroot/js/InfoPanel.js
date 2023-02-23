@@ -11,8 +11,7 @@ connection.on("StatusData", function (StatusData) {
 
     var data = JSON.parse(StatusData);
     if (data != null) {
-        console.log(data);
-        if (data.BodyName != null) { document.getElementById("BodyName").innerHTML = data.BodyName };
+        console.log(data);        
         if (data.LegalState != null) { document.getElementById("LegalState").innerHTML = data.LegalState };
         if (data.Cargo != null) { document.getElementById("Cargo").innerHTML = data.Cargo };
         if (data.FuelMain != null) { document.getElementById("FuelMain").innerHTML = roundAccurately(data.FuelMain, 2) };
@@ -64,6 +63,7 @@ connection.on("LocationData", function (LocationData) {
     if (data != null) {
         console.log(data);
         if (data.SystemName != null) { document.getElementById("SystemName").innerHTML = data.SystemName };       
+        if (data.StationName != null) { document.getElementById("StationName").innerHTML = data.StationName }; 
     }
 });
 
@@ -87,6 +87,17 @@ connection.on("NavRouteData", function (NavRouteData) {
     }
 });
 
+connection.on("JumpData", function (JumpData) {
+
+    var data = JSON.parse(JumpData);
+    if (data != null) {
+        console.log(data);
+        if (data.OriginSystemName != null) { document.getElementById("OriginSystemName").innerHTML = data.OriginSystemName };
+        if (data.DestinationSystemName != null) { document.getElementById("DestinationSystemName").innerHTML = data.DestinationSystemName };
+        if (data.JumpDistance != null) { document.getElementById("JumpDistance").innerHTML = roundAccurately(data.JumpDistance,2) };
+        if (data.FuelUsed != null) { document.getElementById("FuelUsed").innerHTML = roundAccurately(data.FuelUsed,2) };
+    }
+});
 
 connection.start().catch(function (err) {
     return console.error(err.toString());

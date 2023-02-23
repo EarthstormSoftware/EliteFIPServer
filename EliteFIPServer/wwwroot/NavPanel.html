@@ -2,8 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Elite Dangerous Information Panel</title>
-    <link rel="stylesheet" type="text/css" href="DefaultPanelStyles.css"/>
+    <title>Elite Dangerous Navigation Panel</title>
+    <link rel="stylesheet" type="text/css" href="NavRoute.css" />
 </head>
 
 <body>
@@ -38,7 +38,7 @@
             </table>
         </div>
         <div class="column">
-            <h2>Last Jump Data</h2>
+            <h2>Last Jump</h2>
             <table>
                 <tr>
                     <td>Origin System:</td>
@@ -58,51 +58,12 @@
                 </tr>
             </table>
         </div>
-        <div class="column">
-            <h2>Current Target</h2>
-            <table>
-                <tr>
-                    <td>Ship:</td>
-                    <td id="Ship"></td>
-                </tr>
-                <tr>
-                    <td>Pilot name:</td>
-                    <td id="PilotName"></td>
-                </tr>
-                <tr>
-                    <td>Pilot rank:</td>
-                    <td id="PilotRank"></td>
-                </tr>
-                <tr>
-                    <td>Faction:</td>
-                    <td id="Faction"></td>
-                </tr>
-                <tr>
-                    <td>Legal status:</td>
-                    <td id="LegalStatus"></td>
-                </tr>
-                <tr>
-                    <td>Bounty:</td>
-                    <td id="Bounty"></td>
-                </tr>
-            </table>
-
-        </div>
     </div>
-    <div class="row">
-        <div class="column">
-            <table>
-                <tr>
-                    <td>Current Route:</td>
-                </tr>
-                <tr>
-                    <td id="NavRoute">No route available</td>
-                </tr>
-            </table>
-        </div>
+    <div id="NavRoute" class="row">                        
+        
     </div>
 
     <script src="/js/signalr/signalr.js"></script>
-    <script src="/js/InfoPanel.js"></script>
+    <script src="/js/NavPanel.js"></script>
 </body>
 </html>

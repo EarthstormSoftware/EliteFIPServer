@@ -1,7 +1,5 @@
 "use strict";
 
-
-
 const connection = new signalR.HubConnectionBuilder()
 	.withUrl("/gamedataupdatehub", { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets })
 	.withAutomaticReconnect()
@@ -75,8 +73,7 @@ class RouteClass {
 		// Builds the list of systems in the planned route
 		this.routeEl.innerHTML = '';
 		this.systemList = {};
-		this.steps = steps;
-console.log("=== SET STEPS");
+		this.steps = steps;		
 		steps.forEach((step, index) => {
 			const system = new SystemClass(this.routeEl, step.SystemName, step.Class, step.SystemId);
 			this.systemList[step.SystemName] = system;
@@ -91,8 +88,12 @@ console.log("=== SET STEPS");
 		});
 	}
 
-	setCurrentSystem(systemName) {
-console.log("=== SET CURRENT SYSTEM");
+	clearRoute() {
+		this.routeEl.innerHTML = '';
+		this.systemList = {};
+	}
+
+	setCurrentSystem(systemName) {		
 		// Find the previous current system and remove the "current" class from it
 		if (this.currentSystemName && this.systemList[this.currentSystemName]) {
 			this.systemList[this.currentSystemName].el.classList.remove('current')
@@ -242,24 +243,17 @@ connection.start().catch(function (err) {
 connection.on("NavRouteData", function (NavRouteData) {
 		var data = JSON.parse(NavRouteData);
 		if (data != null) {
-				console.log(data);
-				if (data.NavRouteActive = true && data.Stops.length > 0) {
-						console.log("Processing " + data.Stops.length + " stops");
-						route.setSteps(data.Stops);
+			console.log(data);
+			if (data.NavRouteActive = true && data.Stops.length > 0) {
+
+				console.log("Processing " + data.Stops.length + " stops");
+				route.setSteps(data.Stops);
 				console.log("called SET STEPS");
-					console.log(route);
-//					console.log(window.route);
-/*
-						var routestring = ""
-						for (var index in data.Stops) {								
-								 routestring += data.Stops[index].SystemName + " > ";
-						}
-						document.getElementById("check").innerHTML = routestring.slice(0, -3);
-*/
-				} else {
-//						document.getElementById("check").innerHTML = "No route available"
-				}
-//				console.log("HTML: " + document.getElementById("check").innerHTML);
+				console.log(route);
+
+			} else {
+				route.clearRoute();
+			}
 		}
 });
 
@@ -271,5 +265,14 @@ connection.on("LocationData", function (LocationData) {
 					route.setCurrentSystem(data.SystemName);
 				};			 
 		}
+});
+
+connection.on("JumpData", function (JumpData) {
+
+	var data = JSON.parse(JumpData);
+	if (data != null) {
+		console.log(data);		
+		if (data.DestinationSystemName != null) { route.jump(data.DestinationSystemName); };
+	}
 });
 

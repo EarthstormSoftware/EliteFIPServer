@@ -1,0 +1,268 @@
+:root {
+    --on:;
+    --off: initial;
+    --gui-scale: 1;
+    --color-theme: #88F;
+    --color-on: orange;
+    --color-off: var(--color-on);
+    --color-off-alpha: .5;
+    --color-background: #0008;
+    --compact: var(--on);
+}
+
+body {
+    background-color: black;
+    margin: 0;
+    display: grid;
+    align-items: center;
+    overflow: hidden;
+    font-family: Verdana, sans-serif;
+    color: orange;
+    text-shadow: 0 0 .5rem var(--color-background);
+    transition: background-color .5s, padding-bottom .2s;
+}
+
+.row {
+    display: flex;
+    margin-top: 1em;
+    clear:left
+}
+
+.column {
+    flex: 50%;
+}
+
+
+
+.route-container {
+    flex-grow: 1;
+    display: flex;
+    align-self: stretch;
+    align-items: center;
+    overflow-y: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 6rem, black calc(100% - 6rem), transparent);
+    transition: opacity .5s;
+}
+
+ul {
+    display: flex;
+    margin: 0 auto;
+    padding: 0 5rem;
+    min-height: 15rem;
+    list-style-type: none;
+    background-image: radial-gradient(var(--color-background) 25%, transparent 66%, transparent);
+}
+
+li {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+li {
+    --color: var(--color-theme);
+}
+
+    li > span {
+        opacity: var(--color-off-alpha);
+        --color: var(--color-off);
+    }
+
+    li.current {
+        --color: var(--color-on);
+    }
+
+        li.current::before {
+            --color: var(--color-theme);
+        }
+
+        li.current ~ li::before,
+        li.current ~ li::after {
+            opacity: var(--color-off-alpha);
+            --color: var(--color-off);
+        }
+
+    li.jumping::after,
+    li.jumping::before {
+        --color: var(--color-on);
+    }
+
+    li.jumping::after,
+    li.jumping ~ li::before,
+    li.jumping ~ li::after {
+        opacity: var(--color-off-alpha);
+        --color: var(--color-off);
+    }
+
+    li::after {
+        content: "";
+        box-sizing: border-box;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        color: var(--color);
+        border: .2rem solid;
+        transition-property: color, background-color, box-shadow, opacity;
+        transition-duration: .5s;
+    }
+
+    li.scoopable::after {
+        border-width: 0;
+        background-color: var(--color);
+    }
+
+    li.supercharge::after,
+    li.white-dwarf::after {
+        content: "¦";
+        font-size: 2.2rem;
+        padding-bottom: .5rem;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        border-top: none;
+        border-bottom: none;
+        width: .8rem;
+        height: .8rem;
+        margin: .1rem;
+        transform: rotate(45deg);
+    }
+
+    li.white-dwarf::after {
+        width: 1.4rem;
+        height: 1.4rem;
+        margin: 0;
+    }
+
+    li.black-hole::after {
+        border: none;
+        width: 1.6rem;
+        height: 1.6rem;
+        background-color: var(--color);
+        background-clip: content-box;
+        border: .3rem solid transparent;
+        box-shadow: 0 0 0 .1rem var(--color);
+    }
+
+    li + li::before {
+        --max-width: 3.5rem;
+        content: "";
+        display: block;
+        width: var(--max-width);
+        height: .2rem;
+        margin: 0 .2rem;
+        background-color: var(--color);
+        transition: all .5s;
+    }
+
+    li > span {
+        position: absolute;
+        right: .5rem;
+        transform: translate(50%, 2rem);
+        width: 12ch;
+        font-size: 1.2rem;
+        text-align: center;
+        line-height: 1;
+        color: var(--color);
+        transition: opacity .5s, color .5s;
+    }
+
+    li.current > span {
+        color: var(--color-on);
+        opacity: 1;
+    }
+
+    li:nth-child(odd) > span {
+        transform: translate(50%, -2rem);
+    }
+
+@keyframes pulse {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 100% 100%;
+    }
+}
+
+li.jumping::before {
+    animation: pulse infinite 3s linear;
+    background-image: linear-gradient(to right, transparent, white, transparent);
+    background-color: transparent;
+    background-size: 20% 100%;
+}
+
+li.jumping > span {
+    color: var(--color-on);
+    opacity: 1;
+}
+
+li.compact:not(.current):not(.jumping):not(:first-child) + li.compact:not(.current):not(.jumping):not(:last-child)::before {
+    --disabled-value: var(--max-width);
+    --enabled-value: var(--compact) 0;
+    width: var(--enabled-value, var(--disabled-value));
+}
+
+li.compact:not(.current):not(.jumping):not(:first-child):not(:last-child) > span {
+    --disabled-value: var(--color-off-alpha);
+    --enabled-value: var(--compact) 0;
+    opacity: var(--enabled-value, var(--disabled-value));
+}
+
+
+@media (orientation: portrait) {
+    .route-container {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-self: stretch;
+        align-items: center;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-mask-image: linear-gradient(to bottom, transparent, black 6rem, black calc(100% - 6rem), transparent);
+    }
+
+    ul {
+        flex-direction: column-reverse;
+        align-items: flex-end;
+        padding: 10rem 0;
+        padding-right: 4rem;
+        margin: auto 0 auto auto;
+        min-height: auto;
+        width: 100%;
+    }
+
+    li {
+        flex-direction: column-reverse;
+        justify-content: flex-end;
+    }
+
+        li + li::before {
+            --max-width: 2rem;
+            width: .2rem;
+            height: var(--max-width);
+            margin: .2rem 0;
+        }
+
+        li.jumping::before {
+            animation: pulse infinite 1.5s linear reverse;
+            background-image: linear-gradient(to top, transparent, white, transparent);
+            background-size: 100% 25%;
+        }
+
+        li > span,
+        li:nth-child(odd) > span {
+            right: 2rem;
+            width: max-content;
+            font-size: 1.2rem;
+            text-align: right;
+            transform: none;
+        }
+
+        li.compact:not(.current):not(.jumping):not(:first-child) + li.compact:not(.current):not(.jumping):not(:last-child)::before {
+            --disabled-value: var(--max-width);
+            --enabled-value: var(--compact) 0;
+            width: .2rem;
+            height: var(--enabled-value, var(--disabled-value));
+        }
+}

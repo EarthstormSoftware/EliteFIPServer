@@ -11,7 +11,7 @@ namespace EliteFIPServer {
     /// </summary>
     public partial class ServerConsole : Window {
 
-        private ServerCore ServerCore;
+        private CoreServer ServerCore;
 
         private delegate void ImageSafeCallDelegate(Image target, bool newstate);
         private delegate void ButtonSafeCallDelegate(Button target, bool newstate);
@@ -26,8 +26,14 @@ namespace EliteFIPServer {
             txtVersion.Text = version.ToString();
             Log.LogEnabled(Properties.Settings.Default.EnableLog);
             refreshSettingsTab();
-            ServerCore = new ServerCore(this);
+            
+            ServerCore = new CoreServer(this);
+            ServerCore.CurrentState.onStateChange += HandleCoreServerStateChange;
+            ServerCore.PanelServer.CurrentState.onStateChange += HandlePanelServerStateChange;
+            ServerCore.MatricAPI.CurrentState.onStateChange += HandleMatricIntegrationStateChange;
+
             dgMatricClients.ItemsSource = MatricClientList;
+            ServerCore.Start();
 
         }
 
@@ -83,14 +89,11 @@ namespace EliteFIPServer {
             }
                 
         }
-        private void CmdPanelServer_onClick(object sender, RoutedEventArgs e) {
-            cmdPanelServer.IsEnabled = false;
-            if (PanelServerActive) {
-                cmdPanelServer.Content = "Stopping...";
-                ServerCore.StopPanelServer();
-            } else {
-                cmdPanelServer.Content = "Starting...";
-                ServerCore.StartPanelServer();
+        private void CmdPanelServer_onClick(object sender, RoutedEventArgs e) {            
+            if (PanelServerActive) {                
+                ServerCore.PanelServer.Stop();
+            } else {                
+                ServerCore.PanelServer.Start();
             }
         }
 
@@ -111,20 +114,21 @@ namespace EliteFIPServer {
             saveSettings();
         }
 
-        public void updateServerCoreState(bool newstate) {
-            Dispatcher.Invoke(new Action(() => setStatusImage(imgCoreServerStatus, newstate)));
+        private void HandleCoreServerStateChange(object sender, RunState newState) {
+            Dispatcher.Invoke(new Action(() => setStatusImage(imgCoreServerStatus, newState)));
         }
 
-        public void updateMatricState(bool newstate) {
-            Dispatcher.Invoke(new Action(() => setStatusImage(imgMatricStatus, newstate)));
-            Dispatcher.Invoke(new Action(() => setButtonText(cmdMatric, newstate)));
-            MatricIntegrationActive = newstate;
+        private void HandlePanelServerStateChange(object sender, RunState newState) {
+            
+            Dispatcher.Invoke(new Action(() => setStatusImage(imgPanelServerStatus, newState)));
+            Dispatcher.Invoke(new Action(() => setButtonText(cmdPanelServer, newState)));
+            PanelServerActive = newState == RunState.Started ? true : false;            
         }
 
-        public void updatePanelServerState(bool newstate) {
-            Dispatcher.Invoke(new Action(() => setStatusImage(imgPanelServerStatus, newstate)));
-            Dispatcher.Invoke(new Action(() => setButtonText(cmdPanelServer, newstate)));
-            PanelServerActive = newstate;
+        public void HandleMatricIntegrationStateChange (object sender, RunState newState) {
+            Dispatcher.Invoke(new Action(() => setStatusImage(imgMatricStatus, newState)));
+            Dispatcher.Invoke(new Action(() => setButtonText(cmdMatric, newState)));
+            MatricIntegrationActive = newState == RunState.Started ? true : false;
         }
 
         public void updateInfoText(string newInfoText) {
@@ -135,16 +139,46 @@ namespace EliteFIPServer {
             txtInfoText.Text = newInfoText;
         }
 
-        private void setButtonText(Button target, bool started) {
-            cmdMatric.Content = started ? "Stop" : "Start";
-            cmdMatric.IsEnabled = true;
+        private void setButtonText(Button target, RunState newState) {
+            
+            switch (newState) {
+                case RunState.Stopped:
+                    target.Content = "Start";
+                    target.IsEnabled = true;
+                    break;
+
+                case RunState.Starting:
+                    target.Content = "Starting...";
+                    target.IsEnabled = false;
+                    break;
+
+                case RunState.Started:
+                    target.Content = "Stop";
+                    target.IsEnabled = true;
+                    break;
+
+                case RunState.Stopping:
+                    target.Content = "Stopping...";
+                    target.IsEnabled = false;
+                    break;
+            }
         }
 
-        private void setStatusImage(Image target, bool started) {
-            if (started) {
-                target.Source = new BitmapImage(new Uri("pack://application:,,,/Images/yes32.png"));
-            } else {
-                target.Source = new BitmapImage(new Uri("pack://application:,,,/Images/minus32.png"));
+        private void setStatusImage(Image target, RunState newState) {
+
+            switch (newState) {
+                case RunState.Stopped:
+                    target.Source = new BitmapImage(new Uri("pack://application:,,,/Images/minus32.png"));
+                    break;
+
+                case RunState.Starting:
+                case RunState.Stopping:
+                    target.Source = new BitmapImage(new Uri("pack://application:,,,/Images/refresh32.png"));
+                    break;
+
+                case RunState.Started:
+                    target.Source = new BitmapImage(new Uri("pack://application:,,,/Images/yes32.png"));
+                    break;
             }
         }
 

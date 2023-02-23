@@ -6,7 +6,7 @@
     <UseWindowsForms>False</UseWindowsForms>
     <StartupObject>EliteFIPServer.EliteFIPServerApplication</StartupObject>
     <Authors>Earthstorm Software</Authors>
-    <AssemblyVersion>3.1.23050.2</AssemblyVersion>
+    <AssemblyVersion>3.1.23054.13</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>    
     <Platforms>AnyCPU;x64</Platforms>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -46,6 +46,12 @@
     <InheritWinAppVersionFrom>AssemblyVersion</InheritWinAppVersionFrom>
     <PrimaryVersionType>AssemblyVersionAttribute</PrimaryVersionType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Images\refresh256.png" />
+    <None Remove="Images\refresh32.png" />
+    <None Remove="Images\refresh48.png" />
+  </ItemGroup>
 
   <ItemGroup>
       <FrameworkReference Include="Microsoft.AspNetCore.App" />
@@ -96,7 +102,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="MatricIntegration\ButtonTextConfig.json">
+    <None Update="ButtonTextConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="NLog.config">
@@ -109,10 +115,19 @@
     <None Update="wwwroot\DefaultPanelStyles.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="wwwroot\js\NavPanel.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="wwwroot\NavPanel.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="wwwroot\InfoPanel.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="wwwroot\js\InfoPanel.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="wwwroot\js\RoutePanel.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="wwwroot\js\signalr\dist\browser\signalr.js">
@@ -128,6 +143,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="wwwroot\js\TargetPanel.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="wwwroot\NavRoute.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="wwwroot\RoutePanel.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="wwwroot\StatusPanel.html">
@@ -158,6 +179,9 @@
     <Resource Include="Images\no256.png" />
     <Resource Include="Images\no32.png" />
     <Resource Include="Images\no48.png" />
+    <Resource Include="Images\refresh256.png" />
+    <Resource Include="Images\refresh32.png" />
+    <Resource Include="Images\refresh48.png" />
     <Resource Include="Images\yes256.png" />
     <Resource Include="Images\yes32.png" />
     <Resource Include="Images\yes48.png" />

@@ -1,5 +1,5 @@
 ﻿using Matric.Integration;
-namespace EliteFIPServer.MatricIntegration {
+namespace EliteFIPServer {
 
     class MatricButton {
 
