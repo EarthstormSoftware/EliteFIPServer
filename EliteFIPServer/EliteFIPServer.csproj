@@ -6,8 +6,8 @@
     <UseWindowsForms>False</UseWindowsForms>
     <StartupObject>EliteFIPServer.EliteFIPServerApplication</StartupObject>
     <Authors>Earthstorm Software</Authors>
-    <AssemblyVersion>3.1.23080.0</AssemblyVersion>
-    <FileVersion>$(AssemblyVersion)</FileVersion>    
+    <AssemblyVersion>3.2.23080.1</AssemblyVersion>
+    <FileVersion>3.3.23080.0</FileVersion>    
     <Platforms>AnyCPU;x64</Platforms>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Nullable>disable</Nullable>
