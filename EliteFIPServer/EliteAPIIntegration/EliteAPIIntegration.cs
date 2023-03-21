@@ -20,6 +20,7 @@ namespace EliteFIPServer {
         private ShipTargetedData currentTarget = new ShipTargetedData();
         private LocationData currentLocation = new LocationData();
         private NavigationData currentNavRoute = new NavigationData();
+        private NavigationData previousNavRoute = new NavigationData();
         private JumpData currentJump = new JumpData();
 
         public EliteAPIIntegration(CoreServer coreServer) {
@@ -62,7 +63,8 @@ namespace EliteFIPServer {
             if (currentStatus != null) { CoreServer.GameDataEvent(GameEventType.Status, currentStatus); }
             if (currentTarget != null) { CoreServer.GameDataEvent(GameEventType.Target, currentTarget); }
             if (currentLocation != null) { CoreServer.GameDataEvent(GameEventType.Location, currentLocation); }
-            if (currentNavRoute != null) { CoreServer.GameDataEvent(GameEventType.Navigation, currentNavRoute); }
+            if (currentNavRoute != null && currentNavRoute.NavRouteActive) { CoreServer.GameDataEvent(GameEventType.Navigation, currentNavRoute); }
+            if (previousNavRoute != null) { CoreServer.GameDataEvent(GameEventType.PreviousNavRoute, previousNavRoute); }
             if (currentJump != null) { CoreServer.GameDataEvent(GameEventType.Jump, currentJump); }
 
         }
@@ -71,7 +73,7 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Handling Status Event");
 
-            currentStatus.LastUpdate = DateTime.Now;
+            currentStatus.LastUpdate = currentStatusData.Timestamp;
 
             // Original Status Flags
             if (currentStatusData.Available) {
@@ -207,7 +209,7 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Handling Location Event");
 
-            currentLocation.LastUpdate = DateTime.Now;
+            currentLocation.LastUpdate = currentLocationData.Timestamp;
             currentLocation.SystemId = currentLocationData.SystemAddress;
             currentLocation.SystemName = currentLocationData.StarSystem;
             currentLocation.BodyId = currentLocationData.BodyId;
@@ -221,48 +223,75 @@ namespace EliteFIPServer {
         }
         public void HandleStartJumpEvent(EliteAPI.Events.StartJumpEvent startJumpData, EventContext context) {
 
-            Log.Instance.Info("Handling StartJumpEvent Event");
+            Log.Instance.Info("Handling StartJumpEvent Event");            
+            if (currentJump.LastUpdate <= startJumpData.Timestamp && startJumpData.JumpType == "Hyperspace") {
+                currentJump.LastUpdate = startJumpData.Timestamp;
+                currentJump.JumpComplete = false;
+                currentJump.OriginSystemId = currentLocation.SystemId;
+                currentJump.OriginSystemName = currentLocation.SystemName;
+                currentJump.DestinationSystemId = startJumpData.SystemAddress;
+                currentJump.DestinationSystemName = startJumpData.StarSystem;
+                currentJump.DestinationSystemClass = startJumpData.StarClass;
+                currentJump.JumpDistance = 0;
+                currentJump.FuelUsed = 0;
 
-            currentJump.LastUpdate = DateTime.Now;
-            currentJump.JumpComplete = false;
-            currentJump.OriginSystemId = currentLocation.SystemId;
-            currentJump.OriginSystemName = currentLocation.SystemName;
-            currentJump.DestinationSystemId = startJumpData.SystemAddress;
-            currentJump.DestinationSystemName = startJumpData.StarSystem;
-            currentJump.DestinationSystemClass = startJumpData.StarClass;
-            currentJump.JumpDistance = 0;
-            currentJump.FuelUsed = 0;               
+                CoreServer.GameDataEvent(GameEventType.Jump, currentJump);
+            }
 
-            CoreServer.GameDataEvent(GameEventType.Jump, currentJump);
 
         }
         public void HandleFsdJumpEvent(EliteAPI.Events.FsdJumpEvent fsdJumpdataData, EventContext context) {
 
             Log.Instance.Info("Handling FsdJumpEvent Event");
 
-            currentLocation.LastUpdate = DateTime.Now;
-            currentLocation.SystemId = fsdJumpdataData.SystemAddress;
-            currentLocation.SystemName = fsdJumpdataData.StarSystem;
-            currentLocation.BodyId = fsdJumpdataData.BodyId;
-            currentLocation.BodyName = fsdJumpdataData.Body;
+            if (currentLocation.LastUpdate <= fsdJumpdataData.Timestamp) {
+                currentLocation.LastUpdate = fsdJumpdataData.Timestamp;
+                currentLocation.SystemId = fsdJumpdataData.SystemAddress;
+                currentLocation.SystemName = fsdJumpdataData.StarSystem;
+                currentLocation.BodyId = fsdJumpdataData.BodyId;
+                currentLocation.BodyName = fsdJumpdataData.Body;
 
-            currentJump.DestinationSystemId = fsdJumpdataData.SystemAddress;
-            currentJump.DestinationSystemName = fsdJumpdataData.StarSystem;
-            currentJump.JumpDistance = fsdJumpdataData.JumpDist;
-            currentJump.FuelUsed = fsdJumpdataData.FuelUsed;
-            currentJump.JumpComplete = true;
+                CoreServer.GameDataEvent(GameEventType.Location, currentLocation);
+            }
 
-            CoreServer.GameDataEvent(GameEventType.Location, currentLocation);
-            CoreServer.GameDataEvent(GameEventType.Jump, currentJump);
+            if (currentJump.LastUpdate <= fsdJumpdataData.Timestamp) {
+                currentJump.LastUpdate = fsdJumpdataData.Timestamp;
+                currentJump.DestinationSystemId = fsdJumpdataData.SystemAddress;
+                currentJump.DestinationSystemName = fsdJumpdataData.StarSystem;
+                currentJump.JumpDistance = fsdJumpdataData.JumpDist;
+                currentJump.FuelUsed = fsdJumpdataData.FuelUsed;
+                currentJump.JumpComplete = true;
+
+                CoreServer.GameDataEvent(GameEventType.Jump, currentJump);
+            }
+
+            if (currentNavRoute.LastUpdate <= fsdJumpdataData.Timestamp && currentNavRoute.NavRouteActive && 
+                currentNavRoute.Stops != null && currentNavRoute.Stops.Count() != 0) {
+
+                foreach (NavigationData.NavRouteStop  navRouteStop in currentNavRoute.Stops) {
+                    if (navRouteStop.SystemName == fsdJumpdataData.StarSystem) {
+                        currentNavRoute.LastSystemReached = fsdJumpdataData.StarSystem;
+                    }
+                }
+            }
         }
 
         public void HandleNavRouteEvent(EliteAPI.Events.Status.NavRoute.NavRouteEvent currentNavRouteData, EventContext context) {
 
             Log.Instance.Info("Handling NavRoute Event");
+            Log.Instance.Info("Current data from: {curDataTime}, New data from: {newDataTime}", currentNavRoute.LastUpdate.ToString(), currentNavRouteData.Timestamp.ToString());
+            if ((currentNavRoute.LastUpdate <= currentNavRouteData.Timestamp) && (currentNavRouteData.Stops != null) && (currentNavRouteData.Stops.Count() != 0))  {
+                if (currentNavRoute.NavRouteActive) {
+                    previousNavRoute = currentNavRoute.DeepCopy();
+                    previousNavRoute.NavRouteActive = false;
+                    CoreServer.GameDataEvent(GameEventType.PreviousNavRoute, previousNavRoute);
+                }
 
-            currentNavRoute.LastUpdate = DateTime.Now;
-            if ((currentNavRouteData.Stops != null) && (currentNavRouteData.Stops.Count() != 0)) {
+                currentNavRoute.LastUpdate = currentNavRouteData.Timestamp;
+                
+                Log.Instance.Info("New route has {jumpcount} jumps", currentNavRouteData.Stops.Count());
                 currentNavRoute.NavRouteActive = true;
+                currentNavRoute.Stops.Clear();
                 foreach (EliteAPI.Events.Status.NavRoute.NavRouteStop navRouteStop in currentNavRouteData.Stops) {
                     NavigationData.NavRouteStop navStop = new NavigationData.NavRouteStop();
                     navStop.SystemId = navRouteStop.Address;
@@ -270,22 +299,31 @@ namespace EliteFIPServer {
                     navStop.Class = navRouteStop.Class;
                     currentNavRoute.Stops.Add(navStop);
                 }
-            } else {
-                currentNavRoute.NavRouteActive = false;
-                currentNavRoute.Stops.Clear();
+                CoreServer.GameDataEvent(GameEventType.Navigation, currentNavRoute);                
             }
-            CoreServer.GameDataEvent(GameEventType.Navigation, currentNavRoute);
+
         }
 
         public void HandleNavRouteClearEvent(EliteAPI.Events.Status.NavRoute.NavRouteClearEvent navRouteClear, EventContext context) {
 
             Log.Instance.Info("Handling NavRouteClear Event");
+            Log.Instance.Info("Current data from: {curDataTime}, New data from: {newDataTime}", currentNavRoute.LastUpdate.ToString(), navRouteClear.Timestamp.ToString());
+            if (currentNavRoute.LastUpdate <= navRouteClear.Timestamp) {
+                if (currentNavRoute.NavRouteActive) {
+                    previousNavRoute = currentNavRoute.DeepCopy();
+                    previousNavRoute.NavRouteActive = false;
+                    if (currentJump.JumpComplete == false) {
+                        previousNavRoute.LastSystemReached = currentJump.DestinationSystemName;
+                    }
+                    CoreServer.GameDataEvent(GameEventType.PreviousNavRoute, previousNavRoute);
+                }
 
-            currentNavRoute.LastUpdate = DateTime.Now;
-            currentNavRoute.NavRouteActive = false;
-            currentNavRoute.Stops.Clear();
+                currentNavRoute.LastUpdate = navRouteClear.Timestamp;
+                currentNavRoute.NavRouteActive = false;
+                currentNavRoute.Stops.Clear();
 
-            CoreServer.GameDataEvent(GameEventType.Navigation, currentNavRoute);
+                CoreServer.GameDataEvent(GameEventType.Navigation, currentNavRoute);                
+            }
 
         }
 
@@ -293,7 +331,7 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Handling ApproachBodyEvent Event");
 
-            currentLocation.LastUpdate = DateTime.Now;
+            currentLocation.LastUpdate = approachBodyData.Timestamp;
             currentLocation.BodyId = approachBodyData.BodyId;
             currentLocation.BodyName = approachBodyData.Body;
 
@@ -304,7 +342,7 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Handling LeaveBodyEvent Event");
 
-            currentLocation.LastUpdate = DateTime.Now;
+            currentLocation.LastUpdate = leaveBodyData.Timestamp;
             currentLocation.BodyId = "";
             currentLocation.BodyName = "";
 
@@ -315,7 +353,7 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Handling DockedEvent Event");
 
-            currentLocation.LastUpdate = DateTime.Now;
+            currentLocation.LastUpdate = dockedData.Timestamp;
             currentLocation.MarketId = dockedData.MarketId;
             currentLocation.StationName = dockedData.StationName;
             currentLocation.StationType = dockedData.StationType;
@@ -327,7 +365,7 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Handling DockedEvent Event");
 
-            currentLocation.LastUpdate = DateTime.Now;
+            currentLocation.LastUpdate = undockedData.Timestamp;
             currentLocation.MarketId = "";
             currentLocation.StationName = "";
             currentLocation.StationType = "";

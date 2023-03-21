@@ -38,6 +38,11 @@ namespace EliteFIPServer
             _hubContext.Clients.All.SendAsync("NavRouteData", navRouteJSON);
         }
 
+        public void SendPreviousNavRoute(NavigationData navRouteData) {
+            string navRouteJSON = JsonSerializer.Serialize(navRouteData);
+            _hubContext.Clients.All.SendAsync("PreviousNavRoute", navRouteJSON);
+        }
+
         public void SendJumpUpdate(JumpData jumpData) {
             string jumpJSON = JsonSerializer.Serialize(jumpData);
             _hubContext.Clients.All.SendAsync("JumpData", jumpJSON);

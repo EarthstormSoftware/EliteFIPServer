@@ -36,7 +36,7 @@ connection.on("NavRouteData", function (NavRouteData) {
 	var data = JSON.parse(NavRouteData);
 	if (data != null) {
 		console.log(data);
-		if (data.NavRouteActive = true && data.Stops.length > 0) {
+		if (data.NavRouteActive == true && data.Stops.length > 0) {
 			route.setSteps(data.Stops);			
 		} else {
 			route.clearRoute();

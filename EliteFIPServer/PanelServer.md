@@ -13,8 +13,8 @@ use cases.
 
 ## Enabling the Panel Server
 
-The Panel Server is disabled by default as a security precaution. To enable the panel server, open the Settings panel and 
-enable the Panel Server check box. 
+The Panel Server is disabled by default as a security precaution. To enable the panel server, either start it manually via the button
+on the Status tab, or enable it to start automatically via the Settings tab.
 
 The Panel server attempts to use port 4545 by default. This can be changed if required. If it is changed, the user must also
 update any URLS used to access the server, including in the JavaScript used to update the HTML pages.
@@ -54,9 +54,11 @@ Default panels are provided as follows:
 
 Panel Description | Panel FileName
 -------------- | ----------- 
-Status Panel (Misc Navigation Information) | StatusPanel.html 
+Status Panel (Misc general information) | StatusPanel.html 
 Target Panel (Information on currently targeted ship) | TargetPanel.html
-Info Panel (Status & Target Panels combined) | InfoPanel.html
+Info Panel (Extended information including Status, target and current route visualisation) | InfoPanel.html
+Navigation Panel (Status and navigation information incuding current route visualisation) | NavPanel.html
+Route Panel (Simple current route & previrous route visualisation) | RoutePanel.html
 
 ## Customising Panels
 
@@ -73,5 +75,8 @@ StatusData  | StatusData
 TargetData | ShipTargetedData
 LocationData | LocationData
 NavRouteData | NavigationData
+PreviousNavRoute | NavigationData
+JumpData | JumpData
+
 
 Note that some data points might only be available in specific versions of the game (for example some only in ED:Odyssey)

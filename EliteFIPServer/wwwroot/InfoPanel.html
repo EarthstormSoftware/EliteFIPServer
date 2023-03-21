@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <title>Elite Dangerous Information Panel</title>
-    <link rel="stylesheet" type="text/css" href="DefaultPanelStyles.css"/>
+    <link rel="stylesheet" type="text/css" href="NavRoute.css" />
 </head>
 
 <body>
@@ -47,7 +47,7 @@
                 <tr>
                     <td>Destination System:</td>
                     <td id="DestinationSystemName"></td>
-                <tr>                
+                <tr>
                 <tr>
                     <td>Jump Distance:</td>
                     <td id="JumpDistance"></td>
@@ -89,18 +89,9 @@
 
         </div>
     </div>
-    <div class="row">
-        <div class="column">
-            <table>
-                <tr>
-                    <td>Current Route:</td>
-                </tr>
-                <tr>
-                    <td id="NavRoute">No route available</td>
-                </tr>
-            </table>
-        </div>
-    </div>
+    <div id="NavRoute" class="row">
+
+    </div>    
 
     <script src="/js/signalr/signalr.js"></script>
     <script src="/js/InfoPanel.js"></script>

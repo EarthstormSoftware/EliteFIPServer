@@ -112,6 +112,10 @@ namespace EliteFIPServer
                     NavigationData currentNavRoute = gameData as NavigationData;                    
                     GameDataUpdateController.SendNavRouteUpdate(currentNavRoute);
 
+                } else if (eventType == GameEventType.PreviousNavRoute) {
+                    NavigationData previousNavRoute = gameData as NavigationData;
+                    GameDataUpdateController.SendPreviousNavRoute(previousNavRoute);
+
                 } else if (eventType == GameEventType.Jump) {
                     JumpData currentJumpData = gameData as JumpData;
                     GameDataUpdateController.SendJumpUpdate(currentJumpData);

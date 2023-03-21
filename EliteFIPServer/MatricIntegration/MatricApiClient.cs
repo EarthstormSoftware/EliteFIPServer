@@ -109,7 +109,7 @@ namespace EliteFIPServer {
                 }
             }
 
-            // There is a possible timing window where an exception will occur after a connection attemot, but before we get here.
+            // There is a possible timing window where an exception will occur after a connection attempt, but before we get here.
             // In that event, matric integration will already have been stopped and matric set to null, so we need to guard against this
             // but no further action need be triggered.
             if (matric != null) {
@@ -196,7 +196,12 @@ namespace EliteFIPServer {
 
         private void Matric_OnError(Exception ex) {
             Log.Instance.Info("Matric Exception: {message}\r\n{exception}", ex.Message, ex.ToString());
-            Stop();
+            if (ex is System.Net.Sockets.SocketException) {
+                if (ex.HResult == 10054) {
+                    System.Threading.Thread.Sleep(Properties.Settings.Default.MatricRetryInterval*1000);
+                    matric.GetConnectedClients();
+                }
+            }
         }
 
         private void MatricFlashWorkerThread() {

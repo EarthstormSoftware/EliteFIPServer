@@ -3,7 +3,7 @@
 Elite FIP Server is a .NET app which uses [EliteAPI](https://github.com/Somfic/EliteAPI) to 
 read Elite Dangerous game information, and feed it to [Matric](https://matricapp.com) via the Matric 
 Integration API. It also makes some game data available via a self-hosted web server, allowing the data 
-to be viewed via browser, and the display of that data to be customised.
+to be viewed via browser or browser based viwer, and the display of that data to be customised.
 
 The integration with Matric allows Matric to reflect the current game state in the UI, with particular respect to button/toggle state 
 (such as Landing Gear or Lights), and also other information like current target data. Using a custom touch
@@ -24,8 +24,10 @@ If you are upgrading from a previous section, please double check the Runtime Pr
   need the ASP/NET Core Hosting Bundle (Run server apps).
 
 - [Matric v2.x and the MatricIntegration.dll](https://matricapp.com)  
-  Elite FIP Server supports integration with Matric v2.x via the MatricIntegration.dll provided in the Matric installation folder. 
-  This DLL **must** be copied to the Elite FIP Server folder or an exception will occur.
+  Elite FIP Server supports integration with Matric v2.x via the MatricIntegration.dll provided in the Matric installation folder.
+  This DLL **must** be copied to the Elite FIP Server folder or an exception will occur and the pre-packaged installation includes
+  this file.
+  
 
 ---
 
@@ -44,12 +46,11 @@ Older versions of Elite FIP server, used the EliteJournalReader project to provi
 ## Usage
 Use at own risk :)
 1. Either use the provided installer package and install to a suitable location, or build from source
-2. Copy the MatricIntegration.dll file from the Matric installtion folder to the Elite FIP Server folder
-3. Start Matric and connect a client.
-4. Enable API Integration in Matric (Settings > API Integration > Enable 3rd party integration). Please note that PIN authorisation is no longer supported.
-5. Run the EliteFIPServer.exe file - a shortcut will be placed on the desktop if you used the installer
-6. By default, the server will connect to Matric and start parsing game data
-7. You can customise port settings and enable the Panel Server (to pubish data via the built-in  Web Server) in the settings panel as required
+2. Start Matric and connect a client.
+3. Enable API Integration in Matric (Settings > API Integration > Enable 3rd party integration). Please note that PIN authorisation is no longer supported.
+4. Run the EliteFIPServer.exe file - a shortcut will be placed on the desktop if you used the installer
+5. Matric Integration is not enabled by default. You can start this manually from the UI, and configure it to start automatically in the Settings tab. 
+6. The Panel Server (which pubishes game data via a built-in  Web Server) can also be started manually, and configured to start automatically in the Settings tab.
 
 ### Matric Authorisation
 Elite FIP Server v2 does not support Matric PIN authorisation. Please disable this in Matric.
@@ -58,18 +59,17 @@ Elite FIP Server v2 does not support Matric PIN authorisation. Please disable th
 Elite FIP Server no longer restricts users to a single Matric Client device - all connected Matric clients 
 will receive game state updates
 
-### Immediate Start
-In the 'Settings' panel the Immediate Start option determines if the server will connect to Matric and start
-parsing game files immediately after it is started. This is the default. You can start and stop the processing
-of data manually with the buttom in the main screen.
-
 ### Enable Logging
 In the 'Settings' panel the Enable Logging option will enable or disable logging. By default logging is turned 
 off. When enabled, the log is located in the User AppData\Roaming\EliteFIPServer folder.
 For example: c:\Users\MyUserName\AppData\Roaming\EliteFIPServer
 
-### Enable Panel Server
-See [Panel server](EliteFIPServer/PanelServer.md) for more information
+### Autostart Matric Integration
+**Not recommended** The Settings tab allows Matric Integration to be enabled when Elite FIP server starts. This should only be enabled if you always start Matric before
+starting Elite FIP Server. See Known issues for further information.
+
+### Autostart Panel Server
+The Settings tab allows the Panel Server  to be enabled when Elite FIP server starts. See [Panel server](EliteFIPServer/PanelServer.md) for more information
 
 ### Enable Custom Button Text
 To have Elite FIP server change button text when game state changes, you have to update the ButtonTextConfig.json file in the same folder
@@ -91,8 +91,22 @@ any settings (which triggers a reload of the config file).
 
 ---
 
+## Known Issues
+
+ - You must start Matric before starting Matric Integration in Elite FIP Server (either manually or automatically). If you start 
+   Matric Integration in Elite FIP Server before starting Matric, the Integration capability will fail and cannot be started unless
+   you restart Elite FIP Server. It is therefore not recommended to enable Autostart of Matric integration at this time.
+
+ - When you arrive at the final destination system of a planned route, the route information will disappear during the final hyerspace
+   jump. This is working as intended, and is due to the sequence of events emitted by Elite Dangerous. Essentially Elite clears the route
+   automatically during the last jump, before the arrival event in the final system, resulting in the route being cleared in FIP server.
+   To mitigate this, Elite FIP server provides a 'Previous Route' which will show the completed route if desired. See 
+   [Panel server](EliteFIPServer/PanelServer.md) for more information
+   
+
+---
+
 ## Upgrading from v1.x
-- The Elite FIP Server ZIP file no longer contains the MatricIntegration.dll file, this file must be copied to the Elite FIP Server folder manually.
 
 - Elite FIP Server v2.x and later include changes that will cause some Matric decks/existing buttons to not function as expected.
 When upgrading from v1, please review the button name information below and change your buttons in Matric accordingly.
@@ -210,6 +224,13 @@ Text size is per standard Matric setting, but for text which combines multiple E
 ---
 # Change History
 
+### v3.2.0
+- Significant internal refactoring
+- Refreshed user interface
+- Improved Route and Location Handling (including new examples and visualisation in Panel Server)
+- Bug fixes and tweaks
+
+
 ### v3.1.0
 - Added installer and application icons
 - Added first pass of Navigation Route and Location data to Panel Server
@@ -249,7 +270,7 @@ Text size is per standard Matric setting, but for text which combines multiple E
 - Somfic and all the contributers to EliteAPI
 - AnarchyZG - the developer of Matric, both for the software and the support
 - The developers and contributors to EliteJournalReader
--  The developers and contributors to all the other open tools and packages that made this feasible. 
+- The developers and contributors to all the other open tools and packages that made this feasible. 
 
 
 

@@ -10,6 +10,7 @@ namespace EliteFIPServer
         Target,
         Location,
         Navigation,
+        PreviousNavRoute,
         Jump
     }
     public struct GameEventTrigger {
@@ -132,7 +133,7 @@ namespace EliteFIPServer
                 } catch (InvalidOperationException) { }
 
                 if (gameEventTrigger.GameEvent != GameEventType.Empty) {
-                    Log.Instance.Info("Game data event received");
+                    Log.Instance.Info("Updating {statetype} data", gameEventTrigger.GameEvent.ToString());
                     PanelServer.UpdateGameState(gameEventTrigger.GameEvent, gameEventTrigger.EventData);
                     MatricAPI.UpdateGameState(gameEventTrigger.GameEvent, gameEventTrigger.EventData);
                 }
