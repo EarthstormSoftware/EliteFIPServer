@@ -11,7 +11,8 @@ namespace EliteFIPServer
         Location,
         Navigation,
         PreviousNavRoute,
-        Jump
+        Jump,
+        ReceivedText
     }
     public struct GameEventTrigger {
         public GameEventType GameEvent { get; set; }

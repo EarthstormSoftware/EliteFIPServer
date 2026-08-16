@@ -203,15 +203,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Elite FIP Server "
-        "ProductCode" = "8:{A1324B11-3E1D-4CE7-9E2E-6A61058545F1}"
-        "PackageCode" = "8:{5A3BAAA0-8A45-4352-B3C2-84469E085F04}"
+        "ProductCode" = "8:{5F53C0DE-890B-4527-A834-1E0ED9BF08C8}"
+        "PackageCode" = "8:{42B972CA-759F-4C9C-B1C5-FD44B75CD902}"
         "UpgradeCode" = "8:{E2D8E278-91DE-4F6E-9C94-87815388CC79}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:3.2.0"
+        "ProductVersion" = "8:3.2.1"
         "Manufacturer" = "8:Earthstorm Software"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -824,7 +824,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_C813DC4386844416874118CFF0F3E63C"
             {
-            "SourcePath" = "8:..\\EliteFIPServer\\obj\\x64\\Release\\net6.0-windows10.0.17763.0\\apphost.exe"
+            "SourcePath" = "8:..\\EliteFIPServer\\obj\\x64\\Release\\net10.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_BA42497DA5E14A918E5D5CF3C1DEEB0A"

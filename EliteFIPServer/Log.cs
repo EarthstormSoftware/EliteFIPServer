@@ -1,6 +1,5 @@
 ﻿using NLog;
 using NLog.Config;
-using NLog.Targets;
 using LogLevel = NLog.LogLevel;
 
 namespace EliteFIPServer.Logging {
@@ -9,18 +8,8 @@ namespace EliteFIPServer.Logging {
         public static Logger Instance { get; private set; }
 
         static Log() {
-#if DEBUG
-            // Setup the logging view for Sentinel - http://sentinel.codeplex.com
-            var sentinelTarget = new NLogViewerTarget() {
-                Name = "sentinel",
-                Address = "udp://127.0.0.1:9999",
-                IncludeNLogData = false
-            };
-            var sentinelRule = new LoggingRule("*", LogLevel.Trace, sentinelTarget);
-            LogManager.Configuration.AddTarget("sentinel", sentinelTarget);
-            LogManager.Configuration.LoggingRules.Add(sentinelRule);
-
-#endif
+            // Note: NLogViewerTarget (Sentinel) was removed in NLog 6.x
+            // File-based logging configured in NLog.config provides debugging capability
 
             LogManager.ReconfigExistingLoggers();
             Instance = LogManager.GetCurrentClassLogger();

@@ -4,6 +4,7 @@
         public const string OptionsFolder = @"\AppData\Local\Frontier Developments\Elite Dangerous\Options\";
         public const string EDProcessName = "EliteDangerous64";
         public const string MatricProcessName = "MatricServer.exe";
+        public const string MatricInstallDirectory = @"C:\Program Files\Ex Machina\MATRIC Desktop";
         public const string Eyecatcher = "EDFIPSRV";
         public const string ButtonTextConfigFilename = "ButtonTextConfig.json";
 

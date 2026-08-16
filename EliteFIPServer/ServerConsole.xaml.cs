@@ -34,7 +34,12 @@ namespace EliteFIPServer {
 
             dgMatricClients.ItemsSource = MatricClientList;
             ServerCore.Start();
+            this.Closing += ServerConsole_Closing;
 
+        }
+
+        private void ServerConsole_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+            ServerCore.Stop();
         }
 
         private void refreshSettingsTab() {

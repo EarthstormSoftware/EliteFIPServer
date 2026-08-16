@@ -94,5 +94,17 @@ namespace EliteFIPServer.Properties {
                 this["MatricRetryInterval"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string MatricInstallPath {
+            get {
+                return ((string)(this["MatricInstallPath"]));
+            }
+            set {
+                this["MatricInstallPath"] = value;
+            }
+        }
     }
 }

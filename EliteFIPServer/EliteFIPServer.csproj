@@ -1,13 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWindowsForms>False</UseWindowsForms>
     <StartupObject>EliteFIPServer.EliteFIPServerApplication</StartupObject>
     <Authors>Earthstorm Software</Authors>
-    <AssemblyVersion>3.2.23080.1</AssemblyVersion>
-    <FileVersion>3.3.23080.0</FileVersion>    
+    <AssemblyVersion>4.0.26228.1</AssemblyVersion>
+    <FileVersion>4.0.26228.0</FileVersion>    
     <Platforms>AnyCPU;x64</Platforms>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Nullable>disable</Nullable>
@@ -64,27 +64,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-    <PackageReference Include="NLog" Version="5.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.11" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="NLog" Version="6.1.4" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="EliteAPI">
-      <HintPath>..\..\EliteAPI\EliteAPI\bin\Release\net6.0\EliteAPI.dll</HintPath>
-    </Reference>
-    <Reference Include="EliteAPI.Abstractions">
-      <HintPath>..\..\EliteAPI\EliteAPI\bin\Release\net6.0\EliteAPI.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="EliteAPI.Events">
-      <HintPath>..\..\EliteAPI\EliteAPI\bin\Release\net6.0\EliteAPI.Events.dll</HintPath>
+      <HintPath>..\..\EliteAPI\EliteAPI\bin\Release\netstandard2.0\EliteAPI.dll</HintPath>
     </Reference>
     <Reference Include="EliteFIPProtocol">
-      <HintPath>..\..\EliteFIPProtocol\EliteFIPProtocol\bin\Release\net6.0\EliteFIPProtocol.dll</HintPath>
+      <HintPath>..\..\EliteFIPProtocol\EliteFIPProtocol\bin\Release\net10.0\EliteFIPProtocol.dll</HintPath>
     </Reference>
     <Reference Include="MatricIntegration">
-      <HintPath>C:\Program Files\Ex Machina\MATRIC Desktop\MatricIntegration.dll</HintPath>
-      <CopyLocal>False</CopyLocal>
+      <HintPath>libs\Matric\MatricIntegration.dll</HintPath>
+      <!-- Compile-time only: at runtime the copy shipped with the installed MATRIC app is loaded instead, see EliteFIPServerApplication.ResolveMatricAssembly -->
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
 

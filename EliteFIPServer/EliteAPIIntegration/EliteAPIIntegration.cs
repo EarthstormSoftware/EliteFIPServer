@@ -1,8 +1,9 @@
 ﻿using EliteAPI;
-using EliteAPI.Abstractions;
-using EliteAPI.Abstractions.Events;
+using EliteAPI.Events;
+using EliteAPI.Events.Game;
 using EliteFIPProtocol;
 using EliteFIPServer.Logging;
+using Newtonsoft.Json;
 
 namespace EliteFIPServer {
     public class EliteAPIIntegration {
@@ -10,10 +11,8 @@ namespace EliteFIPServer {
         private CoreServer CoreServer;
         public ComponentState CurrentState { get; private set; }
 
-        public event EventHandler<RunState> onStateChange;
-
         // Game State Provider
-        private IEliteDangerousApi EliteAPI;
+        private EliteDangerousApi EliteAPI;
 
         // Current Game State Information
         private StatusData currentStatus = new StatusData();
@@ -22,83 +21,93 @@ namespace EliteFIPServer {
         private NavigationData currentNavRoute = new NavigationData();
         private NavigationData previousNavRoute = new NavigationData();
         private JumpData currentJump = new JumpData();
+        private ReceivedTextData currentReceivedText = new ReceivedTextData();
 
         public EliteAPIIntegration(CoreServer coreServer) {
             CoreServer = coreServer;
             CurrentState = new ComponentState();
 
-            EliteAPI = EliteDangerousApi.Create();
+            EliteAPI = new EliteDangerousApi();
 
             // Add events to watch list            
-            EliteAPI.Events.On<EliteAPI.Events.Status.Ship.StatusEvent>(HandleStatusEvent);
-            EliteAPI.Events.On<EliteAPI.Events.ShipTargetedEvent>(HandleShipTargetedEvent);
-            EliteAPI.Events.On<EliteAPI.Events.LocationEvent>(HandleLocationEvent);
-            EliteAPI.Events.On<EliteAPI.Events.StartJumpEvent>(HandleStartJumpEvent);
-            EliteAPI.Events.On<EliteAPI.Events.FsdJumpEvent>(HandleFsdJumpEvent);
-            EliteAPI.Events.On<EliteAPI.Events.Status.NavRoute.NavRouteEvent>(HandleNavRouteEvent);
-            EliteAPI.Events.On<EliteAPI.Events.Status.NavRoute.NavRouteClearEvent>(HandleNavRouteClearEvent);
-            EliteAPI.Events.On<EliteAPI.Events.ApproachBodyEvent>(HandleApproachBodyEvent);
-            EliteAPI.Events.On<EliteAPI.Events.LeaveBodyEvent>(HandleLeaveBodyEvent);
-            EliteAPI.Events.On<EliteAPI.Events.DockedEvent>(HandleDockedEvent);
-            EliteAPI.Events.On<EliteAPI.Events.UndockedEvent>(HandleUndockedEvent);
+            EliteAPI.OnJson("Status", HandleStatusEvent);
+            EliteAPI.On<ShipTargetedEvent>(HandleShipTargetedEvent);
+            EliteAPI.On<LocationEvent>(HandleLocationEvent);
+            EliteAPI.On<StartJumpEvent>(HandleStartJumpEvent);
+            EliteAPI.On<FsdJumpEvent>(HandleFsdJumpEvent);
+            EliteAPI.OnJson("NavRoute", HandleNavRouteEvent);
+            EliteAPI.On<NavRouteClearEvent>(HandleNavRouteClearEvent);
+            EliteAPI.On<ApproachBodyEvent>(HandleApproachBodyEvent);
+            EliteAPI.On<LeaveBodyEvent>(HandleLeaveBodyEvent);
+            EliteAPI.On<DockedEvent>(HandleDockedEvent);
+            EliteAPI.On<UndockedEvent>(HandleUndockedEvent);
+            EliteAPI.On<ReceiveTextEvent>(HandleReceiveTextEvent);
         }
 
         public void Start() {
             CurrentState.Set(RunState.Starting);
             // Start tracking game events
-            EliteAPI.StartAsync();
+            EliteAPI.Start();
             CurrentState.Set(RunState.Started);
         }
 
         public void Stop() {
             CurrentState.Set(RunState.Stopping);
-            // Stop tracking game events
-            EliteAPI.StopAsync();
+            // EliteAPI v5 exposes no Dispose()/Stop(); the old instance's file watchers keep
+            // running in the background, so handlers below guard on IsRunning to ignore them.
+            EliteAPI = new EliteDangerousApi();
             CurrentState.Set(RunState.Stopped);
 
         }
 
+        private bool IsRunning => CurrentState.State == RunState.Started;
+
 
         public void FullClientUpdate() {
-            if (currentStatus != null) { CoreServer.GameDataEvent(GameEventType.Status, currentStatus); }
-            if (currentTarget != null) { CoreServer.GameDataEvent(GameEventType.Target, currentTarget); }
-            if (currentLocation != null) { CoreServer.GameDataEvent(GameEventType.Location, currentLocation); }
-            if (currentNavRoute != null && currentNavRoute.NavRouteActive) { CoreServer.GameDataEvent(GameEventType.Navigation, currentNavRoute); }
-            if (previousNavRoute != null) { CoreServer.GameDataEvent(GameEventType.PreviousNavRoute, previousNavRoute); }
-            if (currentJump != null) { CoreServer.GameDataEvent(GameEventType.Jump, currentJump); }
+            CoreServer.GameDataEvent(GameEventType.Status, currentStatus);
+            CoreServer.GameDataEvent(GameEventType.Target, currentTarget);
+            CoreServer.GameDataEvent(GameEventType.Location, currentLocation);
+            if (currentNavRoute.NavRouteActive) { CoreServer.GameDataEvent(GameEventType.Navigation, currentNavRoute); }
+            CoreServer.GameDataEvent(GameEventType.PreviousNavRoute, previousNavRoute);
+            CoreServer.GameDataEvent(GameEventType.Jump, currentJump);
+            CoreServer.GameDataEvent(GameEventType.ReceivedText, currentReceivedText);
 
         }
 
-        public void HandleStatusEvent(EliteAPI.Events.Status.Ship.StatusEvent currentStatusData, EventContext context) {
+        public void HandleStatusEvent((string eventName, string json) statusEvent) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling Status Event");
+
+            StatusJson currentStatusData = JsonConvert.DeserializeObject<StatusJson>(statusEvent.json);
+            if (currentStatusData == null) { return; }
 
             currentStatus.LastUpdate = currentStatusData.Timestamp;
 
             // Original Status Flags
             if (currentStatusData.Available) {
-                currentStatus.Docked = currentStatusData.Docked;
-                currentStatus.Landed = currentStatusData.Landed;
-                currentStatus.LandingGearDown = currentStatusData.Gear;
-                currentStatus.ShieldsUp = currentStatusData.Shields;
-                currentStatus.Supercruise = currentStatusData.Supercruise;
-                currentStatus.FlightAssistOff = !currentStatusData.FlightAssist;
-                currentStatus.HardpointsDeployed = currentStatusData.Hardpoints;
-                currentStatus.InWing = currentStatusData.Winging;
-                currentStatus.LightsOn = currentStatusData.Lights;
-                currentStatus.CargoScoopDeployed = currentStatusData.CargoScoop;
-                currentStatus.SilentRunning = currentStatusData.SilentRunning;
-                currentStatus.ScoopingFuel = currentStatusData.Scooping;
-                currentStatus.SrvHandbrake = currentStatusData.SrvHandbrake;
-                currentStatus.SrvTurret = currentStatusData.SrvTurret;
-                currentStatus.SrvUnderShip = currentStatusData.SrvNearShip;
-                currentStatus.SrvDriveAssist = currentStatusData.SrvDriveAssist;
-                currentStatus.FsdMassLocked = currentStatusData.MassLocked;
-                currentStatus.FsdCharging = currentStatusData.FsdCharging;
-                currentStatus.FsdCooldown = currentStatusData.FsdCooldown;
-                currentStatus.LowFuel = currentStatusData.LowFuel;
-                currentStatus.Overheating = currentStatusData.Overheating;
-                if (currentStatusData.HasLatLong) {
+                currentStatus.Docked = currentStatusData.GetShipFlag(ShipFlag.Docked);
+                currentStatus.Landed = currentStatusData.GetShipFlag(ShipFlag.Landed);
+                currentStatus.LandingGearDown = currentStatusData.GetShipFlag(ShipFlag.Gear);
+                currentStatus.ShieldsUp = currentStatusData.GetShipFlag(ShipFlag.Shields);
+                currentStatus.Supercruise = currentStatusData.GetShipFlag(ShipFlag.Supercruise);
+                currentStatus.FlightAssistOff = currentStatusData.GetShipFlag(ShipFlag.FlightAssistOff);
+                currentStatus.HardpointsDeployed = currentStatusData.GetShipFlag(ShipFlag.Hardpoints);
+                currentStatus.InWing = currentStatusData.GetShipFlag(ShipFlag.Winging);
+                currentStatus.LightsOn = currentStatusData.GetShipFlag(ShipFlag.Lights);
+                currentStatus.CargoScoopDeployed = currentStatusData.GetShipFlag(ShipFlag.CargoScoop);
+                currentStatus.SilentRunning = currentStatusData.GetShipFlag(ShipFlag.SilentRunning);
+                currentStatus.ScoopingFuel = currentStatusData.GetShipFlag(ShipFlag.Scooping);
+                currentStatus.SrvHandbrake = currentStatusData.GetShipFlag(ShipFlag.SrvHandbrake);
+                currentStatus.SrvTurret = currentStatusData.GetShipFlag(ShipFlag.SrvTurret);
+                currentStatus.SrvUnderShip = currentStatusData.GetShipFlag(ShipFlag.SrvNearShip);
+                currentStatus.SrvDriveAssist = currentStatusData.GetShipFlag(ShipFlag.SrvDriveAssist);
+                currentStatus.FsdMassLocked = currentStatusData.GetShipFlag(ShipFlag.MassLocked);
+                currentStatus.FsdCharging = currentStatusData.GetShipFlag(ShipFlag.FsdCharging);
+                currentStatus.FsdCooldown = currentStatusData.GetShipFlag(ShipFlag.FsdCooldown);
+                currentStatus.LowFuel = currentStatusData.GetShipFlag(ShipFlag.LowFuel);
+                currentStatus.Overheating = currentStatusData.GetShipFlag(ShipFlag.Overheating);
+                if (currentStatusData.GetShipFlag(ShipFlag.HasLatLong)) {
                     currentStatus.HasLatLong = true;
                     currentStatus.Latitude = currentStatusData.Latitude;
                     currentStatus.Longitude = currentStatusData.Longitude;
@@ -107,43 +116,43 @@ namespace EliteFIPServer {
                     currentStatus.Latitude = 0;
                     currentStatus.Longitude = 0;
                 }
-                currentStatus.InDanger = currentStatusData.InDanger;
-                currentStatus.BeingInterdicted = currentStatusData.InInterdiction;
-                currentStatus.InMainShip = currentStatusData.InMothership;
-                currentStatus.InFighter = currentStatusData.InFighter;
-                currentStatus.InSRV = currentStatusData.InSrv;
-                currentStatus.HudAnalysisMode = currentStatusData.AnalysisMode;
-                currentStatus.NightVision = currentStatusData.NightVision;
-                currentStatus.FsdJump = currentStatusData.FsdJump;
-                currentStatus.AltitudeFromAverageRadius = currentStatusData.AltitudeFromAverageRadius;
-                currentStatus.SrvHighBeam = currentStatusData.SrvHighBeam;
+                currentStatus.InDanger = currentStatusData.GetShipFlag(ShipFlag.InDanger);
+                currentStatus.BeingInterdicted = currentStatusData.GetShipFlag(ShipFlag.InInterdiction);
+                currentStatus.InMainShip = currentStatusData.GetShipFlag(ShipFlag.InMothership);
+                currentStatus.InFighter = currentStatusData.GetShipFlag(ShipFlag.InFighter);
+                currentStatus.InSRV = currentStatusData.GetShipFlag(ShipFlag.InSrv);
+                currentStatus.HudAnalysisMode = currentStatusData.GetShipFlag(ShipFlag.AnalysisMode);
+                currentStatus.NightVision = currentStatusData.GetShipFlag(ShipFlag.NightVision);
+                currentStatus.AltitudeFromAverageRadius = currentStatusData.GetShipFlag(ShipFlag.AltitudeFromAverageRadius);
+                currentStatus.FsdJump = currentStatusData.GetShipFlag(ShipFlag.FsdJump);
+                currentStatus.SrvHighBeam = currentStatusData.GetShipFlag(ShipFlag.SrvHighBeam);
 
-                currentStatus.OnFoot = currentStatusData.OnFoot;
-                currentStatus.InTaxi = currentStatusData.InTaxi;
-                currentStatus.InMulticrew = currentStatusData.InMultiCrew;
-                currentStatus.OnFootInStation = currentStatusData.OnFootInStation;
-                currentStatus.OnFootOnPlanet = currentStatusData.OnFootOnPlanet;
-                currentStatus.AimDownSight = currentStatusData.AimDownSight;
-                currentStatus.LowOxygen = currentStatusData.LowOxygen;
-                currentStatus.LowHealth = currentStatusData.LowHealth;
-                currentStatus.Cold = currentStatusData.Cold;
-                currentStatus.Hot = currentStatusData.Hot;
-                currentStatus.VeryCold = currentStatusData.VeryCold;
-                currentStatus.VeryHot = currentStatusData.VeryHot;
+                currentStatus.OnFoot = currentStatusData.GetCommanderFlag(CommanderFlag.OnFoot);
+                currentStatus.InTaxi = currentStatusData.GetCommanderFlag(CommanderFlag.InTaxi);
+                currentStatus.InMulticrew = currentStatusData.GetCommanderFlag(CommanderFlag.InMultiCrew);
+                currentStatus.OnFootInStation = currentStatusData.GetCommanderFlag(CommanderFlag.OnFootInStation);
+                currentStatus.OnFootOnPlanet = currentStatusData.GetCommanderFlag(CommanderFlag.OnFootOnPlanet);
+                currentStatus.AimDownSight = currentStatusData.GetCommanderFlag(CommanderFlag.AimDownSight);
+                currentStatus.LowOxygen = currentStatusData.GetCommanderFlag(CommanderFlag.LowOxygen);
+                currentStatus.LowHealth = currentStatusData.GetCommanderFlag(CommanderFlag.LowHealth);
+                currentStatus.Cold = currentStatusData.GetCommanderFlag(CommanderFlag.Cold);
+                currentStatus.Hot = currentStatusData.GetCommanderFlag(CommanderFlag.Hot);
+                currentStatus.VeryCold = currentStatusData.GetCommanderFlag(CommanderFlag.VeryCold);
+                currentStatus.VeryHot = currentStatusData.GetCommanderFlag(CommanderFlag.VeryHot);
 
-                currentStatus.SystemPips = currentStatusData.Pips.System;
-                currentStatus.EnginePips = currentStatusData.Pips.Engines;
-                currentStatus.WeaponPips = currentStatusData.Pips.Weapons;
+                currentStatus.SystemPips = currentStatusData.Pips != null && currentStatusData.Pips.Length > 0 ? currentStatusData.Pips[0] : 0;
+                currentStatus.EnginePips = currentStatusData.Pips != null && currentStatusData.Pips.Length > 1 ? currentStatusData.Pips[1] : 0;
+                currentStatus.WeaponPips = currentStatusData.Pips != null && currentStatusData.Pips.Length > 2 ? currentStatusData.Pips[2] : 0;
                 currentStatus.FireGroup = currentStatusData.FireGroup;
-                currentStatus.GuiFocus = currentStatusData.GuiFocus.ToString();
-                currentStatus.FuelMain = currentStatusData.Fuel.FuelMain;
-                currentStatus.FuelReservoir = currentStatusData.Fuel.FuelReservoir;
+                currentStatus.GuiFocus = currentStatusData.GuiFocusName;
+                currentStatus.FuelMain = currentStatusData.Fuel?.FuelMain ?? 0;
+                currentStatus.FuelReservoir = currentStatusData.Fuel?.FuelReservoir ?? 0;
                 currentStatus.Cargo = currentStatusData.Cargo;
-                currentStatus.LegalState = currentStatusData.LegalState.ToString();
+                currentStatus.LegalState = currentStatusData.LegalState;
                 currentStatus.Altitude = currentStatusData.Altitude;
                 currentStatus.Heading = currentStatusData.Heading;
-                currentStatus.BodyName = currentStatusData.Body;
-                currentStatus.PlanetRadius = currentStatusData.BodyRadius;
+                currentStatus.BodyName = currentStatusData.BodyName;
+                currentStatus.PlanetRadius = currentStatusData.PlanetRadius;
                 currentStatus.Balance = currentStatusData.Balance;
                 currentStatus.DestinationSystem = currentStatusData.Destination.SystemId;
                 currentStatus.DestinationBody = currentStatusData.Destination.BodyId;
@@ -151,13 +160,14 @@ namespace EliteFIPServer {
                 currentStatus.Oxygen = currentStatusData.Oxygen;
                 currentStatus.Health = currentStatusData.Health;
                 currentStatus.Temperature = currentStatusData.Temperature;
-                currentStatus.SelectedWeapon = currentStatusData.SelectedWeapon.ToString();
+                currentStatus.SelectedWeapon = Localisation.GetLocalisedString(currentStatusData.SelectedWeapon);
                 currentStatus.Gravity = currentStatusData.Gravity;
             }
             CoreServer.GameDataEvent(GameEventType.Status, currentStatus);
         }
 
-        public void HandleShipTargetedEvent(EliteAPI.Events.ShipTargetedEvent currentTargetData, EventContext context) {
+        public void HandleShipTargetedEvent(ShipTargetedEvent currentTargetData) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling ShipTargetedEvent");
             Log.Instance.Info("Targetlock: {istargetlocked}, Scanstage: {scanstage}", currentTargetData.IsTargetLocked.ToString(), currentTargetData.ScanStage.ToString());
@@ -205,7 +215,8 @@ namespace EliteFIPServer {
             }
         }
 
-        public void HandleLocationEvent(EliteAPI.Events.LocationEvent currentLocationData, EventContext context) {
+        public void HandleLocationEvent(LocationEvent currentLocationData) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling Location Event");
 
@@ -221,7 +232,8 @@ namespace EliteFIPServer {
             CoreServer.GameDataEvent(GameEventType.Location, currentLocation);
 
         }
-        public void HandleStartJumpEvent(EliteAPI.Events.StartJumpEvent startJumpData, EventContext context) {
+        public void HandleStartJumpEvent(StartJumpEvent startJumpData) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling StartJumpEvent Event");            
             if (currentJump.LastUpdate <= startJumpData.Timestamp && startJumpData.JumpType == "Hyperspace") {
@@ -240,7 +252,8 @@ namespace EliteFIPServer {
 
 
         }
-        public void HandleFsdJumpEvent(EliteAPI.Events.FsdJumpEvent fsdJumpdataData, EventContext context) {
+        public void HandleFsdJumpEvent(FsdJumpEvent fsdJumpdataData) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling FsdJumpEvent Event");
 
@@ -276,11 +289,16 @@ namespace EliteFIPServer {
             }
         }
 
-        public void HandleNavRouteEvent(EliteAPI.Events.Status.NavRoute.NavRouteEvent currentNavRouteData, EventContext context) {
+        public void HandleNavRouteEvent((string eventName, string json) navRouteEvent) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling NavRoute Event");
+
+            NavRouteJson currentNavRouteData = JsonConvert.DeserializeObject<NavRouteJson>(navRouteEvent.json);
+            if (currentNavRouteData == null) { return; }
+
             Log.Instance.Info("Current data from: {curDataTime}, New data from: {newDataTime}", currentNavRoute.LastUpdate.ToString(), currentNavRouteData.Timestamp.ToString());
-            if ((currentNavRoute.LastUpdate <= currentNavRouteData.Timestamp) && (currentNavRouteData.Stops != null) && (currentNavRouteData.Stops.Count() != 0))  {
+            if ((currentNavRoute.LastUpdate <= currentNavRouteData.Timestamp) && (currentNavRouteData.Route != null) && (currentNavRouteData.Route.Count() != 0))  {
                 if (currentNavRoute.NavRouteActive) {
                     previousNavRoute = currentNavRoute.DeepCopy();
                     previousNavRoute.NavRouteActive = false;
@@ -289,14 +307,14 @@ namespace EliteFIPServer {
 
                 currentNavRoute.LastUpdate = currentNavRouteData.Timestamp;
                 
-                Log.Instance.Info("New route has {jumpcount} jumps", currentNavRouteData.Stops.Count());
+                Log.Instance.Info("New route has {jumpcount} jumps", currentNavRouteData.Route.Count());
                 currentNavRoute.NavRouteActive = true;
                 currentNavRoute.Stops.Clear();
-                foreach (EliteAPI.Events.Status.NavRoute.NavRouteStop navRouteStop in currentNavRouteData.Stops) {
+                foreach (NavRouteStopJson navRouteStop in currentNavRouteData.Route) {
                     NavigationData.NavRouteStop navStop = new NavigationData.NavRouteStop();
-                    navStop.SystemId = navRouteStop.Address;
-                    navStop.SystemName = navRouteStop.System;
-                    navStop.Class = navRouteStop.Class;
+                    navStop.SystemId = navRouteStop.SystemAddress;
+                    navStop.SystemName = navRouteStop.StarSystem;
+                    navStop.Class = navRouteStop.StarClass;
                     currentNavRoute.Stops.Add(navStop);
                 }
                 CoreServer.GameDataEvent(GameEventType.Navigation, currentNavRoute);                
@@ -304,7 +322,8 @@ namespace EliteFIPServer {
 
         }
 
-        public void HandleNavRouteClearEvent(EliteAPI.Events.Status.NavRoute.NavRouteClearEvent navRouteClear, EventContext context) {
+        public void HandleNavRouteClearEvent(NavRouteClearEvent navRouteClear) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling NavRouteClear Event");
             Log.Instance.Info("Current data from: {curDataTime}, New data from: {newDataTime}", currentNavRoute.LastUpdate.ToString(), navRouteClear.Timestamp.ToString());
@@ -327,7 +346,8 @@ namespace EliteFIPServer {
 
         }
 
-        public void HandleApproachBodyEvent(EliteAPI.Events.ApproachBodyEvent approachBodyData, EventContext context) {
+        public void HandleApproachBodyEvent(ApproachBodyEvent approachBodyData) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling ApproachBodyEvent Event");
 
@@ -338,7 +358,8 @@ namespace EliteFIPServer {
             CoreServer.GameDataEvent(GameEventType.Location, currentLocation);
         }
 
-        public void HandleLeaveBodyEvent(EliteAPI.Events.LeaveBodyEvent leaveBodyData, EventContext context) {
+        public void HandleLeaveBodyEvent(LeaveBodyEvent leaveBodyData) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling LeaveBodyEvent Event");
 
@@ -349,7 +370,8 @@ namespace EliteFIPServer {
             CoreServer.GameDataEvent(GameEventType.Location, currentLocation);
         }
 
-        public void HandleDockedEvent(EliteAPI.Events.DockedEvent dockedData, EventContext context) {
+        public void HandleDockedEvent(DockedEvent dockedData) {
+            if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling DockedEvent Event");
 
@@ -361,9 +383,10 @@ namespace EliteFIPServer {
             CoreServer.GameDataEvent(GameEventType.Location, currentLocation);
         }
 
-        public void HandleUndockedEvent(EliteAPI.Events.UndockedEvent undockedData, EventContext context) {
+        public void HandleUndockedEvent(UndockedEvent undockedData) {
+            if (!IsRunning) { return; }
 
-            Log.Instance.Info("Handling DockedEvent Event");
+            Log.Instance.Info("Handling UndockedEvent Event");
 
             currentLocation.LastUpdate = undockedData.Timestamp;
             currentLocation.MarketId = "";
@@ -373,5 +396,17 @@ namespace EliteFIPServer {
             CoreServer.GameDataEvent(GameEventType.Location, currentLocation);
         }
 
+        public void HandleReceiveTextEvent(ReceiveTextEvent receiveTextData) {
+            if (!IsRunning) { return; }
+
+            Log.Instance.Info("Handling ReceiveTextEvent Event");
+
+            currentReceivedText.LastUpdate = receiveTextData.Timestamp;
+            currentReceivedText.Channel = receiveTextData.Channel;
+            currentReceivedText.Source = receiveTextData.From.ToString();
+            currentReceivedText.Message = receiveTextData.Message.ToString();
+
+            CoreServer.GameDataEvent(GameEventType.ReceivedText, currentReceivedText);
+        }
     }
 }
