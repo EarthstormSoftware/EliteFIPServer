@@ -71,33 +71,73 @@ namespace EliteFIPServer.ViewModels
         [RelayCommand]
         public void StartMatric()
         {
-            MatricButtonEnabled = false;
-            MatricButtonText = "Starting...";
-            _coreServer.StartMatricIntegration();
+            try
+            {
+                MatricButtonEnabled = false;
+                MatricButtonText = "Starting...";
+                _coreServer.StartMatricIntegration();
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError("Start Matric Integration", $"Failed to start Matric Integration: {ex.Message}");
+                MatricButtonEnabled = true;
+                MatricButtonText = "Start";
+                Logging.Log.Instance.Error("Failed to start Matric Integration: {error}", ex.Message);
+            }
         }
 
         [RelayCommand]
         public void StopMatric()
         {
-            MatricButtonEnabled = false;
-            MatricButtonText = "Stopping...";
-            _coreServer.StopMatricIntegration();
+            try
+            {
+                MatricButtonEnabled = false;
+                MatricButtonText = "Stopping...";
+                _coreServer.StopMatricIntegration();
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError("Stop Matric Integration", $"Failed to stop Matric Integration: {ex.Message}");
+                MatricButtonEnabled = true;
+                MatricButtonText = "Stop";
+                Logging.Log.Instance.Error("Failed to stop Matric Integration: {error}", ex.Message);
+            }
         }
 
         [RelayCommand]
         public void StartPanel()
         {
-            PanelButtonEnabled = false;
-            PanelButtonText = "Starting...";
-            _coreServer.PanelServer.Start();
+            try
+            {
+                PanelButtonEnabled = false;
+                PanelButtonText = "Starting...";
+                _coreServer.PanelServer.Start();
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError("Start Panel Server", $"Failed to start Panel Server: {ex.Message}");
+                PanelButtonEnabled = true;
+                PanelButtonText = "Start";
+                Logging.Log.Instance.Error("Failed to start Panel Server: {error}", ex.Message);
+            }
         }
 
         [RelayCommand]
         public void StopPanel()
         {
-            PanelButtonEnabled = false;
-            PanelButtonText = "Stopping...";
-            _coreServer.PanelServer.Stop();
+            try
+            {
+                PanelButtonEnabled = false;
+                PanelButtonText = "Stopping...";
+                _coreServer.PanelServer.Stop();
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError("Stop Panel Server", $"Failed to stop Panel Server: {ex.Message}");
+                PanelButtonEnabled = true;
+                PanelButtonText = "Stop";
+                Logging.Log.Instance.Error("Failed to stop Panel Server: {error}", ex.Message);
+            }
         }
 
         private void OnCoreStateChanged(object sender, RunState newState)
