@@ -5,6 +5,7 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using EliteFIPServer.Infrastructure;
 using EliteFIPServer.Infrastructure.Services;
+using EliteFIPServer.ViewModels;
 
 namespace EliteFIPServer {
     public class EliteFIPServerApplication : Application {
@@ -39,6 +40,11 @@ namespace EliteFIPServer {
             // Register services
             services.AddSingleton<ThemeManager>();
             services.AddSingleton<IDialogService, DialogService>();
+
+            // Register ViewModels (as transient - will be created by ServerConsole)
+            services.AddTransient<ServerStatusViewModel>();
+            services.AddTransient<SettingsViewModel>();
+            services.AddTransient<ClientsViewModel>();
 
             return services.BuildServiceProvider();
         }

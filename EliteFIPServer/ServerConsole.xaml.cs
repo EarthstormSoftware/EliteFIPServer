@@ -2,10 +2,12 @@
 using EliteFIPServer.Logging;
 using EliteFIPServer.Infrastructure;
 using EliteFIPServer.Infrastructure.Services;
+using EliteFIPServer.ViewModels;
 using Matric.Integration;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
+using System.Windows.Data;
 
 namespace EliteFIPServer {
     /// <summary>
@@ -16,13 +18,9 @@ namespace EliteFIPServer {
         private CoreServer ServerCore;
         private ThemeManager ThemeManager;
         private IDialogService DialogService;
-
-        private delegate void ImageSafeCallDelegate(Image target, bool newstate);
-        private delegate void ButtonSafeCallDelegate(Button target, bool newstate);
-
-        private bool MatricIntegrationActive = false;
-        private bool PanelServerActive = false;
-        private List<ClientInfo> MatricClientList = new List<ClientInfo>();
+        private ServerStatusViewModel StatusViewModel;
+        private SettingsViewModel SettingsViewModel;
+        private ClientsViewModel ClientsViewModel;
 
         public ServerConsole() {
             InitializeComponent();
@@ -44,208 +42,105 @@ namespace EliteFIPServer {
             var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             txtVersion.Text = version.ToString();
             Log.LogEnabled(Properties.Settings.Default.EnableLog);
-            refreshSettingsTab();
-            
-            ServerCore = new CoreServer(this);
-            ServerCore.CurrentState.onStateChange += HandleCoreServerStateChange;
-            ServerCore.PanelServer.CurrentState.onStateChange += HandlePanelServerStateChange;
-            ServerCore.MatricAPI.CurrentState.onStateChange += HandleMatricIntegrationStateChange;
 
-            dgMatricClients.ItemsSource = MatricClientList;
-            ServerCore.Start();
+            // Initialize CoreServer
+            ServerCore = new CoreServer(this);
+
+            // Create ViewModels
+            StatusViewModel = new ServerStatusViewModel(ServerCore, DialogService);
+            SettingsViewModel = new SettingsViewModel(DialogService, ThemeManager);
+            ClientsViewModel = new ClientsViewModel(ServerCore);
+
+            // Bind ViewModels to UI
+            BindingOperations.SetBinding(txtInfoText, TextBox.TextProperty, 
+                new System.Windows.Data.Binding("OverallStatus") { Source = StatusViewModel });
+
+            cmdMatric.SetBinding(Button.ContentProperty, 
+                new System.Windows.Data.Binding("MatricButtonText") { Source = StatusViewModel });
+            cmdMatric.SetBinding(Button.IsEnabledProperty, 
+                new System.Windows.Data.Binding("MatricButtonEnabled") { Source = StatusViewModel });
+
+            cmdPanelServer.SetBinding(Button.ContentProperty, 
+                new System.Windows.Data.Binding("PanelButtonText") { Source = StatusViewModel });
+            cmdPanelServer.SetBinding(Button.IsEnabledProperty, 
+                new System.Windows.Data.Binding("PanelButtonEnabled") { Source = StatusViewModel });
+
+            imgCoreServerStatus.SetBinding(Image.SourceProperty, 
+                new System.Windows.Data.Binding("CoreStatusImage") { Source = StatusViewModel });
+            imgMatricStatus.SetBinding(Image.SourceProperty, 
+                new System.Windows.Data.Binding("MatricStatusImage") { Source = StatusViewModel });
+            imgPanelServerStatus.SetBinding(Image.SourceProperty, 
+                new System.Windows.Data.Binding("PanelStatusImage") { Source = StatusViewModel });
+
+            // Settings bindings
+            chkEnableLog.SetBinding(CheckBox.IsCheckedProperty, 
+                new System.Windows.Data.Binding("EnableLog") { Source = SettingsViewModel, Mode = System.Windows.Data.BindingMode.TwoWay });
+            chkDarkMode.SetBinding(CheckBox.IsCheckedProperty, 
+                new System.Windows.Data.Binding("DarkMode") { Source = SettingsViewModel, Mode = System.Windows.Data.BindingMode.TwoWay });
+            chkAutostartMatricIntegration.SetBinding(CheckBox.IsCheckedProperty, 
+                new System.Windows.Data.Binding("AutostartMatricIntegration") { Source = SettingsViewModel, Mode = System.Windows.Data.BindingMode.TwoWay });
             
-            // Initialize status display
-            Dispatcher.Invoke(() => UpdateOverallStatus());
+            // Bind numeric spinners using reflection to find the ValueProperty
+            var spinnerValueProperty = typeof(NumericSpinner).GetProperty("ValueProperty", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)?.GetValue(null) as System.Windows.DependencyProperty
+                ?? typeof(NumericSpinner).GetField("ValueProperty", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)?.GetValue(null) as System.Windows.DependencyProperty;
+            
+            if (spinnerValueProperty != null)
+            {
+                BindingOperations.SetBinding(txtMatricPort, spinnerValueProperty, 
+                    new System.Windows.Data.Binding("MatricApiPort") { Source = SettingsViewModel, Mode = System.Windows.Data.BindingMode.TwoWay });
+                BindingOperations.SetBinding(txtMatricRetryInterval, spinnerValueProperty, 
+                    new System.Windows.Data.Binding("MatricRetryInterval") { Source = SettingsViewModel, Mode = System.Windows.Data.BindingMode.TwoWay });
+                BindingOperations.SetBinding(txtPanelServerPort, spinnerValueProperty, 
+                    new System.Windows.Data.Binding("PanelServerPort") { Source = SettingsViewModel, Mode = System.Windows.Data.BindingMode.TwoWay });
+            }
+            
+            chkAutostartPanelServer.SetBinding(CheckBox.IsCheckedProperty, 
+                new System.Windows.Data.Binding("AutostartPanelServer") { Source = SettingsViewModel, Mode = System.Windows.Data.BindingMode.TwoWay });
+
+            // Clients binding
+            dgMatricClients.SetBinding(DataGrid.ItemsSourceProperty, 
+                new System.Windows.Data.Binding("Clients") { Source = ClientsViewModel });
+
+            ServerCore.Start();
+            StatusViewModel.UpdateAllStatus();
             
             this.Closing += ServerConsole_Closing;
-
         }
 
         private void ServerConsole_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
             ServerCore.Stop();
+            StatusViewModel?.Cleanup();
         }
 
-        private void refreshSettingsTab() {
-
-            chkEnableLog.IsChecked = Properties.Settings.Default.EnableLog;
-            chkDarkMode.IsChecked = Properties.Settings.Default.DarkMode;
-            chkAutostartMatricIntegration.IsChecked = Properties.Settings.Default.AutostartMatricIntegration;
-            txtMatricPort.Value = Properties.Settings.Default.MatricApiPort;
-            txtMatricRetryInterval.Value = Properties.Settings.Default.MatricRetryInterval;
-            chkAutostartPanelServer.IsChecked= Properties.Settings.Default.AutostartPanelServer;
-            txtPanelServerPort.Value = Properties.Settings.Default.PanelServerPort;
-        }
-
-        private void saveSettings() {
-            MessageBoxResult result = DialogService.ShowConfirmation("Elite FIP Server Settings", "Do you want to save changes?");
-            
-            if (result == MessageBoxResult.Yes) {
-                Log.Instance.Info("Saving settings");
-                Properties.Settings.Default.EnableLog = (bool)chkEnableLog.IsChecked;
-                Properties.Settings.Default.DarkMode = (bool)chkDarkMode.IsChecked;
-                Properties.Settings.Default.AutostartMatricIntegration = (bool)chkAutostartMatricIntegration.IsChecked;
-                Properties.Settings.Default.MatricApiPort = (int)txtMatricPort.Value;
-                Properties.Settings.Default.MatricRetryInterval = (int)txtMatricRetryInterval.Value;
-                Properties.Settings.Default.AutostartPanelServer = (bool)chkAutostartPanelServer.IsChecked;
-                Properties.Settings.Default.PanelServerPort = (int)txtPanelServerPort.Value;
-                Properties.Settings.Default.Save();
-                Log.LogEnabled(Properties.Settings.Default.EnableLog);
-            }
-            
-        }
-
-        void MainTabMenu_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+        private void MainTabMenu_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (tabClients.IsSelected) {
                 Log.Instance.Info("Client tab selected");
-                MatricClientList = ServerCore.GetMatricApi().GetConnectedClients();
-                dgMatricClients.ItemsSource = MatricClientList;
-            }
-        }
-
-        private void ChkDarkMode_OnChecked(object sender, RoutedEventArgs e)
-        {
-            if (!ThemeManager.IsDarkMode)
-            {
-                ThemeManager.ToggleTheme();
-            }
-        }
-
-        private void ChkDarkMode_OnUnchecked(object sender, RoutedEventArgs e)
-        {
-            if (ThemeManager.IsDarkMode)
-            {
-                ThemeManager.ToggleTheme();
+                ClientsViewModel.RefreshClientsCommand.Execute(null);
             }
         }
 
         private void CmdMatric_onClick(object sender, RoutedEventArgs e) {            
-            cmdMatric.IsEnabled = false;
-            if (MatricIntegrationActive) {
-                cmdMatric.Content = "Stopping...";
-                ServerCore.StopMatricIntegration();
+            if (StatusViewModel.MatricIntegrationActive) {
+                StatusViewModel.StopMatricCommand.Execute(null);
             } else {
-                cmdMatric.Content = "Starting...";
-                ServerCore.StartMatricIntegration();
+                StatusViewModel.StartMatricCommand.Execute(null);
             }
-                
         }
+
         private void CmdPanelServer_onClick(object sender, RoutedEventArgs e) {            
-            if (PanelServerActive) {                
-                ServerCore.PanelServer.Stop();
-            } else {                
-                ServerCore.PanelServer.Start();
+            if (StatusViewModel.PanelServerActive) {
+                StatusViewModel.StopPanelCommand.Execute(null);
+            } else {
+                StatusViewModel.StartPanelCommand.Execute(null);
             }
         }
 
         private void CmdRevertSettings_onClick(object sender, RoutedEventArgs e) {
-            MessageBoxResult result = DialogService.ShowConfirmation("Elite FIP Server Settings", "Do you want to revert to saved settings?");
-            
-            if (result == MessageBoxResult.Yes) {
-                refreshSettingsTab();
-            }
-
+            SettingsViewModel.RevertSettingsCommand.Execute(null);
         }
+
         private void CmdsaveSettings_onClick(object sender, RoutedEventArgs e) {
-            saveSettings();
-        }
-
-        private void HandleCoreServerStateChange(object sender, RunState newState) {
-            Dispatcher.Invoke(new Action(() => {
-                setStatusImage(imgCoreServerStatus, newState);
-                UpdateOverallStatus();
-            }));
-        }
-
-        private void HandlePanelServerStateChange(object sender, RunState newState) {
-            Dispatcher.Invoke(new Action(() => {
-                setStatusImage(imgPanelServerStatus, newState);
-                setButtonText(cmdPanelServer, newState);
-                PanelServerActive = newState == RunState.Started ? true : false;
-                UpdateOverallStatus();
-            }));
-        }
-
-        public void HandleMatricIntegrationStateChange(object sender, RunState newState) {
-            Dispatcher.Invoke(new Action(() => {
-                setStatusImage(imgMatricStatus, newState);
-                setButtonText(cmdMatric, newState);
-                MatricIntegrationActive = newState == RunState.Started ? true : false;
-                UpdateOverallStatus();
-            }));
-        }
-
-        private void UpdateOverallStatus() {
-            string status = GetFormattedStatus();
-            setInfoText(status);
-        }
-
-        private string GetFormattedStatus() {
-            string coreStatus = GetStateEmoji(ServerCore.CurrentState.State);
-            string matricStatus = GetStateEmoji(ServerCore.MatricAPI.CurrentState.State);
-            string panelStatus = GetStateEmoji(ServerCore.PanelServer.CurrentState.State);
-            
-            return $"{coreStatus} Core | {matricStatus} Matric | {panelStatus} Panel";
-        }
-
-        private string GetStateEmoji(RunState state) {
-            return state switch {
-                RunState.Stopped => "⏹️ Stopped",
-                RunState.Starting => "🔄 Starting",
-                RunState.Started => "✅ Started",
-                RunState.Stopping => "⏸️ Stopping",
-                _ => "❓ Unknown"
-            };
-        }
-
-        private void setInfoText(string newInfoText) {
-            txtInfoText.Text = newInfoText;
-        }
-
-        private void setButtonText(Button target, RunState newState) {
-            
-            switch (newState) {
-                case RunState.Stopped:
-                    target.Content = "Start";
-                    target.IsEnabled = true;
-                    break;
-
-                case RunState.Starting:
-                    target.Content = "Starting...";
-                    target.IsEnabled = false;
-                    break;
-
-                case RunState.Started:
-                    target.Content = "Stop";
-                    target.IsEnabled = true;
-                    break;
-
-                case RunState.Stopping:
-                    target.Content = "Stopping...";
-                    target.IsEnabled = false;
-                    break;
-            }
-        }
-
-        private void setStatusImage(Image target, RunState newState) {
-
-            switch (newState) {
-                case RunState.Stopped:
-                    target.Source = new BitmapImage(new Uri("pack://application:,,,/Images/minus32.png"));
-                    break;
-
-                case RunState.Starting:
-                case RunState.Stopping:
-                    target.Source = new BitmapImage(new Uri("pack://application:,,,/Images/refresh32.png"));
-                    break;
-
-                case RunState.Started:
-                    target.Source = new BitmapImage(new Uri("pack://application:,,,/Images/yes32.png"));
-                    break;
-            }
-        }
-
-        private void mainTabMenu_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-
+            SettingsViewModel.SaveSettingsCommand.Execute(null);
         }
     }
 }

@@ -78,7 +78,7 @@
                         </Grid.RowDefinitions>
                         <CheckBox Grid.Column="0" Grid.Row="0" x:Name="chkEnableLog" Content="Enable Log" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="{DynamicResource PrimaryTextBrush}"/>
 
-                        <CheckBox Grid.Column="0" Grid.Row="1" x:Name="chkDarkMode" Content="Dark Mode" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="{DynamicResource PrimaryTextBrush}" Checked="ChkDarkMode_OnChecked" Unchecked="ChkDarkMode_OnUnchecked"/>
+                        <CheckBox Grid.Column="0" Grid.Row="1" x:Name="chkDarkMode" Content="Dark Mode" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="{DynamicResource PrimaryTextBrush}"/>
 
                         <CheckBox Grid.Column="0" Grid.Row="3" x:Name="chkAutostartMatricIntegration" Content="Autostart Matric Integration" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="{DynamicResource PrimaryTextBrush}"/>
 
