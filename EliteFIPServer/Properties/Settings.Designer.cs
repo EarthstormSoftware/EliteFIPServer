@@ -61,7 +61,7 @@ namespace EliteFIPServer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("50300")]
+        [global::System.Configuration.DefaultSettingValueAttribute("5300")]
         public int MatricApiPort {
             get {
                 return ((int)(this["MatricApiPort"]));
