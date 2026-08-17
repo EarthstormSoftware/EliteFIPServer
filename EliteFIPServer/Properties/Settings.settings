@@ -12,7 +12,7 @@
       <Value Profile="(Default)">4545</Value>
     </Setting>
     <Setting Name="MatricApiPort" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">50300</Value>
+      <Value Profile="(Default)">5300</Value>
     </Setting>
     <Setting Name="AutostartMatricIntegration" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
