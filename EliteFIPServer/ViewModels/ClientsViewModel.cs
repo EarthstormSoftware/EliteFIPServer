@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EliteFIPServer.Logging;
 using Matric.Integration;
+using System;
 using System.Collections.ObjectModel;
 
 namespace EliteFIPServer.ViewModels
@@ -23,11 +25,38 @@ namespace EliteFIPServer.ViewModels
         [RelayCommand]
         public void RefreshClients()
         {
-            var connectedClients = _coreServer.GetMatricApi().GetConnectedClients();
-            Clients.Clear();
-            foreach (var client in connectedClients)
+            try
             {
-                Clients.Add(client);
+                if (_coreServer == null)
+                {
+                    Clients.Clear();
+                    return;
+                }
+
+                var matricApi = _coreServer.GetMatricApi();
+                if (matricApi == null)
+                {
+                    Clients.Clear();
+                    return;
+                }
+
+                var connectedClients = matricApi.GetConnectedClients();
+                if (connectedClients == null)
+                {
+                    Clients.Clear();
+                    return;
+                }
+
+                Clients.Clear();
+                foreach (var client in connectedClients)
+                {
+                    Clients.Add(client);
+                }
+            }
+            catch (Exception ex)
+            {
+                Clients.Clear();
+                Logging.Log.Instance.Error("Error refreshing Matric clients: {error}", ex.ToString());
             }
         }
     }

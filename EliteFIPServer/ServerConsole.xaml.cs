@@ -119,28 +119,82 @@ namespace EliteFIPServer {
             }
         }
 
-        private void CmdMatric_onClick(object sender, RoutedEventArgs e) {            
-            if (StatusViewModel.MatricIntegrationActive) {
-                StatusViewModel.StopMatricCommand.Execute(null);
-            } else {
-                StatusViewModel.StartMatricCommand.Execute(null);
+        private void CmdMatric_onClick(object sender, RoutedEventArgs e) {
+            try
+            {
+                if (StatusViewModel == null)
+                {
+                    MessageBox.Show("StatusViewModel is not initialized", "Error");
+                    return;
+                }
+                
+                if (StatusViewModel.MatricIntegrationActive) {
+                    StatusViewModel.StopMatricCommand.Execute(null);
+                } else {
+                    StatusViewModel.StartMatricCommand.Execute(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log.Instance.Error("Error in CmdMatric_onClick: {error}", ex.ToString());
+                MessageBox.Show($"Error: {ex.Message}\n\n{ex.StackTrace}", "Matric Control Error");
             }
         }
 
-        private void CmdPanelServer_onClick(object sender, RoutedEventArgs e) {            
-            if (StatusViewModel.PanelServerActive) {
-                StatusViewModel.StopPanelCommand.Execute(null);
-            } else {
-                StatusViewModel.StartPanelCommand.Execute(null);
+        private void CmdPanelServer_onClick(object sender, RoutedEventArgs e) {
+            try
+            {
+                if (StatusViewModel == null)
+                {
+                    MessageBox.Show("StatusViewModel is not initialized", "Error");
+                    return;
+                }
+                
+                if (StatusViewModel.PanelServerActive) {
+                    StatusViewModel.StopPanelCommand.Execute(null);
+                } else {
+                    StatusViewModel.StartPanelCommand.Execute(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Log.Instance.Error("Error in CmdPanelServer_onClick: {error}", ex.ToString());
+                MessageBox.Show($"Error: {ex.Message}\n\n{ex.StackTrace}", "Panel Control Error");
             }
         }
 
         private void CmdRevertSettings_onClick(object sender, RoutedEventArgs e) {
-            SettingsViewModel.RevertSettingsCommand.Execute(null);
+            try
+            {
+                if (SettingsViewModel == null)
+                {
+                    MessageBox.Show("SettingsViewModel is not initialized", "Error");
+                    return;
+                }
+                SettingsViewModel.RevertSettingsCommand.Execute(null);
+            }
+            catch (Exception ex)
+            {
+                Logging.Log.Instance.Error("Error in CmdRevertSettings_onClick: {error}", ex.ToString());
+                MessageBox.Show($"Error: {ex.Message}\n\n{ex.StackTrace}", "Settings Error");
+            }
         }
 
         private void CmdsaveSettings_onClick(object sender, RoutedEventArgs e) {
-            SettingsViewModel.SaveSettingsCommand.Execute(null);
+            try
+            {
+                if (SettingsViewModel == null)
+                {
+                    MessageBox.Show("SettingsViewModel is not initialized", "Error");
+                    return;
+                }
+                SettingsViewModel.SaveSettingsCommand.Execute(null);
+            }
+            catch (Exception ex)
+            {
+                Logging.Log.Instance.Error("Error in CmdsaveSettings_onClick: {error}", ex.ToString());
+                MessageBox.Show($"Error: {ex.Message}\n\n{ex.StackTrace}", "Settings Error");
+            }
         }
     }
 }

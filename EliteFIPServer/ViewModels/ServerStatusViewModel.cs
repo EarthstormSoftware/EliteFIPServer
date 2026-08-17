@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using EliteFIPServer.Infrastructure;
 using EliteFIPServer.Infrastructure.Services;
 using Matric.Integration;
+using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace EliteFIPServer.ViewModels
@@ -142,22 +143,52 @@ namespace EliteFIPServer.ViewModels
 
         private void OnCoreStateChanged(object sender, RunState newState)
         {
-            UpdateCoreStatus(newState);
-            RefreshOverallStatus();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    UpdateCoreStatus(newState);
+                    RefreshOverallStatus();
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log.Instance.Error("Error in OnCoreStateChanged: {error}", ex.ToString());
+                }
+            });
         }
 
         private void OnPanelStateChanged(object sender, RunState newState)
         {
-            UpdatePanelStatus(newState);
-            PanelServerActive = newState == RunState.Started;
-            RefreshOverallStatus();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    UpdatePanelStatus(newState);
+                    PanelServerActive = newState == RunState.Started;
+                    RefreshOverallStatus();
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log.Instance.Error("Error in OnPanelStateChanged: {error}", ex.ToString());
+                }
+            });
         }
 
         private void OnMatricStateChanged(object sender, RunState newState)
         {
-            UpdateMatricStatus(newState);
-            MatricIntegrationActive = newState == RunState.Started;
-            RefreshOverallStatus();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    UpdateMatricStatus(newState);
+                    MatricIntegrationActive = newState == RunState.Started;
+                    RefreshOverallStatus();
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log.Instance.Error("Error in OnMatricStateChanged: {error}", ex.ToString());
+                }
+            });
         }
 
         private void UpdateCoreStatus(RunState state)
