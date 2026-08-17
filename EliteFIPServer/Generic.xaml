@@ -2,20 +2,109 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:EliteFIPServer">
 
-    <!-- THEME BASIC -->
+    <!-- THEME FALLBACK - Default Light Theme Colors -->
+    <!-- These are overridden by LightTheme.xaml or DarkTheme.xaml at runtime -->
     <Color x:Key="ThemeColor">#40a6d1</Color>
     <Color x:Key="ThemeRedColor">#d14040</Color>
     <Color x:Key="ThemeColorDark">#3992b8</Color>
     <Color x:Key="ThemeColorDarker">#FF688CAF</Color>
     <Color x:Key="ThemeColorInactive">#4cd1ff</Color>
     <Color x:Key="ThemeColorActive">#FF3BACDC</Color>
+    <Color x:Key="BackgroundColor">#FFFFFF</Color>
+    <Color x:Key="SecondaryBackgroundColor">#F5F5F5</Color>
+    <Color x:Key="BorderColor">#D0D0D0</Color>
+    <Color x:Key="PrimaryTextColor">#000000</Color>
+    <Color x:Key="SecondaryTextColor">#666666</Color>
+    
     <SolidColorBrush x:Key="ThemeBrush" Color="{DynamicResource ThemeColor}" />
     <SolidColorBrush x:Key="ThemeBrushDark" Color="{DynamicResource ThemeColorDark}" />
     <SolidColorBrush x:Key="ThemeBrushDarker" Color="{DynamicResource ThemeColorDarker}" />
     <SolidColorBrush x:Key="ThemeBrushInactive" Color="{DynamicResource ThemeColorInactive}" />
     <SolidColorBrush x:Key="ThemeBrushActive" Color="{DynamicResource ThemeColorActive}" />
     <SolidColorBrush x:Key="ThemeRedBrush" Color="{DynamicResource ThemeRedColor}" />
-
-    <SolidColorBrush x:Key="Theme_Brush_Bg" Color="White" />
+    
+    <SolidColorBrush x:Key="Theme_Brush_Bg" Color="{DynamicResource BackgroundColor}" />
     <SolidColorBrush x:Key="Theme_Brush_SilverBorder" Color="Silver" />
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{DynamicResource BackgroundColor}" />
+    <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="{DynamicResource SecondaryBackgroundColor}" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{DynamicResource PrimaryTextColor}" />
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{DynamicResource SecondaryTextColor}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{DynamicResource BorderColor}" />
+    
+    <!-- TabControl Style with proper theme support -->
+    <Style TargetType="{x:Type TabControl}">
+        <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TabControl}">
+                    <Grid KeyboardNavigation.TabNavigation="Local">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TabPanel Grid.Row="0" x:Name="HeaderPanel" IsItemsHost="True" Margin="0,0,0,0" Background="{DynamicResource SecondaryBackgroundBrush}" />
+                        <Border Grid.Row="1" x:Name="Border" Background="{DynamicResource BackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" KeyboardNavigation.DirectionalNavigation="Contained">
+                            <ContentPresenter x:Name="PART_SelectedContentHost" Margin="0" ContentSource="SelectedContent" />
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- TabItem Style with proper theme support -->
+    <Style TargetType="{x:Type TabItem}">
+        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Padding" Value="12,4" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TabItem}">
+                    <Grid x:Name="Root" SnapsToDevicePixels="True">
+                        <Border x:Name="Bg" Background="{DynamicResource SecondaryBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,1,1,0">
+                            <TextBlock x:Name="Content" Text="{TemplateBinding Header}" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" />
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource BackgroundBrush}" />
+                            <Setter TargetName="Content" Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource BackgroundBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- DataGridCell Style -->
+    <Style TargetType="{x:Type DataGridCell}">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- DataGrid Column Header Style for theme compatibility -->
+    <Style TargetType="{x:Type DataGridColumnHeader}">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="BorderThickness" Value="0,0,1,1" />
+    </Style>
+
+    <!-- DataGrid Style for theme compatibility -->
+    <Style TargetType="{x:Type DataGrid}">
+        <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="RowBackground" Value="{DynamicResource BackgroundBrush}" />
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource SecondaryBackgroundBrush}" />
+    </Style>
+    
 </ResourceDictionary>
