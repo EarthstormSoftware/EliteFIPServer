@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace EliteFIPServer;
@@ -29,7 +28,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public ObservableCollection<MatricClientSummary> MatricClients { get; } = new();
     public ObservableCollection<ActivityLogEntry> ActivityLog { get; } = new();
 
-    public string VersionText { get; } = $"Version {Assembly.GetEntryAssembly()?.GetName().Version}";
+    public string VersionText { get; } = $"Version {BuildInfo.BuildString}";
 
     public string CoreStatus
     {
