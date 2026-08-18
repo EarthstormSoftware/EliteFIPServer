@@ -28,7 +28,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public ObservableCollection<MatricClientSummary> MatricClients { get; } = new();
     public ObservableCollection<ActivityLogEntry> ActivityLog { get; } = new();
 
-    public string VersionText { get; } = $"Version {BuildInfo.BuildString}";
+    public string VersionText { get; } = $"Version {BuildInfo.Version}";
 
     public string CoreStatus
     {
