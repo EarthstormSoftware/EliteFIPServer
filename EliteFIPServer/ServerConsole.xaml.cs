@@ -44,7 +44,7 @@ namespace EliteFIPServer {
             Log.LogEnabled(Properties.Settings.Default.EnableLog);
 
             // Initialize CoreServer
-            ServerCore = new CoreServer(this);
+            ServerCore = new CoreServer(EliteFIPServerApplication.GetArgs());
 
             // Create ViewModels
             StatusViewModel = new ServerStatusViewModel(ServerCore, DialogService);

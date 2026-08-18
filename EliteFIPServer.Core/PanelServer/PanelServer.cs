@@ -31,7 +31,7 @@ namespace EliteFIPServer
 
             try {
                 var panelServerUrl = "http://*:" + Properties.Settings.Default.PanelServerPort;
-                var panelServerBuilder = WebApplication.CreateBuilder(EliteFIPServerApplication.GetArgs());
+                var panelServerBuilder = WebApplication.CreateBuilder(serverCore.ApplicationArgs);
 
                 panelServerBuilder.Services.AddMvcCore().AddMvcOptions(options => options.EnableEndpointRouting=false);
                 panelServerBuilder.Services.AddCors(cors => cors.AddPolicy("CorsPolicy", builder => {

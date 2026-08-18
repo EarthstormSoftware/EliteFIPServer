@@ -26,11 +26,9 @@ namespace EliteFIPServer
 
     public class CoreServer {
 
-        // Reference to Primary UI 
-        private ServerConsole ServerConsole;
-
         // Server States
         public ComponentState CurrentState { get; private set; }
+        public string[] ApplicationArgs { get; }
 
         // Game Event Worker
         private CancellationTokenSource GameDataWorkerCTS;
@@ -47,8 +45,8 @@ namespace EliteFIPServer
         public PanelServer PanelServer { get; private set; }
 
 
-        public CoreServer(ServerConsole serverConsole) {
-            ServerConsole = serverConsole;
+        public CoreServer(string[] applicationArgs = null) {
+            ApplicationArgs = applicationArgs ?? Array.Empty<string>();
             CurrentState = new ComponentState();
 
             EliteAPIIntegration = new EliteAPIIntegration(this);
@@ -80,7 +78,6 @@ namespace EliteFIPServer
             }
 
             CurrentState.Set(RunState.Started);
-            //ServerConsole.UpdateServerStatus(ServerCoreState);
             Log.Instance.Info("Server Core started");            
         }
 

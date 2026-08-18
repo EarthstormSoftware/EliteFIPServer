@@ -6,8 +6,8 @@
     <UseWindowsForms>False</UseWindowsForms>
     <StartupObject>EliteFIPServer.EliteFIPServerApplication</StartupObject>
     <Authors>Earthstorm Software</Authors>
-    <AssemblyVersion>4.0.26229.18</AssemblyVersion>
-    <FileVersion>4.0.26229.18</FileVersion>    
+    <AssemblyVersion>4.0.26230.1</AssemblyVersion>
+    <FileVersion>4.0.26230.1</FileVersion>    
     <Platforms>AnyCPU;x64</Platforms>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Nullable>disable</Nullable>
@@ -54,20 +54,13 @@
   </ItemGroup>
 
   <ItemGroup>
-      <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Images\EliteFIPServerIcon256.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.11" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="NLog" Version="6.1.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -85,11 +78,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
+    <ProjectReference Include="..\EliteFIPServer.Core\EliteFIPServer.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -103,10 +95,6 @@
     </None>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Properties\Settings.settings">
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Update="wwwroot\DefaultPanelStyles.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -224,21 +212,4 @@
   </Target>
 
 </Project>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

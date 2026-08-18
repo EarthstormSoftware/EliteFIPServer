@@ -3,7 +3,7 @@ using NLog.Config;
 using LogLevel = NLog.LogLevel;
 
 namespace EliteFIPServer.Logging {
-    internal static class Log {
+    public static class Log {
 
         public static Logger Instance { get; private set; }
 
