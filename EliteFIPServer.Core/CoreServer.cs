@@ -40,6 +40,7 @@ namespace EliteFIPServer
 
         // Matric Integration
         public MatricApiClient MatricAPI { get; private set; }
+        public event EventHandler<IReadOnlyList<MatricClientSummary>> ConnectedMatricClientsChanged;
 
         // Panel Server
         public PanelServer PanelServer { get; private set; }
@@ -51,6 +52,7 @@ namespace EliteFIPServer
 
             EliteAPIIntegration = new EliteAPIIntegration(this);
             MatricAPI = new MatricApiClient();
+            MatricAPI.ConnectedClientsChanged += OnConnectedMatricClientsChanged;
             PanelServer = new PanelServer(this);            
 
         }
@@ -158,5 +160,17 @@ namespace EliteFIPServer
         public MatricApiClient GetMatricApi() {
             return MatricAPI;
         }   
+
+        public IReadOnlyList<MatricClientSummary> GetConnectedMatricClients() {
+            return MatricAPI.GetConnectedClientSummaries();
+        }
+
+        public void RefreshConnectedMatricClients() {
+            MatricAPI.RequestConnectedClients();
+        }
+
+        private void OnConnectedMatricClientsChanged(object sender, IReadOnlyList<MatricClientSummary> clients) {
+            ConnectedMatricClientsChanged?.Invoke(this, clients);
+        }
     }
 }

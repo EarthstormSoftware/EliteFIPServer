@@ -9,6 +9,7 @@ namespace EliteFIPServer {
     public class MatricApiClient {
 
         public ComponentState CurrentState { get; private set; } = new ComponentState();
+        public event EventHandler<IReadOnlyList<MatricClientSummary>> ConnectedClientsChanged;
 
         public List<ClientInfo> ConnectedClients = new List<ClientInfo>();
         private Dictionary<string, MatricButton> MatricButtonList;
@@ -113,7 +114,7 @@ namespace EliteFIPServer {
             // In that event, matric integration will already have been stopped and matric set to null, so we need to guard against this
             // but no further action need be triggered.
             if (matric != null) {
-                matric.GetConnectedClients();
+                RequestConnectedClients();
             }
         }
 
@@ -172,14 +173,15 @@ namespace EliteFIPServer {
         }
 
         public void Matric_OnConnectedClientsReceived(object source, List<ClientInfo> clients) {
-            Log.Instance.Info("Matric client list updated");
+            Log.Instance.Info("Matric client list updated: {clientcount} clients", clients?.Count ?? 0);
 
             // If we get a client list (even empty) from Matric, we know we have connectivity
             if (CurrentState.State == RunState.Starting) {
                 CompleteStart();                
             }
             
-            ConnectedClients = clients;
+            ConnectedClients = clients ?? new List<ClientInfo>();
+            ConnectedClientsChanged?.Invoke(this, GetConnectedClientSummaries());
 
             // Matric version 2 supports use of 'null' Client IDs, in which case the updates are set to all Clients. 
             // Previous logic to select first client, and store the ID for reuse is removed in favour of updating all.
@@ -199,7 +201,7 @@ namespace EliteFIPServer {
             if (ex is System.Net.Sockets.SocketException) {
                 if (ex.HResult == 10054) {
                     System.Threading.Thread.Sleep(Properties.Settings.Default.MatricRetryInterval*1000);
-                    matric.GetConnectedClients();
+                    RequestConnectedClients();
                 }
             }
         }
@@ -237,6 +239,27 @@ namespace EliteFIPServer {
 
         public List<ClientInfo> GetConnectedClients() {
             return ConnectedClients;
+        }
+
+        public IReadOnlyList<MatricClientSummary> GetConnectedClientSummaries() {
+            return ConnectedClients?
+                .Select(client => new MatricClientSummary {
+                    Name = client.Name,
+                    IP = client.IP,
+                    Id = client.Id
+                })
+                .ToList() ?? new List<MatricClientSummary>();
+        }
+
+        public void RequestConnectedClients() {
+            if (matric == null) {
+                Log.Instance.Info("Unable to refresh Matric clients because Matric integration is not initialized");
+                ConnectedClientsChanged?.Invoke(this, GetConnectedClientSummaries());
+                return;
+            }
+
+            Log.Instance.Info("Requesting Matric client list");
+            matric.GetConnectedClients();
         }
 
         public void UpdateStatus(StatusData currentStatus) {

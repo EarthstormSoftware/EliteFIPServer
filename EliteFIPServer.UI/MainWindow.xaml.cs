@@ -2,6 +2,7 @@ using EliteFIPServer.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace EliteFIPServer;
@@ -9,19 +10,23 @@ namespace EliteFIPServer;
 public sealed partial class MainWindow : Window
 {
     private readonly CoreServer serverCore;
+    private readonly ObservableCollection<MatricClientSummary> matricClients = new();
 
     public MainWindow(string[] args)
     {
         InitializeComponent();
+        lstMatricClients.ItemsSource = matricClients;
 
         serverCore = new CoreServer(args);
         serverCore.CurrentState.onStateChange += OnCoreStateChanged;
         serverCore.MatricAPI.CurrentState.onStateChange += OnMatricStateChanged;
         serverCore.PanelServer.CurrentState.onStateChange += OnPanelStateChanged;
+        serverCore.ConnectedMatricClientsChanged += OnConnectedMatricClientsChanged;
         Closed += MainWindow_Closed;
 
         LoadSettings();
         UpdateAllStatus();
+        RefreshClients();
         serverCore.Start();
     }
 
@@ -30,6 +35,7 @@ public sealed partial class MainWindow : Window
         serverCore.CurrentState.onStateChange -= OnCoreStateChanged;
         serverCore.MatricAPI.CurrentState.onStateChange -= OnMatricStateChanged;
         serverCore.PanelServer.CurrentState.onStateChange -= OnPanelStateChanged;
+        serverCore.ConnectedMatricClientsChanged -= OnConnectedMatricClientsChanged;
         serverCore.Stop();
     }
 
@@ -89,6 +95,13 @@ public sealed partial class MainWindow : Window
         ApplyTheme(chkDarkMode.IsChecked == true);
     }
 
+    private void CmdRefreshClients_Click(object sender, RoutedEventArgs args)
+    {
+        txtClientCount.Text = "Refreshing clients...";
+        serverCore.RefreshConnectedMatricClients();
+        RefreshClients(serverCore.GetConnectedMatricClients());
+    }
+
     private void OnCoreStateChanged(object sender, RunState state)
     {
         UpdateOnUiThread(() => UpdateCoreStatus(state));
@@ -102,6 +115,11 @@ public sealed partial class MainWindow : Window
     private void OnPanelStateChanged(object sender, RunState state)
     {
         UpdateOnUiThread(() => UpdatePanelStatus(state));
+    }
+
+    private void OnConnectedMatricClientsChanged(object sender, IReadOnlyList<MatricClientSummary> clients)
+    {
+        UpdateOnUiThread(() => RefreshClients(clients));
     }
 
     private void UpdateAllStatus()
@@ -121,6 +139,11 @@ public sealed partial class MainWindow : Window
         txtMatricStatus.Text = state.ToString();
         cmdMatric.Content = state == RunState.Started ? "Stop Matric" : "Start Matric";
         cmdMatric.IsEnabled = state is not RunState.Starting and not RunState.Stopping;
+
+        if (state == RunState.Started)
+        {
+            serverCore.RefreshConnectedMatricClients();
+        }
     }
 
     private void UpdatePanelStatus(RunState state)
@@ -140,6 +163,34 @@ public sealed partial class MainWindow : Window
         chkAutostartPanel.IsChecked = Properties.Settings.Default.AutostartPanelServer;
         numPanelServerPort.Value = Properties.Settings.Default.PanelServerPort;
         ApplyTheme(Properties.Settings.Default.DarkMode);
+    }
+
+    private void RefreshClients()
+    {
+        RefreshClients(serverCore.GetConnectedMatricClients());
+    }
+
+    private void RefreshClients(IReadOnlyList<MatricClientSummary> connectedClients)
+    {
+        try
+        {
+            matricClients.Clear();
+            if (connectedClients != null)
+            {
+                foreach (MatricClientSummary client in connectedClients)
+                {
+                    matricClients.Add(client);
+                }
+            }
+
+            txtClientCount.Text = matricClients.Count == 1 ? "1 client" : $"{matricClients.Count} clients";
+        }
+        catch (Exception ex)
+        {
+            matricClients.Clear();
+            txtClientCount.Text = "Unable to refresh clients";
+            Log.Instance.Error("Error refreshing Matric clients: {error}", ex.ToString());
+        }
     }
 
     private void ApplyTheme(bool darkMode)
