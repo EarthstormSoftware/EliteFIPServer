@@ -1,5 +1,8 @@
+using EliteFIPServer.Logging;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Threading.Tasks;
 
 namespace EliteFIPServer;
 
@@ -17,6 +20,7 @@ public sealed partial class MainWindow : Window
         serverCore.PanelServer.CurrentState.onStateChange += OnPanelStateChanged;
         Closed += MainWindow_Closed;
 
+        LoadSettings();
         UpdateAllStatus();
         serverCore.Start();
     }
@@ -49,6 +53,40 @@ public sealed partial class MainWindow : Window
         }
 
         serverCore.PanelServer.Start();
+    }
+
+    private async void CmdSaveSettings_Click(object sender, RoutedEventArgs args)
+    {
+        if (!await Confirm("Elite FIP Server Settings", "Do you want to save changes?"))
+        {
+            return;
+        }
+
+        Log.Instance.Info("Saving settings");
+        Properties.Settings.Default.EnableLog = chkEnableLog.IsChecked == true;
+        Properties.Settings.Default.DarkMode = chkDarkMode.IsChecked == true;
+        Properties.Settings.Default.AutostartMatricIntegration = chkAutostartMatric.IsChecked == true;
+        Properties.Settings.Default.MatricApiPort = GetNumberBoxValue(numMatricPort, Properties.Settings.Default.MatricApiPort);
+        Properties.Settings.Default.MatricRetryInterval = GetNumberBoxValue(numMatricRetryInterval, Properties.Settings.Default.MatricRetryInterval);
+        Properties.Settings.Default.AutostartPanelServer = chkAutostartPanel.IsChecked == true;
+        Properties.Settings.Default.PanelServerPort = GetNumberBoxValue(numPanelServerPort, Properties.Settings.Default.PanelServerPort);
+        Properties.Settings.Default.Save();
+
+        Log.LogEnabled(Properties.Settings.Default.EnableLog);
+        ApplyTheme(Properties.Settings.Default.DarkMode);
+    }
+
+    private async void CmdRevertSettings_Click(object sender, RoutedEventArgs args)
+    {
+        if (await Confirm("Elite FIP Server Settings", "Do you want to revert to saved settings?"))
+        {
+            LoadSettings();
+        }
+    }
+
+    private void ChkDarkMode_Changed(object sender, RoutedEventArgs args)
+    {
+        ApplyTheme(chkDarkMode.IsChecked == true);
     }
 
     private void OnCoreStateChanged(object sender, RunState state)
@@ -90,6 +128,47 @@ public sealed partial class MainWindow : Window
         txtPanelStatus.Text = state.ToString();
         cmdPanel.Content = state == RunState.Started ? "Stop Panel" : "Start Panel";
         cmdPanel.IsEnabled = state is not RunState.Starting and not RunState.Stopping;
+    }
+
+    private void LoadSettings()
+    {
+        chkEnableLog.IsChecked = Properties.Settings.Default.EnableLog;
+        chkDarkMode.IsChecked = Properties.Settings.Default.DarkMode;
+        chkAutostartMatric.IsChecked = Properties.Settings.Default.AutostartMatricIntegration;
+        numMatricPort.Value = Properties.Settings.Default.MatricApiPort;
+        numMatricRetryInterval.Value = Properties.Settings.Default.MatricRetryInterval;
+        chkAutostartPanel.IsChecked = Properties.Settings.Default.AutostartPanelServer;
+        numPanelServerPort.Value = Properties.Settings.Default.PanelServerPort;
+        ApplyTheme(Properties.Settings.Default.DarkMode);
+    }
+
+    private void ApplyTheme(bool darkMode)
+    {
+        if (Content is FrameworkElement root)
+        {
+            root.RequestedTheme = darkMode ? ElementTheme.Dark : ElementTheme.Light;
+        }
+    }
+
+    private int GetNumberBoxValue(NumberBox numberBox, int fallback)
+    {
+        return double.IsNaN(numberBox.Value) ? fallback : Convert.ToInt32(numberBox.Value);
+    }
+
+    private async Task<bool> Confirm(string title, string message)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = message,
+            PrimaryButtonText = "Yes",
+            CloseButtonText = "No",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = Content.XamlRoot
+        };
+
+        ContentDialogResult result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
     }
 
     private void UpdateOnUiThread(Action update)

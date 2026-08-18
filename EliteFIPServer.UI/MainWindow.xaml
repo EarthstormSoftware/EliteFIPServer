@@ -7,43 +7,68 @@
     mc:Ignorable="d"
     Title="Elite FIP Server Console">
 
-    <Grid Padding="24" RowSpacing="20">
+    <Grid x:Name="RootGrid" Padding="24" RowSpacing="20" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <StackPanel Spacing="4">
-            <TextBlock Text="Elite FIP Server" FontSize="24" />
+            <TextBlock Text="Elite FIP Server" FontSize="24" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
             <TextBlock Text="WinUI shell" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Spacing="12" MaxWidth="420" HorizontalAlignment="Left">
-            <Grid ColumnSpacing="16">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="140" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+        <TabView Grid.Row="1" IsAddTabButtonVisible="False" CanDragTabs="False">
+            <TabViewItem Header="Status" IsClosable="False">
+                <ScrollViewer>
+                    <StackPanel Spacing="12" MaxWidth="420" HorizontalAlignment="Left" Padding="0,16,0,0">
+                        <Grid ColumnSpacing="16" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-                <TextBlock Text="Core" />
-                <TextBlock x:Name="txtCoreStatus" Grid.Column="1" />
+                            <TextBlock Text="Core" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                            <TextBlock x:Name="txtCoreStatus" Grid.Column="1" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
-                <TextBlock Grid.Row="1" Text="Matric" />
-                <TextBlock x:Name="txtMatricStatus" Grid.Row="1" Grid.Column="1" />
+                            <TextBlock Grid.Row="1" Text="Matric" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                            <TextBlock x:Name="txtMatricStatus" Grid.Row="1" Grid.Column="1" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
-                <TextBlock Grid.Row="2" Text="Panel Server" />
-                <TextBlock x:Name="txtPanelStatus" Grid.Row="2" Grid.Column="1" />
-            </Grid>
+                            <TextBlock Grid.Row="2" Text="Panel Server" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                            <TextBlock x:Name="txtPanelStatus" Grid.Row="2" Grid.Column="1" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        </Grid>
 
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button x:Name="cmdMatric" MinWidth="120" Click="CmdMatric_Click" />
-                <Button x:Name="cmdPanel" MinWidth="120" Click="CmdPanel_Click" />
-            </StackPanel>
-        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="cmdMatric" MinWidth="120" Click="CmdMatric_Click" />
+                            <Button x:Name="cmdPanel" MinWidth="120" Click="CmdPanel_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabViewItem>
+
+            <TabViewItem Header="Settings" IsClosable="False">
+                <ScrollViewer>
+                    <StackPanel Spacing="12" MaxWidth="420" HorizontalAlignment="Left" Padding="0,16,0,0">
+                        <CheckBox x:Name="chkEnableLog" Content="Enable logging" />
+                        <CheckBox x:Name="chkDarkMode" Content="Dark mode" Checked="ChkDarkMode_Changed" Unchecked="ChkDarkMode_Changed" />
+                        <CheckBox x:Name="chkAutostartMatric" Content="Start Matric integration automatically" />
+                        <NumberBox x:Name="numMatricPort" Header="Matric API port" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" />
+                        <NumberBox x:Name="numMatricRetryInterval" Header="Matric retry interval" Minimum="1" Maximum="3600" SpinButtonPlacementMode="Compact" />
+                        <CheckBox x:Name="chkAutostartPanel" Content="Start Panel Server automatically" />
+                        <NumberBox x:Name="numPanelServerPort" Header="Panel Server port" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="cmdSaveSettings" Content="Save" MinWidth="96" Click="CmdSaveSettings_Click" />
+                            <Button x:Name="cmdRevertSettings" Content="Revert" MinWidth="96" Click="CmdRevertSettings_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabViewItem>
+        </TabView>
     </Grid>
 </Window>
