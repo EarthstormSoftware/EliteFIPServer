@@ -1,0 +1,49 @@
+<Window
+    x:Class="EliteFIPServer.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Elite FIP Server Console">
+
+    <Grid Padding="24" RowSpacing="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Elite FIP Server" FontSize="24" />
+            <TextBlock Text="WinUI shell" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Spacing="12" MaxWidth="420" HorizontalAlignment="Left">
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Core" />
+                <TextBlock x:Name="txtCoreStatus" Grid.Column="1" />
+
+                <TextBlock Grid.Row="1" Text="Matric" />
+                <TextBlock x:Name="txtMatricStatus" Grid.Row="1" Grid.Column="1" />
+
+                <TextBlock Grid.Row="2" Text="Panel Server" />
+                <TextBlock x:Name="txtPanelStatus" Grid.Row="2" Grid.Column="1" />
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button x:Name="cmdMatric" MinWidth="120" Click="CmdMatric_Click" />
+                <Button x:Name="cmdPanel" MinWidth="120" Click="CmdPanel_Click" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

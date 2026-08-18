@@ -6,8 +6,8 @@
     <UseWindowsForms>False</UseWindowsForms>
     <StartupObject>EliteFIPServer.EliteFIPServerApplication</StartupObject>
     <Authors>Earthstorm Software</Authors>
-    <AssemblyVersion>4.0.26230.1</AssemblyVersion>
-    <FileVersion>4.0.26230.1</FileVersion>    
+    <AssemblyVersion>4.0.26230.2</AssemblyVersion>
+    <FileVersion>4.0.26230.2</FileVersion>    
     <Platforms>AnyCPU;x64</Platforms>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Nullable>disable</Nullable>
@@ -212,4 +212,5 @@
   </Target>
 
 </Project>
+
 
