@@ -5,62 +5,71 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Elite FIP Server Console">
+    Title="Elite FIP Server">
 
-    <Grid x:Name="RootGrid" Padding="24" RowSpacing="20" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid x:Name="RootGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Spacing="4">
-            <TextBlock Text="Elite FIP Server" FontSize="24" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-            <TextBlock Text="WinUI shell" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-        </StackPanel>
-
-        <TabView Grid.Row="1" IsAddTabButtonVisible="False" CanDragTabs="False">
+        <TabView Margin="16,12,16,0" IsAddTabButtonVisible="False" CanDragTabs="False">
             <TabViewItem Header="Status" IsClosable="False">
                 <ScrollViewer>
-                    <StackPanel Spacing="12" MaxWidth="420" HorizontalAlignment="Left" Padding="0,16,0,0">
-                        <Grid ColumnSpacing="16" RowSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="140" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                    <Grid MaxWidth="680" HorizontalAlignment="Left" Padding="0,20,0,0" ColumnSpacing="16" RowSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="140" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                            <TextBlock Text="Core" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                            <TextBlock x:Name="txtCoreStatus" Grid.Column="1" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Grid.Column="2" Text="Status" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="3" Text="Control" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
 
-                            <TextBlock Grid.Row="1" Text="Matric" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                            <TextBlock x:Name="txtMatricStatus" Grid.Row="1" Grid.Column="1" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-
-                            <TextBlock Grid.Row="2" Text="Panel Server" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                            <TextBlock x:Name="txtPanelStatus" Grid.Row="2" Grid.Column="1" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Grid.Row="1" Text="Core Server" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <Grid Grid.Row="1" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
+                            <Ellipse x:Name="coreStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ProgressRing x:Name="coreStatusProgress" Width="24" Height="24" />
                         </Grid>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding CoreStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Grid.Row="1" Grid.Column="3" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Name="cmdMatric" MinWidth="120" Click="CmdMatric_Click" />
-                            <Button x:Name="cmdPanel" MinWidth="120" Click="CmdPanel_Click" />
-                        </StackPanel>
-                    </StackPanel>
+                        <TextBlock Grid.Row="2" Text="Matric Integration" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <Grid Grid.Row="2" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
+                            <Ellipse x:Name="matricStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ProgressRing x:Name="matricStatusProgress" Width="24" Height="24" />
+                        </Grid>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding MatricStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <Button Grid.Row="2" Grid.Column="3" MinWidth="120" Content="{Binding MatricButtonText}" IsEnabled="{Binding MatricButtonEnabled}" Click="CmdMatric_Click" />
+
+                        <TextBlock Grid.Row="3" Text="Panel Server" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <Grid Grid.Row="3" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
+                            <Ellipse x:Name="panelStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ProgressRing x:Name="panelStatusProgress" Width="24" Height="24" />
+                        </Grid>
+                        <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding PanelStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <Button Grid.Row="3" Grid.Column="3" MinWidth="120" Content="{Binding PanelButtonText}" IsEnabled="{Binding PanelButtonEnabled}" Click="CmdPanel_Click" />
+                    </Grid>
                 </ScrollViewer>
             </TabViewItem>
 
             <TabViewItem Header="Settings" IsClosable="False">
                 <ScrollViewer>
-                    <StackPanel Spacing="12" MaxWidth="420" HorizontalAlignment="Left" Padding="0,16,0,0">
-                        <CheckBox x:Name="chkEnableLog" Content="Enable logging" />
-                        <CheckBox x:Name="chkDarkMode" Content="Dark mode" Checked="ChkDarkMode_Changed" Unchecked="ChkDarkMode_Changed" />
-                        <CheckBox x:Name="chkAutostartMatric" Content="Start Matric integration automatically" />
-                        <NumberBox x:Name="numMatricPort" Header="Matric API port" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" />
-                        <NumberBox x:Name="numMatricRetryInterval" Header="Matric retry interval" Minimum="1" Maximum="3600" SpinButtonPlacementMode="Compact" />
-                        <CheckBox x:Name="chkAutostartPanel" Content="Start Panel Server automatically" />
-                        <NumberBox x:Name="numPanelServerPort" Header="Panel Server port" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" />
+                    <StackPanel Spacing="14" MaxWidth="460" HorizontalAlignment="Left" Padding="0,16,0,0">
+                        <ToggleSwitch Header="Enable logging" IsOn="{Binding EnableLog, Mode=TwoWay}" />
+                        <ToggleSwitch Header="Dark mode" IsOn="{Binding DarkMode, Mode=TwoWay}" Toggled="SwtDarkMode_Toggled" />
+                        <ToggleSwitch Header="Start Matric integration automatically" IsOn="{Binding AutostartMatricIntegration, Mode=TwoWay}" />
+                        <NumberBox Header="Matric API port" Value="{Binding MatricApiPort, Mode=TwoWay}" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" />
+                        <NumberBox Header="Matric retry interval" Value="{Binding MatricRetryInterval, Mode=TwoWay}" Minimum="1" Maximum="3600" SpinButtonPlacementMode="Compact" />
+                        <ToggleSwitch Header="Start Panel Server automatically" IsOn="{Binding AutostartPanelServer, Mode=TwoWay}" />
+                        <NumberBox Header="Panel Server port" Value="{Binding PanelServerPort, Mode=TwoWay}" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" />
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button x:Name="cmdSaveSettings" Content="Save" MinWidth="96" Click="CmdSaveSettings_Click" />
@@ -79,10 +88,10 @@
 
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <Button x:Name="cmdRefreshClients" Content="Refresh" MinWidth="96" Click="CmdRefreshClients_Click" />
-                        <TextBlock x:Name="txtClientCount" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="{Binding ClientCountText}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
 
-                    <ListView x:Name="lstMatricClients" Grid.Row="1" MaxWidth="720" HorizontalAlignment="Left">
+                    <ListView Grid.Row="1" ItemsSource="{Binding MatricClients}" MaxWidth="720" HorizontalAlignment="Left">
                         <ListView.Header>
                             <Grid Padding="12,0,12,8" ColumnSpacing="16">
                                 <Grid.ColumnDefinitions>
@@ -114,6 +123,72 @@
                     </ListView>
                 </Grid>
             </TabViewItem>
+
+            <TabViewItem Header="Activity" IsClosable="False">
+                <Grid Padding="0,16,0,0" RowSpacing="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Clear" MinWidth="96" Click="CmdClearActivity_Click" />
+                    </StackPanel>
+
+                    <ListView x:Name="lstActivity" Grid.Row="1" ItemsSource="{Binding ActivityLog}" MaxWidth="820" HorizontalAlignment="Left">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="12,4" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="88" />
+                                        <ColumnDefinition Width="680" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="{Binding DisplayTime}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Message}" TextWrapping="Wrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </TabViewItem>
         </TabView>
+
+        <Border Grid.Row="1" Padding="8,4" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Ellipse x:Name="coreSummaryIndicator" Width="9" Height="9" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="Core" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Grid.Column="2" Text="{Binding CoreStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                <Rectangle Grid.Column="3" Width="1" Height="16" VerticalAlignment="Center" Fill="{ThemeResource CardStrokeColorDefaultBrush}" />
+
+                <Ellipse x:Name="matricSummaryIndicator" Grid.Column="4" Width="9" Height="9" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="5" Text="Matric" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Grid.Column="6" Text="{Binding MatricStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                <Rectangle Grid.Column="7" Width="1" Height="16" VerticalAlignment="Center" Fill="{ThemeResource CardStrokeColorDefaultBrush}" />
+
+                <StackPanel Grid.Column="8" Orientation="Horizontal" Spacing="12">
+                    <Ellipse x:Name="panelSummaryIndicator" Width="9" Height="9" VerticalAlignment="Center" />
+                    <TextBlock Text="Panel" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="{Binding PanelStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                </StackPanel>
+
+                <TextBlock Grid.Column="9" Text="{Binding VersionText}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+            </Grid>
+        </Border>
     </Grid>
 </Window>

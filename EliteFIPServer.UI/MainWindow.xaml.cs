@@ -1,8 +1,11 @@
 using EliteFIPServer.Logging;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
+using System.IO;
 using System;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace EliteFIPServer;
@@ -10,12 +13,13 @@ namespace EliteFIPServer;
 public sealed partial class MainWindow : Window
 {
     private readonly CoreServer serverCore;
-    private readonly ObservableCollection<MatricClientSummary> matricClients = new();
+    private readonly MainWindowViewModel viewModel = new();
 
     public MainWindow(string[] args)
     {
         InitializeComponent();
-        lstMatricClients.ItemsSource = matricClients;
+        RootGrid.DataContext = viewModel;
+        SetTitleBarIcon();
 
         serverCore = new CoreServer(args);
         serverCore.CurrentState.onStateChange += OnCoreStateChanged;
@@ -27,6 +31,7 @@ public sealed partial class MainWindow : Window
         LoadSettings();
         UpdateAllStatus();
         RefreshClients();
+        AddActivity("Starting server core...");
         serverCore.Start();
     }
 
@@ -43,10 +48,12 @@ public sealed partial class MainWindow : Window
     {
         if (serverCore.MatricAPI.CurrentState.State == RunState.Started)
         {
+            AddActivity("Stopping Matric integration...");
             serverCore.StopMatricIntegration();
             return;
         }
 
+        AddActivity("Starting Matric integration...");
         serverCore.StartMatricIntegration();
     }
 
@@ -54,10 +61,12 @@ public sealed partial class MainWindow : Window
     {
         if (serverCore.PanelServer.CurrentState.State == RunState.Started)
         {
+            AddActivity("Stopping Panel Server...");
             serverCore.PanelServer.Stop();
             return;
         }
 
+        AddActivity("Starting Panel Server...");
         serverCore.PanelServer.Start();
     }
 
@@ -69,17 +78,18 @@ public sealed partial class MainWindow : Window
         }
 
         Log.Instance.Info("Saving settings");
-        Properties.Settings.Default.EnableLog = chkEnableLog.IsChecked == true;
-        Properties.Settings.Default.DarkMode = chkDarkMode.IsChecked == true;
-        Properties.Settings.Default.AutostartMatricIntegration = chkAutostartMatric.IsChecked == true;
-        Properties.Settings.Default.MatricApiPort = GetNumberBoxValue(numMatricPort, Properties.Settings.Default.MatricApiPort);
-        Properties.Settings.Default.MatricRetryInterval = GetNumberBoxValue(numMatricRetryInterval, Properties.Settings.Default.MatricRetryInterval);
-        Properties.Settings.Default.AutostartPanelServer = chkAutostartPanel.IsChecked == true;
-        Properties.Settings.Default.PanelServerPort = GetNumberBoxValue(numPanelServerPort, Properties.Settings.Default.PanelServerPort);
+        Properties.Settings.Default.EnableLog = viewModel.EnableLog;
+        Properties.Settings.Default.DarkMode = viewModel.DarkMode;
+        Properties.Settings.Default.AutostartMatricIntegration = viewModel.AutostartMatricIntegration;
+        Properties.Settings.Default.MatricApiPort = GetNumberBoxValue(viewModel.MatricApiPort, Properties.Settings.Default.MatricApiPort);
+        Properties.Settings.Default.MatricRetryInterval = GetNumberBoxValue(viewModel.MatricRetryInterval, Properties.Settings.Default.MatricRetryInterval);
+        Properties.Settings.Default.AutostartPanelServer = viewModel.AutostartPanelServer;
+        Properties.Settings.Default.PanelServerPort = GetNumberBoxValue(viewModel.PanelServerPort, Properties.Settings.Default.PanelServerPort);
         Properties.Settings.Default.Save();
 
         Log.LogEnabled(Properties.Settings.Default.EnableLog);
         ApplyTheme(Properties.Settings.Default.DarkMode);
+        AddActivity("Settings saved");
     }
 
     private async void CmdRevertSettings_Click(object sender, RoutedEventArgs args)
@@ -87,19 +97,27 @@ public sealed partial class MainWindow : Window
         if (await Confirm("Elite FIP Server Settings", "Do you want to revert to saved settings?"))
         {
             LoadSettings();
+            AddActivity("Settings reverted");
         }
     }
 
-    private void ChkDarkMode_Changed(object sender, RoutedEventArgs args)
+    private void SwtDarkMode_Toggled(object sender, RoutedEventArgs args)
     {
-        ApplyTheme(chkDarkMode.IsChecked == true);
+        ApplyTheme(viewModel.DarkMode);
     }
 
     private void CmdRefreshClients_Click(object sender, RoutedEventArgs args)
     {
-        txtClientCount.Text = "Refreshing clients...";
+        viewModel.ClientCountText = "Refreshing clients...";
+        AddActivity("Refreshing Matric clients...");
         serverCore.RefreshConnectedMatricClients();
         RefreshClients(serverCore.GetConnectedMatricClients());
+    }
+
+    private void CmdClearActivity_Click(object sender, RoutedEventArgs args)
+    {
+        viewModel.ActivityLog.Clear();
+        AddActivity("Activity log cleared");
     }
 
     private void OnCoreStateChanged(object sender, RunState state)
@@ -131,14 +149,22 @@ public sealed partial class MainWindow : Window
 
     private void UpdateCoreStatus(RunState state)
     {
-        txtCoreStatus.Text = state.ToString();
+        viewModel.CoreStatus = state.ToString();
+        UpdateStatusVisual(coreStatusIndicator, coreStatusProgress, state);
+        UpdateStatusIndicator(coreSummaryIndicator, state);
+        RefreshStatusSummary();
+        AddActivity($"Core {state}");
     }
 
     private void UpdateMatricStatus(RunState state)
     {
-        txtMatricStatus.Text = state.ToString();
-        cmdMatric.Content = state == RunState.Started ? "Stop Matric" : "Start Matric";
-        cmdMatric.IsEnabled = state is not RunState.Starting and not RunState.Stopping;
+        viewModel.MatricStatus = state.ToString();
+        viewModel.MatricButtonText = state == RunState.Started ? "Stop Matric" : "Start Matric";
+        viewModel.MatricButtonEnabled = state is not RunState.Starting and not RunState.Stopping;
+        UpdateStatusVisual(matricStatusIndicator, matricStatusProgress, state);
+        UpdateStatusIndicator(matricSummaryIndicator, state);
+        RefreshStatusSummary();
+        AddActivity($"Matric integration {state}");
 
         if (state == RunState.Started)
         {
@@ -148,20 +174,24 @@ public sealed partial class MainWindow : Window
 
     private void UpdatePanelStatus(RunState state)
     {
-        txtPanelStatus.Text = state.ToString();
-        cmdPanel.Content = state == RunState.Started ? "Stop Panel" : "Start Panel";
-        cmdPanel.IsEnabled = state is not RunState.Starting and not RunState.Stopping;
+        viewModel.PanelStatus = state.ToString();
+        viewModel.PanelButtonText = state == RunState.Started ? "Stop Panel" : "Start Panel";
+        viewModel.PanelButtonEnabled = state is not RunState.Starting and not RunState.Stopping;
+        UpdateStatusVisual(panelStatusIndicator, panelStatusProgress, state);
+        UpdateStatusIndicator(panelSummaryIndicator, state);
+        RefreshStatusSummary();
+        AddActivity($"Panel Server {state}");
     }
 
     private void LoadSettings()
     {
-        chkEnableLog.IsChecked = Properties.Settings.Default.EnableLog;
-        chkDarkMode.IsChecked = Properties.Settings.Default.DarkMode;
-        chkAutostartMatric.IsChecked = Properties.Settings.Default.AutostartMatricIntegration;
-        numMatricPort.Value = Properties.Settings.Default.MatricApiPort;
-        numMatricRetryInterval.Value = Properties.Settings.Default.MatricRetryInterval;
-        chkAutostartPanel.IsChecked = Properties.Settings.Default.AutostartPanelServer;
-        numPanelServerPort.Value = Properties.Settings.Default.PanelServerPort;
+        viewModel.EnableLog = Properties.Settings.Default.EnableLog;
+        viewModel.DarkMode = Properties.Settings.Default.DarkMode;
+        viewModel.AutostartMatricIntegration = Properties.Settings.Default.AutostartMatricIntegration;
+        viewModel.MatricApiPort = Properties.Settings.Default.MatricApiPort;
+        viewModel.MatricRetryInterval = Properties.Settings.Default.MatricRetryInterval;
+        viewModel.AutostartPanelServer = Properties.Settings.Default.AutostartPanelServer;
+        viewModel.PanelServerPort = Properties.Settings.Default.PanelServerPort;
         ApplyTheme(Properties.Settings.Default.DarkMode);
     }
 
@@ -174,21 +204,23 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            matricClients.Clear();
+            viewModel.MatricClients.Clear();
             if (connectedClients != null)
             {
                 foreach (MatricClientSummary client in connectedClients)
                 {
-                    matricClients.Add(client);
+                    viewModel.MatricClients.Add(client);
                 }
             }
 
-            txtClientCount.Text = matricClients.Count == 1 ? "1 client" : $"{matricClients.Count} clients";
+            viewModel.ClientCountText = viewModel.MatricClients.Count == 1 ? "1 client" : $"{viewModel.MatricClients.Count} clients";
+            AddActivity("Matric clients refreshed");
         }
         catch (Exception ex)
         {
-            matricClients.Clear();
-            txtClientCount.Text = "Unable to refresh clients";
+            viewModel.MatricClients.Clear();
+            viewModel.ClientCountText = "Unable to refresh clients";
+            AddActivity("Unable to refresh Matric clients");
             Log.Instance.Error("Error refreshing Matric clients: {error}", ex.ToString());
         }
     }
@@ -201,9 +233,70 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private int GetNumberBoxValue(NumberBox numberBox, int fallback)
+    private int GetNumberBoxValue(double value, int fallback)
     {
-        return double.IsNaN(numberBox.Value) ? fallback : Convert.ToInt32(numberBox.Value);
+        return double.IsNaN(value) ? fallback : Convert.ToInt32(value);
+    }
+
+    private void RefreshStatusSummary()
+    {
+        viewModel.StatusMessage = $"{GetStateLabel(viewModel.CoreStatus)} Core | {GetStateLabel(viewModel.MatricStatus)} Matric | {GetStateLabel(viewModel.PanelStatus)} Panel";
+    }
+
+    private string GetStateLabel(string state)
+    {
+        return state switch
+        {
+            nameof(RunState.Stopped) => "Stopped",
+            nameof(RunState.Starting) => "Starting",
+            nameof(RunState.Started) => "Started",
+            nameof(RunState.Stopping) => "Stopping",
+            _ => "Unknown"
+        };
+    }
+
+    private void UpdateStatusVisual(Ellipse indicator, ProgressRing progress, RunState state)
+    {
+        bool isTransitioning = state is RunState.Starting or RunState.Stopping;
+        progress.IsActive = isTransitioning;
+        progress.Visibility = isTransitioning ? Visibility.Visible : Visibility.Collapsed;
+        indicator.Visibility = isTransitioning ? Visibility.Collapsed : Visibility.Visible;
+        indicator.Fill = new SolidColorBrush(state switch
+        {
+            RunState.Started => Colors.LimeGreen,
+            RunState.Stopped => Colors.Gray,
+            _ => Colors.Goldenrod
+        });
+    }
+
+    private void UpdateStatusIndicator(Ellipse indicator, RunState state)
+    {
+        indicator.Fill = new SolidColorBrush(state switch
+        {
+            RunState.Started => Colors.LimeGreen,
+            RunState.Stopped => Colors.Gray,
+            _ => Colors.Goldenrod
+        });
+    }
+
+    private void AddActivity(string message)
+    {
+        viewModel.ActivityLog.Add(new ActivityLogEntry { Timestamp = DateTime.Now, Message = message });
+        if (viewModel.ActivityLog.Count > 500)
+        {
+            viewModel.ActivityLog.RemoveAt(0);
+        }
+
+        lstActivity?.ScrollIntoView(viewModel.ActivityLog[^1]);
+    }
+
+    private void SetTitleBarIcon()
+    {
+        string iconPath = System.IO.Path.Combine(AppContext.BaseDirectory, "EliteFIPServerIcon256.ico");
+        if (File.Exists(iconPath))
+        {
+            AppWindow.SetIcon(iconPath);
+        }
     }
 
     private async Task<bool> Confirm(string title, string message)
