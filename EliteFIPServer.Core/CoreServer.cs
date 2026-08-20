@@ -41,6 +41,10 @@ namespace EliteFIPServer
         // Matric Integration
         public MatricApiClient MatricAPI { get; private set; }
         public event EventHandler<IReadOnlyList<MatricClientSummary>> ConnectedMatricClientsChanged;
+        public event EventHandler<MatricClientSummary> MatricClientAdded;
+        public event EventHandler<MatricClientSummary> MatricClientRemoved;
+        public event EventHandler<string> PanelClientConnected;
+        public event EventHandler<string> PanelClientDisconnected;
 
         // Panel Server
         public PanelServer PanelServer { get; private set; }
@@ -53,6 +57,10 @@ namespace EliteFIPServer
             EliteAPIIntegration = new EliteAPIIntegration(this);
             MatricAPI = new MatricApiClient();
             MatricAPI.ConnectedClientsChanged += OnConnectedMatricClientsChanged;
+            MatricAPI.ClientAdded += OnMatricClientAdded;
+            MatricAPI.ClientRemoved += OnMatricClientRemoved;
+            GameDataUpdateHub.ClientConnected += OnPanelClientConnected;
+            GameDataUpdateHub.ClientDisconnected += OnPanelClientDisconnected;
             PanelServer = new PanelServer(this);            
 
         }
@@ -171,6 +179,26 @@ namespace EliteFIPServer
 
         private void OnConnectedMatricClientsChanged(object sender, IReadOnlyList<MatricClientSummary> clients) {
             ConnectedMatricClientsChanged?.Invoke(this, clients);
+        }
+
+        private void OnMatricClientAdded(object sender, MatricClientSummary client)
+        {
+            MatricClientAdded?.Invoke(this, client);
+        }
+
+        private void OnMatricClientRemoved(object sender, MatricClientSummary client)
+        {
+            MatricClientRemoved?.Invoke(this, client);
+        }
+
+        private void OnPanelClientConnected(object sender, string connectionId)
+        {
+            PanelClientConnected?.Invoke(this, connectionId);
+        }
+
+        private void OnPanelClientDisconnected(object sender, string connectionId)
+        {
+            PanelClientDisconnected?.Invoke(this, connectionId);
         }
     }
 }

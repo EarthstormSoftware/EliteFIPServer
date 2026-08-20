@@ -39,6 +39,14 @@ Elite FIP Server requires the following:
 - [EliteFIPProtocol](https://github.com/EarthstormSoftware/EliteFIPProtocol)
 - [MatricIntegration.dll](https://matricapp.com)
 
+To build the current UI and Core projects with one synchronized version increment, run from the repository root:
+
+```powershell
+.\Build-UI.ps1
+```
+
+This increments the shared version once, then builds the UI and its Core project reference. Running `dotnet build` directly does not increment the version.
+
 Older versions of Elite FIP server, used the EliteJournalReader project to provide in-game events.
 
 ---

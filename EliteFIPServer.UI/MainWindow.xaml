@@ -61,20 +61,109 @@
             </TabViewItem>
 
             <TabViewItem Header="Settings" IsClosable="False">
-                <ScrollViewer>
-                    <StackPanel Spacing="14" MaxWidth="460" HorizontalAlignment="Left" Padding="0,16,0,0">
-                        <ToggleSwitch Header="Enable logging" IsOn="{Binding EnableLog, Mode=TwoWay}" />
-                        <ToggleSwitch Header="Dark mode" IsOn="{Binding DarkMode, Mode=TwoWay}" Toggled="SwtDarkMode_Toggled" />
-                        <ToggleSwitch Header="Start Matric integration automatically" IsOn="{Binding AutostartMatricIntegration, Mode=TwoWay}" />
-                        <NumberBox Header="Matric API port" Value="{Binding MatricApiPort, Mode=TwoWay}" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" />
-                        <NumberBox Header="Matric retry interval" Value="{Binding MatricRetryInterval, Mode=TwoWay}" Minimum="1" Maximum="3600" SpinButtonPlacementMode="Compact" />
-                        <ToggleSwitch Header="Start Panel Server automatically" IsOn="{Binding AutostartPanelServer, Mode=TwoWay}" />
-                        <NumberBox Header="Panel Server port" Value="{Binding PanelServerPort, Mode=TwoWay}" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" />
+                <ScrollViewer HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="8" HorizontalAlignment="Stretch" Padding="0,16,0,0">
+                        <TextBlock Text="General settings" FontWeight="SemiBold" Margin="0,8,0,4" />
+                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Enable logging" FontWeight="SemiBold" />
+                                    <TextBlock Text="Write server activity to the log file" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsOn="{Binding EnableLog, Mode=TwoWay}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
 
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button x:Name="cmdSaveSettings" Content="Save" MinWidth="96" Click="CmdSaveSettings_Click" />
-                            <Button x:Name="cmdRevertSettings" Content="Revert" MinWidth="96" Click="CmdRevertSettings_Click" />
-                        </StackPanel>
+                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Dark mode" FontWeight="SemiBold" />
+                                    <TextBlock Text="Use the dark application theme" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsOn="{Binding DarkMode, Mode=TwoWay}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="Matric settings" FontWeight="SemiBold" Margin="0,16,0,4" />
+                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Start Matric integration automatically" FontWeight="SemiBold" />
+                                    <TextBlock Text="Start the Matric service when the application launches" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsOn="{Binding AutostartMatricIntegration, Mode=TwoWay}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Matric API port" FontWeight="SemiBold" />
+                                    <TextBlock Text="Port used by the Matric integration" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <NumberBox Grid.Column="1" Width="180" Value="{Binding MatricApiPort, Mode=TwoWay}" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="Panel Server settings" FontWeight="SemiBold" Margin="0,16,0,4" />
+                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Matric retry interval" FontWeight="SemiBold" />
+                                    <TextBlock Text="Seconds between connection attempts" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <NumberBox Grid.Column="1" Width="180" Value="{Binding MatricRetryInterval, Mode=TwoWay}" Minimum="1" Maximum="3600" SpinButtonPlacementMode="Compact" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Start Panel Server automatically" FontWeight="SemiBold" />
+                                    <TextBlock Text="Start the Panel Server when the application launches" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsOn="{Binding AutostartPanelServer, Mode=TwoWay}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Panel Server port" FontWeight="SemiBold" />
+                                    <TextBlock Text="Port used by the Panel Server" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <NumberBox Grid.Column="1" Width="180" Value="{Binding PanelServerPort, Mode=TwoWay}" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
                     </StackPanel>
                 </ScrollViewer>
             </TabViewItem>
@@ -84,43 +173,49 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <Button x:Name="cmdRefreshClients" Content="Refresh" MinWidth="96" Click="CmdRefreshClients_Click" />
-                        <TextBlock Text="{Binding ClientCountText}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
 
-                    <ListView Grid.Row="1" ItemsSource="{Binding MatricClients}" MaxWidth="720" HorizontalAlignment="Left">
+                    <ListView Grid.Row="1" ItemsSource="{Binding MatricClients}" HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" SelectionMode="None">
                         <ListView.Header>
-                            <Grid Padding="12,0,12,8" ColumnSpacing="16">
+                            <Border Padding="12,8" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                <Grid ColumnSpacing="16">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="180" />
-                                    <ColumnDefinition Width="160" />
-                                    <ColumnDefinition Width="320" />
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="1.5*" />
+                                    <ColumnDefinition Width="3*" />
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock Text="Name" FontWeight="SemiBold" />
                                 <TextBlock Grid.Column="1" Text="IP" FontWeight="SemiBold" />
-                                <TextBlock Grid.Column="2" Text="ID" FontWeight="SemiBold" />
-                            </Grid>
+                                <TextBlock Grid.Column="2" Text="Client ID" FontWeight="SemiBold" />
+                                </Grid>
+                            </Border>
                         </ListView.Header>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Padding="12,6" ColumnSpacing="16">
+                                <Border Padding="12,8" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="180" />
-                                        <ColumnDefinition Width="160" />
-                                        <ColumnDefinition Width="320" />
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="1.5*" />
+                                        <ColumnDefinition Width="3*" />
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
                                     <TextBlock Grid.Column="1" Text="{Binding IP}" TextTrimming="CharacterEllipsis" />
                                     <TextBlock Grid.Column="2" Text="{Binding Id}" TextTrimming="CharacterEllipsis" />
-                                </Grid>
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+
+                    <TextBlock Grid.Row="2" Text="{Binding ClientCountText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </Grid>
             </TabViewItem>
 
@@ -135,18 +230,33 @@
                         <Button Content="Clear" MinWidth="96" Click="CmdClearActivity_Click" />
                     </StackPanel>
 
-                    <ListView x:Name="lstActivity" Grid.Row="1" ItemsSource="{Binding ActivityLog}" MaxWidth="820" HorizontalAlignment="Left">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Padding="12,4" ColumnSpacing="12">
+                    <ListView x:Name="lstActivity" Grid.Row="1" ItemsSource="{Binding ActivityLog}" HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" SelectionMode="None">
+                        <ListView.Header>
+                            <Border Padding="12,8" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="88" />
-                                        <ColumnDefinition Width="680" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Text="{Binding DisplayTime}" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Message}" TextWrapping="Wrap" />
+                                    <TextBlock Text="Time" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="1" Text="Message" FontWeight="SemiBold" />
                                 </Grid>
+                            </Border>
+                        </ListView.Header>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="12,8" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                    <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="{Binding DisplayTime}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Message}" TextWrapping="Wrap" />
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>

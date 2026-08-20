@@ -1,70 +1,58 @@
-# Auto-increment build version script
-# Format: MAJOR.MINOR.YYDDD.BUILD
-# - YYDDD: Year and day of year
-# - BUILD: Auto-increments, resets to 1 on new day
+# Auto-increment the UI build version and diagnostic build string.
+# External format: Major.Minor.Build.0
+# Internal format: Major.Minor.YYYYMMDD_BBBBB
 
 param(
-    [string]$ProjectPath = "EliteFIPServer/EliteFIPServer.csproj"
+    [string]$VersionPropsPath,
+    [string]$BuildInfoPath,
+    [string]$ProjectPath,
+    [string]$VersionOutputPath
 )
 
-# Get current date in YYDDD format (YY = last 2 digits of year, DDD = day of year)
-$today = [DateTime]::Now
-$year = $today.ToString("yy")
-$dayOfYear = $today.DayOfYear.ToString("000")
-$todayVersion = "$year$dayOfYear"
+if (-not $VersionPropsPath -or -not $BuildInfoPath) {
+    exit 0
+}
+
+$today = [DateTime]::Now.ToString("yyyyMMdd")
 
 Write-Host "Build Version Update Script" -ForegroundColor Cyan
-Write-Host "Today's date code: $todayVersion (Year: $year, Day: $dayOfYear)" -ForegroundColor Green
+Write-Host "Today's date code: $today" -ForegroundColor Green
 
-# Read the csproj file
-$csprojContent = Get-Content $ProjectPath -Raw
+$versionPropsContent = Get-Content $VersionPropsPath -Raw
+$buildInfoContent = Get-Content $BuildInfoPath -Raw
 
-# Extract current AssemblyVersion using regex
-$versionMatch = [regex]::Match($csprojContent, '<AssemblyVersion>(\d+\.\d+\.\d+)\.(\d+)</AssemblyVersion>')
+$versionMatch = [regex]::Match($versionPropsContent, '<AssemblyVersion>(\d+)\.(\d+)\.(\d+)\.0</AssemblyVersion>')
 
 if ($versionMatch.Success) {
-    $currentVersion = $versionMatch.Groups[1].Value
-    $currentBuild = [int]$versionMatch.Groups[2].Value
-    
-    Write-Host "Current version: $currentVersion.$currentBuild" -ForegroundColor Yellow
-    
-    # Parse the current version to extract YYDDD portion
-    $parts = $currentVersion.Split('.')
-    $major = $parts[0]
-    $minor = $parts[1]
-    $currentDateCode = $parts[2]
-    
-    # Determine new build number
-    if ($currentDateCode -eq $todayVersion) {
-        # Same day - increment build number
-        $newBuild = $currentBuild + 1
-        Write-Host "Same day detected - incrementing build number: $currentBuild to $newBuild" -ForegroundColor Green
-    }
-    else {
-        # New day - reset build number to 1
-        $newBuild = 1
-        Write-Host "New day detected ($currentDateCode to $todayVersion) - resetting build number to 1" -ForegroundColor Green
+    $major = $versionMatch.Groups[1].Value
+    $minor = $versionMatch.Groups[2].Value
+    $currentBuild = [int]$versionMatch.Groups[3].Value
+    $newBuild = $currentBuild + 1
+
+    if ($newBuild -gt 65535) {
+        throw "Build number limit reached for version $major.$minor. Start a new minor release."
     }
     
-    $newVersion = "$major.$minor.$todayVersion.$newBuild"
+    $newVersion = "$major.$minor.$newBuild.0"
+    $newBuildString = "$major.$minor.$($today)_$($newBuild.ToString('D5'))"
     Write-Host "New version: $newVersion" -ForegroundColor Cyan
     
-    # Update AssemblyVersion
-    $csprojContent = $csprojContent -replace `
-        '<AssemblyVersion>(\d+\.\d+\.\d+)\.(\d+)</AssemblyVersion>', `
-        "<AssemblyVersion>$newVersion</AssemblyVersion>"
-    
-    # Update FileVersion (same as AssemblyVersion)
-    $csprojContent = $csprojContent -replace `
-        '<FileVersion>(\d+\.\d+\.\d+)\.(\d+)</FileVersion>', `
-        "<FileVersion>$newVersion</FileVersion>"
-    
-    # Write the updated content back
-    Set-Content $ProjectPath $csprojContent
+    $versionPropsContent = $versionPropsContent -replace '<AssemblyVersion>\d+\.\d+\.\d+\.0</AssemblyVersion>', "<AssemblyVersion>$newVersion</AssemblyVersion>"
+    $versionPropsContent = $versionPropsContent -replace '<FileVersion>\d+\.\d+\.\d+\.0</FileVersion>', "<FileVersion>$newVersion</FileVersion>"
+    $versionPropsContent = $versionPropsContent -replace '<Version>\d+\.\d+\.\d+\.0</Version>', "<Version>$newVersion</Version>"
+    $buildInfoContent = $buildInfoContent -replace 'public const string BuildString = "[^"]+";', ('public const string BuildString = "' + $newBuildString + '";')
+    $buildInfoContent = $buildInfoContent -replace 'public const string Version = "[^"]+";', ('public const string Version = "' + $newVersion + '";')
+
+    Set-Content $VersionPropsPath $versionPropsContent
+    Set-Content $BuildInfoPath $buildInfoContent
+    if ($VersionOutputPath) {
+        Set-Content $VersionOutputPath $newVersion
+    }
     
     Write-Host "Version updated successfully!" -ForegroundColor Green
     Write-Host "  AssemblyVersion: $newVersion" -ForegroundColor Green
     Write-Host "  FileVersion: $newVersion" -ForegroundColor Green
+    Write-Host "  BuildString: $newBuildString" -ForegroundColor Green
 }
 else {
     Write-Host "ERROR: Could not find AssemblyVersion in csproj file" -ForegroundColor Red

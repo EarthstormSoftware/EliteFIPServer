@@ -12,36 +12,120 @@ namespace EliteFIPServer;
 
 public sealed partial class MainWindow : Window
 {
+    private const int DefaultWindowWidth = 877;
+    private const int DefaultWindowHeight = 880;
+    private const int MinimumWindowWidth = 720;
+    private const int MinimumWindowHeight = 520;
+
     private readonly CoreServer serverCore;
     private readonly MainWindowViewModel viewModel = new();
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer clientRefreshTimer;
 
     public MainWindow(string[] args)
     {
         InitializeComponent();
+        RestoreWindowBounds();
+        Activated += MainWindow_Activated;
         RootGrid.DataContext = viewModel;
         SetTitleBarIcon();
 
         serverCore = new CoreServer(args);
+        clientRefreshTimer = DispatcherQueue.CreateTimer();
+        clientRefreshTimer.Interval = TimeSpan.FromSeconds(20);
+        clientRefreshTimer.Tick += ClientRefreshTimer_Tick;
         serverCore.CurrentState.onStateChange += OnCoreStateChanged;
         serverCore.MatricAPI.CurrentState.onStateChange += OnMatricStateChanged;
         serverCore.PanelServer.CurrentState.onStateChange += OnPanelStateChanged;
         serverCore.ConnectedMatricClientsChanged += OnConnectedMatricClientsChanged;
+        serverCore.MatricClientAdded += OnMatricClientAdded;
+        serverCore.MatricClientRemoved += OnMatricClientRemoved;
+        serverCore.PanelClientConnected += OnPanelClientConnected;
+        serverCore.PanelClientDisconnected += OnPanelClientDisconnected;
         Closed += MainWindow_Closed;
 
         LoadSettings();
+        viewModel.PropertyChanged += ViewModel_PropertyChanged;
         UpdateAllStatus();
         RefreshClients();
         AddActivity("Starting server core...");
         serverCore.Start();
+        clientRefreshTimer.Start();
     }
 
     private void MainWindow_Closed(object sender, WindowEventArgs args)
     {
+        SaveWindowBounds();
         serverCore.CurrentState.onStateChange -= OnCoreStateChanged;
         serverCore.MatricAPI.CurrentState.onStateChange -= OnMatricStateChanged;
         serverCore.PanelServer.CurrentState.onStateChange -= OnPanelStateChanged;
         serverCore.ConnectedMatricClientsChanged -= OnConnectedMatricClientsChanged;
+        serverCore.MatricClientAdded -= OnMatricClientAdded;
+        serverCore.MatricClientRemoved -= OnMatricClientRemoved;
+        serverCore.PanelClientConnected -= OnPanelClientConnected;
+        serverCore.PanelClientDisconnected -= OnPanelClientDisconnected;
         serverCore.Stop();
+        clientRefreshTimer.Stop();
+    }
+
+    private void ClientRefreshTimer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
+    {
+        RefreshClients(serverCore.GetConnectedMatricClients(), false);
+        serverCore.RefreshConnectedMatricClients();
+    }
+
+    private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        if (args.WindowActivationState == WindowActivationState.Deactivated)
+        {
+            return;
+        }
+
+        Activated -= MainWindow_Activated;
+        RestoreWindowPosition();
+    }
+
+    private void RestoreWindowBounds()
+    {
+        var settings = Properties.Settings.Default;
+        var displayArea = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(AppWindow.Id, Microsoft.UI.Windowing.DisplayAreaFallback.Primary);
+        var workArea = displayArea.WorkArea;
+        var width = Math.Clamp(settings.WindowWidth, MinimumWindowWidth, Math.Max(MinimumWindowWidth, workArea.Width));
+        var height = Math.Clamp(settings.WindowHeight, MinimumWindowHeight, Math.Max(MinimumWindowHeight, workArea.Height));
+
+        if (settings.WindowWidth <= 0 || settings.WindowHeight <= 0)
+        {
+            width = Math.Min(DefaultWindowWidth, workArea.Width);
+            height = Math.Min(DefaultWindowHeight, workArea.Height);
+        }
+
+        AppWindow.Resize(new Windows.Graphics.SizeInt32(width, height));
+    }
+
+    private void RestoreWindowPosition()
+    {
+        var settings = Properties.Settings.Default;
+        if (settings.WindowLeft != -1 && settings.WindowTop != -1)
+        {
+            var displayArea = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(AppWindow.Id, Microsoft.UI.Windowing.DisplayAreaFallback.Primary);
+            var workArea = displayArea.WorkArea;
+            var size = AppWindow.Size;
+            var left = Math.Clamp(settings.WindowLeft, workArea.X, workArea.X + workArea.Width - size.Width);
+            var top = Math.Clamp(settings.WindowTop, workArea.Y, workArea.Y + workArea.Height - size.Height);
+            AppWindow.Move(new Windows.Graphics.PointInt32(left, top));
+        }
+    }
+
+    private void SaveWindowBounds()
+    {
+        var settings = Properties.Settings.Default;
+        var size = AppWindow.Size;
+        var position = AppWindow.Position;
+
+        settings.WindowWidth = size.Width;
+        settings.WindowHeight = size.Height;
+        settings.WindowLeft = position.X;
+        settings.WindowTop = position.Y;
+        settings.Save();
     }
 
     private void CmdMatric_Click(object sender, RoutedEventArgs args)
@@ -70,13 +154,24 @@ public sealed partial class MainWindow : Window
         serverCore.PanelServer.Start();
     }
 
-    private async void CmdSaveSettings_Click(object sender, RoutedEventArgs args)
+    private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs args)
     {
-        if (!await Confirm("Elite FIP Server Settings", "Do you want to save changes?"))
+        switch (args.PropertyName)
         {
-            return;
+            case nameof(MainWindowViewModel.EnableLog):
+            case nameof(MainWindowViewModel.DarkMode):
+            case nameof(MainWindowViewModel.AutostartMatricIntegration):
+            case nameof(MainWindowViewModel.MatricApiPort):
+            case nameof(MainWindowViewModel.MatricRetryInterval):
+            case nameof(MainWindowViewModel.AutostartPanelServer):
+            case nameof(MainWindowViewModel.PanelServerPort):
+                SaveSettings();
+                break;
         }
+    }
 
+    private void SaveSettings()
+    {
         Log.Instance.Info("Saving settings");
         Properties.Settings.Default.EnableLog = viewModel.EnableLog;
         Properties.Settings.Default.DarkMode = viewModel.DarkMode;
@@ -89,21 +184,6 @@ public sealed partial class MainWindow : Window
 
         Log.LogEnabled(Properties.Settings.Default.EnableLog);
         ApplyTheme(Properties.Settings.Default.DarkMode);
-        AddActivity("Settings saved");
-    }
-
-    private async void CmdRevertSettings_Click(object sender, RoutedEventArgs args)
-    {
-        if (await Confirm("Elite FIP Server Settings", "Do you want to revert to saved settings?"))
-        {
-            LoadSettings();
-            AddActivity("Settings reverted");
-        }
-    }
-
-    private void SwtDarkMode_Toggled(object sender, RoutedEventArgs args)
-    {
-        ApplyTheme(viewModel.DarkMode);
     }
 
     private void CmdRefreshClients_Click(object sender, RoutedEventArgs args)
@@ -111,7 +191,7 @@ public sealed partial class MainWindow : Window
         viewModel.ClientCountText = "Refreshing clients...";
         AddActivity("Refreshing Matric clients...");
         serverCore.RefreshConnectedMatricClients();
-        RefreshClients(serverCore.GetConnectedMatricClients());
+        RefreshClients(serverCore.GetConnectedMatricClients(), false);
     }
 
     private void CmdClearActivity_Click(object sender, RoutedEventArgs args)
@@ -137,7 +217,37 @@ public sealed partial class MainWindow : Window
 
     private void OnConnectedMatricClientsChanged(object sender, IReadOnlyList<MatricClientSummary> clients)
     {
-        UpdateOnUiThread(() => RefreshClients(clients));
+        UpdateOnUiThread(() => RefreshClients(clients, false));
+    }
+
+    private void OnMatricClientAdded(object sender, MatricClientSummary client)
+    {
+        UpdateOnUiThread(() => AddActivity($"Matric client connected: {FormatClient(client)}"));
+    }
+
+    private void OnMatricClientRemoved(object sender, MatricClientSummary client)
+    {
+        UpdateOnUiThread(() => AddActivity($"Matric client disconnected: {FormatClient(client)}"));
+    }
+
+    private void OnPanelClientConnected(object sender, string connectionId)
+    {
+        UpdateOnUiThread(() => AddActivity($"Panel client subscribed: {ShortConnectionId(connectionId)}"));
+    }
+
+    private void OnPanelClientDisconnected(object sender, string connectionId)
+    {
+        UpdateOnUiThread(() => AddActivity($"Panel client unsubscribed: {ShortConnectionId(connectionId)}"));
+    }
+
+    private string FormatClient(MatricClientSummary client)
+    {
+        return string.IsNullOrWhiteSpace(client.Name) ? client.IP : $"{client.Name} ({client.IP})";
+    }
+
+    private string ShortConnectionId(string connectionId)
+    {
+        return connectionId?.Length > 8 ? connectionId[..8] : connectionId;
     }
 
     private void UpdateAllStatus()
@@ -197,10 +307,10 @@ public sealed partial class MainWindow : Window
 
     private void RefreshClients()
     {
-        RefreshClients(serverCore.GetConnectedMatricClients());
+        RefreshClients(serverCore.GetConnectedMatricClients(), true);
     }
 
-    private void RefreshClients(IReadOnlyList<MatricClientSummary> connectedClients)
+    private void RefreshClients(IReadOnlyList<MatricClientSummary> connectedClients, bool recordActivity)
     {
         try
         {
@@ -214,13 +324,19 @@ public sealed partial class MainWindow : Window
             }
 
             viewModel.ClientCountText = viewModel.MatricClients.Count == 1 ? "1 client" : $"{viewModel.MatricClients.Count} clients";
-            AddActivity("Matric clients refreshed");
+            if (recordActivity)
+            {
+                AddActivity("Matric clients refreshed");
+            }
         }
         catch (Exception ex)
         {
             viewModel.MatricClients.Clear();
             viewModel.ClientCountText = "Unable to refresh clients";
-            AddActivity("Unable to refresh Matric clients");
+            if (recordActivity)
+            {
+                AddActivity("Unable to refresh Matric clients");
+            }
             Log.Instance.Error("Error refreshing Matric clients: {error}", ex.ToString());
         }
     }

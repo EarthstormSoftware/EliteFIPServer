@@ -141,6 +141,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 public sealed class ActivityLogEntry
 {
     public DateTime Timestamp { get; set; }
-    public string DisplayTime => Timestamp.ToString("HH:mm:ss");
+    public string DisplayTime => Timestamp.ToString("HH:mm:ss.fff");
     public string Message { get; set; }
 }

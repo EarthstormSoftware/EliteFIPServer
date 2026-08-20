@@ -10,6 +10,8 @@ namespace EliteFIPServer {
 
         public ComponentState CurrentState { get; private set; } = new ComponentState();
         public event EventHandler<IReadOnlyList<MatricClientSummary>> ConnectedClientsChanged;
+        public event EventHandler<MatricClientSummary> ClientAdded;
+        public event EventHandler<MatricClientSummary> ClientRemoved;
 
         public List<ClientInfo> ConnectedClients = new List<ClientInfo>();
         private Dictionary<string, MatricButton> MatricButtonList;
@@ -180,7 +182,21 @@ namespace EliteFIPServer {
                 CompleteStart();                
             }
             
+            List<ClientInfo> previousClients = ConnectedClients;
             ConnectedClients = clients ?? new List<ClientInfo>();
+            var previousByKey = previousClients.ToDictionary(GetClientKey);
+            var currentByKey = ConnectedClients.ToDictionary(GetClientKey);
+
+            foreach (var client in ConnectedClients.Where(client => !previousByKey.ContainsKey(GetClientKey(client))))
+            {
+                ClientAdded?.Invoke(this, ToClientSummary(client));
+            }
+
+            foreach (var client in previousClients.Where(client => !currentByKey.ContainsKey(GetClientKey(client))))
+            {
+                ClientRemoved?.Invoke(this, ToClientSummary(client));
+            }
+
             ConnectedClientsChanged?.Invoke(this, GetConnectedClientSummaries());
 
             // Matric version 2 supports use of 'null' Client IDs, in which case the updates are set to all Clients. 
@@ -243,12 +259,22 @@ namespace EliteFIPServer {
 
         public IReadOnlyList<MatricClientSummary> GetConnectedClientSummaries() {
             return ConnectedClients?
-                .Select(client => new MatricClientSummary {
-                    Name = client.Name,
-                    IP = client.IP,
-                    Id = client.Id
-                })
+                .Select(ToClientSummary)
                 .ToList() ?? new List<MatricClientSummary>();
+        }
+
+        private static string GetClientKey(ClientInfo client)
+        {
+            return client.Id ?? $"{client.Name}|{client.IP}";
+        }
+
+        private static MatricClientSummary ToClientSummary(ClientInfo client)
+        {
+            return new MatricClientSummary {
+                Name = client.Name,
+                IP = client.IP,
+                Id = client.Id
+            };
         }
 
         public void RequestConnectedClients() {
