@@ -8,6 +8,12 @@
     <Setting Name="AutostartPanelServer" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="PanelServerAllowLanAccess" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="PanelServerAccessToken" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
     <Setting Name="PanelServerPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4545</Value>
     </Setting>

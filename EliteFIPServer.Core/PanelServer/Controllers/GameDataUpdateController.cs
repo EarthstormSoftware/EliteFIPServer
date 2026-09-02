@@ -14,38 +14,38 @@ namespace EliteFIPServer
             _hubContext = hubContext;
         }
 
-        public void SendStatusUpdate(StatusData statusData)
+        public async Task SendStatusUpdate(StatusData statusData)
         {
             string statusJSON = JsonSerializer.Serialize(statusData);
-            _hubContext.Clients.All.SendAsync("StatusData", statusJSON);
+            await _hubContext.Clients.All.SendAsync("StatusData", statusJSON);
         }
 
-        public void SendTargetUpdate(ShipTargetedData targetData)
+        public async Task SendTargetUpdate(ShipTargetedData targetData)
         {
             string targetJSON = JsonSerializer.Serialize(targetData);
-            _hubContext.Clients.All.SendAsync("TargetData", targetJSON);
+            await _hubContext.Clients.All.SendAsync("TargetData", targetJSON);
         }
 
-        public void SendLocationUpdate(LocationData locationData)
+        public async Task SendLocationUpdate(LocationData locationData)
         {
             string locationJSON = JsonSerializer.Serialize(locationData);
-            _hubContext.Clients.All.SendAsync("LocationData", locationJSON);
+            await _hubContext.Clients.All.SendAsync("LocationData", locationJSON);
         }
 
-        public void SendNavRouteUpdate(NavigationData navRouteData)
+        public async Task SendNavRouteUpdate(NavigationData navRouteData)
         {
             string navRouteJSON = JsonSerializer.Serialize(navRouteData);
-            _hubContext.Clients.All.SendAsync("NavRouteData", navRouteJSON);
+            await _hubContext.Clients.All.SendAsync("NavRouteData", navRouteJSON);
         }
 
-        public void SendPreviousNavRoute(NavigationData navRouteData) {
+        public async Task SendPreviousNavRoute(NavigationData navRouteData) {
             string navRouteJSON = JsonSerializer.Serialize(navRouteData);
-            _hubContext.Clients.All.SendAsync("PreviousNavRoute", navRouteJSON);
+            await _hubContext.Clients.All.SendAsync("PreviousNavRoute", navRouteJSON);
         }
 
-        public void SendJumpUpdate(JumpData jumpData) {
+        public async Task SendJumpUpdate(JumpData jumpData) {
             string jumpJSON = JsonSerializer.Serialize(jumpData);
-            _hubContext.Clients.All.SendAsync("JumpData", jumpJSON);
+            await _hubContext.Clients.All.SendAsync("JumpData", jumpJSON);
         }
     }
 }

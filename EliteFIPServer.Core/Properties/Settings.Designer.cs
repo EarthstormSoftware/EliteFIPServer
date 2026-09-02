@@ -49,6 +49,30 @@ namespace EliteFIPServer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool PanelServerAllowLanAccess {
+            get {
+                return ((bool)(this["PanelServerAllowLanAccess"]));
+            }
+            set {
+                this["PanelServerAllowLanAccess"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PanelServerAccessToken {
+            get {
+                return ((string)(this["PanelServerAccessToken"]));
+            }
+            set {
+                this["PanelServerAccessToken"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("4545")]
         public int PanelServerPort {
             get {

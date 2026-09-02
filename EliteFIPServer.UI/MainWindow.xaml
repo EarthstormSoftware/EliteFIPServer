@@ -129,6 +129,19 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Spacing="2">
+                                    <TextBlock Text="Allow LAN access" FontWeight="SemiBold" />
+                                    <TextBlock Text="Allow other devices on your local network to connect" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsOn="{Binding PanelServerAllowLanAccess, Mode=TwoWay}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                            <Grid ColumnSpacing="24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
                                     <TextBlock Text="Matric retry interval" FontWeight="SemiBold" />
                                     <TextBlock Text="Seconds between connection attempts" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                                 </StackPanel>

@@ -11,11 +11,11 @@ connection.on("StatusData", function (StatusData) {
 
     var data = JSON.parse(StatusData);
     if (data != null) {
-        console.log(data);        
-        if (data.LegalState != null) { document.getElementById("LegalState").innerHTML = data.LegalState };
-        if (data.Cargo != null) { document.getElementById("Cargo").innerHTML = data.Cargo };
-        if (data.FuelMain != null) { document.getElementById("FuelMain").innerHTML = roundAccurately(data.FuelMain, 2) };
-        if (data.FuelReservoir != null) { document.getElementById("FuelReservoir").innerHTML = roundAccurately(data.FuelReservoir, 2) };
+        console.log(data);
+        if (data.LegalState != null) { document.getElementById("LegalState").textContent = data.LegalState; }
+        if (data.Cargo != null) { document.getElementById("Cargo").textContent = data.Cargo; }
+        if (data.FuelMain != null) { document.getElementById("FuelMain").textContent = roundAccurately(data.FuelMain, 2); }
+        if (data.FuelReservoir != null) { document.getElementById("FuelReservoir").textContent = roundAccurately(data.FuelReservoir, 2); }
     }
 });
 
@@ -25,18 +25,18 @@ connection.on("TargetData", function (TargetData) {
     if (data != null) {
         console.log(data);
 
-        document.getElementById("Ship").innerHTML = ""
-        document.getElementById("PilotName").innerHTML = ""
-        document.getElementById("PilotRank").innerHTML = ""
-        document.getElementById("Faction").innerHTML = ""
-        document.getElementById("LegalStatus").innerHTML = ""
-        document.getElementById("Bounty").innerHTML = ""
+        document.getElementById("Ship").textContent = "";
+        document.getElementById("PilotName").textContent = "";
+        document.getElementById("PilotRank").textContent = "";
+        document.getElementById("Faction").textContent = "";
+        document.getElementById("LegalStatus").textContent = "";
+        document.getElementById("Bounty").textContent = "";
 
         if (data.TargetLocked != null && data.TargetLocked != false) {
-            if (data.Ship != null) { document.getElementById("Ship").innerHTML = data.Ship };
-            if (data.PilotName != null) { document.getElementById("PilotName").innerHTML = data.PilotName };
-            if (data.PilotRank != null) { document.getElementById("PilotRank").innerHTML = data.PilotRank };
-            if (data.Faction != null) { document.getElementById("Faction").innerHTML = data.Faction };
+            if (data.Ship != null) { document.getElementById("Ship").textContent = data.Ship; }
+            if (data.PilotName != null) { document.getElementById("PilotName").textContent = data.PilotName; }
+            if (data.PilotRank != null) { document.getElementById("PilotRank").textContent = data.PilotRank; }
+            if (data.Faction != null) { document.getElementById("Faction").textContent = data.Faction; }
             if (data.LegalStatus != null) {
                 var legalStatusCell = document.getElementById("LegalStatus");
                 if (data.LegalStatus == "Wanted") {
@@ -44,13 +44,13 @@ connection.on("TargetData", function (TargetData) {
                 } else {
                     legalStatusCell.style.color = 'orange';
                 }
-                document.getElementById("LegalStatus").innerHTML = data.LegalStatus
-            };
+                legalStatusCell.textContent = data.LegalStatus;
+            }
             if (data.Bounty != null) {
                 if (data.Bounty == 0) {
-                    document.getElementById("Bounty").innerHTML = "";
+                    document.getElementById("Bounty").textContent = "";
                 } else {
-                    document.getElementById("Bounty").innerHTML = data.Bounty;
+                    document.getElementById("Bounty").textContent = data.Bounty;
                 }
             }
         }
@@ -74,7 +74,7 @@ connection.on("NavRouteData", function (NavRouteData) {
     var data = JSON.parse(NavRouteData);
     if (data != null) {
         console.log(data);
-		if (data.NavRouteActive = true && data.Stops.length > 0) {
+        if (data.NavRouteActive === true && Array.isArray(data.Stops) && data.Stops.length > 0) {
             route.setSteps(data.Stops);
         } else {
             route.clearRoute();

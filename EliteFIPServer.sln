@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EliteFIPServer.Core", "Elit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EliteFIPServer.UI", "EliteFIPServer.UI\EliteFIPServer.UI.csproj", "{951E8327-047C-403E-BDCB-16719723E1B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EliteFIPServer.Tests", "EliteFIPServer.Tests\EliteFIPServer.Tests.csproj", "{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,26 @@ Global
 		{951E8327-047C-403E-BDCB-16719723E1B9}.Release|x64.Build.0 = Release|Any CPU
 		{951E8327-047C-403E-BDCB-16719723E1B9}.Release|x86.ActiveCfg = Release|Any CPU
 		{951E8327-047C-403E-BDCB-16719723E1B9}.Release|x86.Build.0 = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|ARM.Build.0 = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|x64.Build.0 = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Debug|x86.Build.0 = Debug|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|ARM.ActiveCfg = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|ARM.Build.0 = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|ARM64.Build.0 = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|x64.ActiveCfg = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|x64.Build.0 = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|x86.ActiveCfg = Release|Any CPU
+		{C66A9CC9-6393-4F72-91E8-BFC2FD921A65}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

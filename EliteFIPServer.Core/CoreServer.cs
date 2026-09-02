@@ -66,29 +66,32 @@ namespace EliteFIPServer
         }
 
         public void Start() {
+            if (CurrentState.State == RunState.Started) {
+                return;
+            }
+
             Log.Instance.Info("Server Core starting");
-            CurrentState.Set(RunState.Starting);            
+            CurrentState.Set(RunState.Starting);
 
             // Start Game Data Worker Thread
             Log.Instance.Info("Starting Game data worker");
+            GameDataQueue = new BlockingCollection<GameEventTrigger>(Constants.MaxGameDataQueueSize);
+            GameDataWorkerCTS?.Dispose();
             GameDataWorkerCTS = new CancellationTokenSource();
-            GameDataTask = new Task(new Action(GameDataWorkerThread), GameDataWorkerCTS.Token);
-            GameDataTask.ContinueWith(GameDataWorkerThreadEnded);
-            GameDataTask.Start();
+            GameDataTask = Task.Run(GameDataWorkerThread, GameDataWorkerCTS.Token);
+            GameDataTask.ContinueWith(GameDataWorkerThreadEnded, TaskScheduler.Default);
 
             EliteAPIIntegration.Start();
 
-            // Start Matric Integration if set to autostart
             if (Properties.Settings.Default.AutostartMatricIntegration) {
                 this.StartMatricIntegration();
             }
-            // Start Matric Integration if set to autostart
             if (Properties.Settings.Default.AutostartPanelServer) {
                 PanelServer.Start();
             }
 
             CurrentState.Set(RunState.Started);
-            Log.Instance.Info("Server Core started");            
+            Log.Instance.Info("Server Core started");
         }
 
         public void StartMatricIntegration() {
@@ -99,21 +102,31 @@ namespace EliteFIPServer
         }
 
         public void Stop() {
-            Log.Instance.Info("Server Core stopping");            
+            if (CurrentState.State == RunState.Stopped || CurrentState.State == RunState.Stopping) {
+                return;
+            }
+
+            Log.Instance.Info("Server Core stopping");
             CurrentState.Set(RunState.Stopping);
             EliteAPIIntegration.Stop();
 
-            // Isssue the cancel to signal worker threads to end
-            GameDataWorkerCTS.Cancel();
+            if (GameDataWorkerCTS != null && !GameDataWorkerCTS.IsCancellationRequested) {
+                GameDataWorkerCTS.Cancel();
+            }
 
-            // Stop Matric Integration
             StopMatricIntegration();
-
-            // Stop Panel Server
             PanelServer.Stop();
 
-            GameDataQueue.CompleteAdding();
-            CurrentState.Set(RunState.Stopped);                                   
+            if (GameDataQueue != null && !GameDataQueue.IsAddingCompleted) {
+                GameDataQueue.CompleteAdding();
+            }
+
+            try {
+                GameDataTask?.Wait(1500);
+            } catch (AggregateException) {
+            }
+
+            CurrentState.Set(RunState.Stopped);
             Log.Instance.Info("Server Core stopped");
         }
 
@@ -128,24 +141,22 @@ namespace EliteFIPServer
             GameDataWorkerState = RunState.Started;
             Log.Instance.Info("Game Data Worker Thread started");
 
-            DateTime lastSuccessfulUpdate = DateTime.Today;
-
             CancellationToken cToken = GameDataWorkerCTS.Token;
 
-
-            while (cToken.IsCancellationRequested == false && !GameDataQueue.IsCompleted) {
-
-                GameEventTrigger gameEventTrigger = new GameEventTrigger(GameEventType.Empty, null);
+            while (!cToken.IsCancellationRequested) {
                 try {
-                    gameEventTrigger = GameDataQueue.Take(cToken);
-                } catch (InvalidOperationException) { }
-
-                if (gameEventTrigger.GameEvent != GameEventType.Empty) {
-                    Log.Instance.Info("Updating {statetype} data", gameEventTrigger.GameEvent.ToString());
-                    PanelServer.UpdateGameState(gameEventTrigger.GameEvent, gameEventTrigger.EventData);
-                    MatricAPI.UpdateGameState(gameEventTrigger.GameEvent, gameEventTrigger.EventData);
+                    GameEventTrigger gameEventTrigger = GameDataQueue.Take(cToken);
+                    if (gameEventTrigger.GameEvent != GameEventType.Empty) {
+                        Log.Instance.Info("Updating {statetype} data", gameEventTrigger.GameEvent.ToString());
+                        PanelServer.UpdateGameState(gameEventTrigger.GameEvent, gameEventTrigger.EventData).GetAwaiter().GetResult();
+                        MatricAPI.UpdateGameState(gameEventTrigger.GameEvent, gameEventTrigger.EventData);
+                    }
+                    Log.Instance.Info("Game Data Worker Thread waiting for new work");
+                } catch (OperationCanceledException) {
+                    break;
+                } catch (InvalidOperationException) {
+                    break;
                 }
-                Log.Instance.Info("Game Data Worker Thread waiting for new work");
             }
             Log.Instance.Info("Game Data Worker Thread ending");
         }
@@ -159,10 +170,18 @@ namespace EliteFIPServer
         }
 
         public void GameDataEvent(GameEventType eventType, Object evt) {
+            if (CurrentState.State == RunState.Stopped || GameDataWorkerCTS == null || GameDataQueue == null || GameDataQueue.IsAddingCompleted) {
+                return;
+            }
 
-            GameEventTrigger newStatusEvent = new GameEventTrigger(eventType, evt);
-            CancellationToken cToken = GameDataWorkerCTS.Token;
-            GameDataQueue.Add(newStatusEvent, cToken);
+            try {
+                GameEventTrigger newStatusEvent = new GameEventTrigger(eventType, evt);
+                CancellationToken cToken = GameDataWorkerCTS.Token;
+                GameDataQueue.Add(newStatusEvent, cToken);
+            } catch (ObjectDisposedException) {
+            } catch (InvalidOperationException) {
+            } catch (OperationCanceledException) {
+            }
         }
 
         public MatricApiClient GetMatricApi() {

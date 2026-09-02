@@ -13,18 +13,18 @@ connection.on("TargetData", function (TargetData) {
     if (data != null) {
         console.log(data);
 
-        document.getElementById("Ship").innerHTML = ""
-        document.getElementById("PilotName").innerHTML = ""
-        document.getElementById("PilotRank").innerHTML = ""
-        document.getElementById("Faction").innerHTML = ""
-        document.getElementById("LegalStatus").innerHTML = ""
-        document.getElementById("Bounty").innerHTML = ""
+        document.getElementById("Ship").textContent = "";
+        document.getElementById("PilotName").textContent = "";
+        document.getElementById("PilotRank").textContent = "";
+        document.getElementById("Faction").textContent = "";
+        document.getElementById("LegalStatus").textContent = "";
+        document.getElementById("Bounty").textContent = "";
 
         if (data.TargetLocked != null && data.TargetLocked != false) {
-            if (data.Ship != null) { document.getElementById("Ship").innerHTML = data.Ship };
-            if (data.PilotName != null) { document.getElementById("PilotName").innerHTML = data.PilotName };
-            if (data.PilotRank != null) { document.getElementById("PilotRank").innerHTML = data.PilotRank };
-            if (data.Faction != null) { document.getElementById("Faction").innerHTML = data.Faction };
+            if (data.Ship != null) { document.getElementById("Ship").textContent = data.Ship; }
+            if (data.PilotName != null) { document.getElementById("PilotName").textContent = data.PilotName; }
+            if (data.PilotRank != null) { document.getElementById("PilotRank").textContent = data.PilotRank; }
+            if (data.Faction != null) { document.getElementById("Faction").textContent = data.Faction; }
             if (data.LegalStatus != null) {
                 var legalStatusCell = document.getElementById("LegalStatus");
                 if (data.LegalStatus == "Wanted") {
@@ -32,13 +32,13 @@ connection.on("TargetData", function (TargetData) {
                 } else {
                     legalStatusCell.style.color = 'orange';
                 }
-                document.getElementById("LegalStatus").innerHTML = data.LegalStatus
-            };
+                legalStatusCell.textContent = data.LegalStatus;
+            }
             if (data.Bounty != null) {
                 if (data.Bounty == 0) {
-                    document.getElementById("Bounty").innerHTML = "";
+                    document.getElementById("Bounty").textContent = "";
                 } else {
-                    document.getElementById("Bounty").innerHTML = data.Bounty;
+                    document.getElementById("Bounty").textContent = data.Bounty;
                 }
             }
         }

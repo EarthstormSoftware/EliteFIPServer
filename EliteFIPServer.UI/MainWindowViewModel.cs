@@ -21,6 +21,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private double matricApiPort;
     private double matricRetryInterval;
     private bool autostartPanelServer;
+    private bool panelServerAllowLanAccess;
     private double panelServerPort;
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -118,6 +119,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         get => autostartPanelServer;
         set => SetProperty(ref autostartPanelServer, value);
+    }
+
+    public bool PanelServerAllowLanAccess
+    {
+        get => panelServerAllowLanAccess;
+        set => SetProperty(ref panelServerAllowLanAccess, value);
     }
 
     public double PanelServerPort

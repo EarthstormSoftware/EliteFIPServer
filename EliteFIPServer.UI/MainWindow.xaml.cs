@@ -164,6 +164,7 @@ public sealed partial class MainWindow : Window
             case nameof(MainWindowViewModel.MatricApiPort):
             case nameof(MainWindowViewModel.MatricRetryInterval):
             case nameof(MainWindowViewModel.AutostartPanelServer):
+            case nameof(MainWindowViewModel.PanelServerAllowLanAccess):
             case nameof(MainWindowViewModel.PanelServerPort):
                 SaveSettings();
                 break;
@@ -179,6 +180,7 @@ public sealed partial class MainWindow : Window
         Properties.Settings.Default.MatricApiPort = GetNumberBoxValue(viewModel.MatricApiPort, Properties.Settings.Default.MatricApiPort);
         Properties.Settings.Default.MatricRetryInterval = GetNumberBoxValue(viewModel.MatricRetryInterval, Properties.Settings.Default.MatricRetryInterval);
         Properties.Settings.Default.AutostartPanelServer = viewModel.AutostartPanelServer;
+        Properties.Settings.Default.PanelServerAllowLanAccess = viewModel.PanelServerAllowLanAccess;
         Properties.Settings.Default.PanelServerPort = GetNumberBoxValue(viewModel.PanelServerPort, Properties.Settings.Default.PanelServerPort);
         Properties.Settings.Default.Save();
 
@@ -301,6 +303,7 @@ public sealed partial class MainWindow : Window
         viewModel.MatricApiPort = Properties.Settings.Default.MatricApiPort;
         viewModel.MatricRetryInterval = Properties.Settings.Default.MatricRetryInterval;
         viewModel.AutostartPanelServer = Properties.Settings.Default.AutostartPanelServer;
+        viewModel.PanelServerAllowLanAccess = Properties.Settings.Default.PanelServerAllowLanAccess;
         viewModel.PanelServerPort = Properties.Settings.Default.PanelServerPort;
         ApplyTheme(Properties.Settings.Default.DarkMode);
     }
