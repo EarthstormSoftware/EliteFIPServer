@@ -44,6 +44,7 @@ public sealed partial class MainWindow : Window
         Closed += MainWindow_Closed;
 
         LoadSettings();
+        ShowSettingsHome(this, EventArgs.Empty);
         viewModel.PropertyChanged += ViewModel_PropertyChanged;
         UpdateAllStatus();
         RefreshClients();
@@ -139,6 +140,20 @@ public sealed partial class MainWindow : Window
 
         AddActivity("Starting Matric integration...");
         serverCore.StartMatricIntegration();
+    }
+
+    private void ShowSettingsHome(object sender, EventArgs args)
+    {
+        var page = new SettingsHomePage { DataContext = viewModel };
+        page.MatricSettingsRequested += ShowMatricSettings;
+        SettingsFrame.Content = page;
+    }
+
+    private void ShowMatricSettings(object sender, EventArgs args)
+    {
+        var page = new MatricSettingsPage { DataContext = viewModel };
+        page.BackRequested += ShowSettingsHome;
+        SettingsFrame.Content = page;
     }
 
     private void CmdPanel_Click(object sender, RoutedEventArgs args)

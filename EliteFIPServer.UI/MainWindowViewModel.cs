@@ -24,9 +24,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private bool panelServerAllowLanAccess;
     private double panelServerPort;
 
+    public MainWindowViewModel()
+    {
+        LoadMatricButtonTextConfigs();
+    }
+
     public event PropertyChangedEventHandler PropertyChanged;
 
     public ObservableCollection<MatricClientSummary> MatricClients { get; } = new();
+    public ObservableCollection<MatricButtonTextConfigViewModel> MatricButtonTextConfigs { get; } = new();
     public ObservableCollection<ActivityLogEntry> ActivityLog { get; } = new();
 
     public string VersionText { get; } = $"Version {BuildInfo.Version}";
@@ -133,6 +139,47 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         set => SetProperty(ref panelServerPort, value);
     }
 
+    public void ResetMatricButtonTextConfigs()
+    {
+        foreach (var config in MatricButtonTextConfigs)
+        {
+            config.PropertyChanged -= MatricButtonTextConfig_PropertyChanged;
+        }
+
+        MatricButtonTextConfigs.Clear();
+        LoadMatricButtonTextConfigs(MatricButtonTextConfigStore.GetDefaults(), true);
+    }
+
+    private void LoadMatricButtonTextConfigs(bool save = false)
+    {
+        LoadMatricButtonTextConfigs(MatricButtonTextConfigStore.Load(), save);
+    }
+
+    private void LoadMatricButtonTextConfigs(IEnumerable<MatricButtonTextConfig> configs, bool save)
+    {
+        foreach (var config in configs)
+        {
+            var viewModel = new MatricButtonTextConfigViewModel(config);
+            viewModel.PropertyChanged += MatricButtonTextConfig_PropertyChanged;
+            MatricButtonTextConfigs.Add(viewModel);
+        }
+
+        if (save)
+        {
+            SaveMatricButtonTextConfigs();
+        }
+    }
+
+    private void MatricButtonTextConfig_PropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+        SaveMatricButtonTextConfigs();
+    }
+
+    private void SaveMatricButtonTextConfigs()
+    {
+        MatricButtonTextConfigStore.Save(MatricButtonTextConfigs.Select(config => config.ToConfig()));
+    }
+
     private void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
     {
         if (Equals(field, value))
@@ -150,4 +197,60 @@ public sealed class ActivityLogEntry
     public DateTime Timestamp { get; set; }
     public string DisplayTime => Timestamp.ToString("HH:mm:ss.fff");
     public string Message { get; set; }
+}
+
+public sealed class MatricButtonTextConfigViewModel : INotifyPropertyChanged
+{
+    private string offText;
+    private string onText;
+    private bool updateButtonText;
+
+    public MatricButtonTextConfigViewModel(MatricButtonTextConfig config)
+    {
+        ButtonName = config.ButtonName;
+        offText = config.OffText;
+        onText = config.OnText;
+        updateButtonText = config.UpdateButtonText;
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public string ButtonName { get; }
+
+    public string OffText
+    {
+        get => offText;
+        set => SetProperty(ref offText, value);
+    }
+
+    public string OnText
+    {
+        get => onText;
+        set => SetProperty(ref onText, value);
+    }
+
+    public bool UpdateButtonText
+    {
+        get => updateButtonText;
+        set => SetProperty(ref updateButtonText, value);
+    }
+
+    public MatricButtonTextConfig ToConfig() => new()
+    {
+        ButtonName = ButtonName,
+        OffText = OffText,
+        OnText = OnText,
+        UpdateButtonText = UpdateButtonText
+    };
+
+    private void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+    {
+        if (Equals(field, value))
+        {
+            return;
+        }
+
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

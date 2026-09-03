@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <Content Include="..\EliteFIPServer\Images\EliteFIPServerIcon256.ico" Link="EliteFIPServerIcon256.ico" CopyToOutputDirectory="Always" />
-    <Content Include="..\EliteFIPServer\ButtonTextConfig.json" Link="ButtonTextConfig.json" CopyToOutputDirectory="Always" />
     <Content Include="..\EliteFIPServer\NLog.config" Link="NLog.config" CopyToOutputDirectory="Always" />
     <Content Include="..\EliteFIPServer\wwwroot\**\*" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
   </ItemGroup>

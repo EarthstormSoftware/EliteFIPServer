@@ -90,9 +90,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="ButtonTextConfig.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

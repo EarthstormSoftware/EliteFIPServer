@@ -1,8 +1,6 @@
 ﻿using EliteFIPProtocol;
 using EliteFIPServer.Logging;
 using Matric.Integration;
-using Newtonsoft.Json;
-using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace EliteFIPServer {
@@ -129,22 +127,13 @@ namespace EliteFIPServer {
             MatricFlashWorkerTask.ContinueWith(MatricFlashWorkerThreadEnded);
             MatricFlashWorkerTask.Start();
 
-            // Refesh Button Text Config 
-            Log.Instance.Info("Refesh Button Text Config");
-            try {
-                string jsonButtonTextConfig = File.ReadAllText(Constants.ButtonTextConfigFilename);
-                var buttonTextConfigList = JsonConvert.DeserializeObject<List<ButtonTextConfig>>(jsonButtonTextConfig);                
-                foreach (ButtonTextConfig buttonConfig in buttonTextConfigList) {
-                    if (MatricButtonList.ContainsKey(buttonConfig.ButtonName)) {
-                        MatricButtonList[buttonConfig.ButtonName].OffText = buttonConfig.OffText;
-                        MatricButtonList[buttonConfig.ButtonName].OnText = buttonConfig.OnText;
-                        MatricButtonList[buttonConfig.ButtonName].UpdateButtonText = buttonConfig.UpdateButtonText;
-                        Log.Instance.Info("Button updated: {name}, Offtext: {offtext}, Ontext: {Ontext},UpdateButtonText: {updatebuttontext}",
-                            MatricButtonList[buttonConfig.ButtonName].ButtonName, MatricButtonList[buttonConfig.ButtonName].OffText, MatricButtonList[buttonConfig.ButtonName].OnText, MatricButtonList[buttonConfig.ButtonName].UpdateButtonText);
-                    }
+            Log.Instance.Info("Refreshing Matric button text config");
+            foreach (MatricButtonTextConfig buttonConfig in MatricButtonTextConfigStore.Load()) {
+                if (MatricButtonList.ContainsKey(buttonConfig.ButtonName)) {
+                    MatricButtonList[buttonConfig.ButtonName].OffText = buttonConfig.OffText;
+                    MatricButtonList[buttonConfig.ButtonName].OnText = buttonConfig.OnText;
+                    MatricButtonList[buttonConfig.ButtonName].UpdateButtonText = buttonConfig.UpdateButtonText;
                 }
-            } catch {
-                Log.Instance.Info("Unable to refesh Button Text Config");
             }
             CurrentState.Set(RunState.Started);
         }

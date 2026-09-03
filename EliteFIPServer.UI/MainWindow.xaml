@@ -61,124 +61,13 @@
             </TabViewItem>
 
             <TabViewItem Header="Settings" IsClosable="False">
-                <ScrollViewer HorizontalContentAlignment="Stretch">
-                    <StackPanel Spacing="8" HorizontalAlignment="Stretch" Padding="0,16,0,0">
-                        <TextBlock Text="General settings" FontWeight="SemiBold" Margin="0,8,0,4" />
-                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
-                            <Grid ColumnSpacing="24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Enable logging" FontWeight="SemiBold" />
-                                    <TextBlock Text="Write server activity to the log file" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <ToggleSwitch Grid.Column="1" IsOn="{Binding EnableLog, Mode=TwoWay}" VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-
-                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
-                            <Grid ColumnSpacing="24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Dark mode" FontWeight="SemiBold" />
-                                    <TextBlock Text="Use the dark application theme" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <ToggleSwitch Grid.Column="1" IsOn="{Binding DarkMode, Mode=TwoWay}" VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-
-                        <TextBlock Text="Matric settings" FontWeight="SemiBold" Margin="0,16,0,4" />
-                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
-                            <Grid ColumnSpacing="24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Start Matric integration automatically" FontWeight="SemiBold" />
-                                    <TextBlock Text="Start the Matric service when the application launches" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <ToggleSwitch Grid.Column="1" IsOn="{Binding AutostartMatricIntegration, Mode=TwoWay}" VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-
-                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
-                            <Grid ColumnSpacing="24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Matric API port" FontWeight="SemiBold" />
-                                    <TextBlock Text="Port used by the Matric integration" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <NumberBox Grid.Column="1" Width="180" Value="{Binding MatricApiPort, Mode=TwoWay}" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-
-                        <TextBlock Text="Panel Server settings" FontWeight="SemiBold" Margin="0,16,0,4" />
-                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
-                            <Grid ColumnSpacing="24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Allow LAN access" FontWeight="SemiBold" />
-                                    <TextBlock Text="Allow other devices on your local network to connect" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <ToggleSwitch Grid.Column="1" IsOn="{Binding PanelServerAllowLanAccess, Mode=TwoWay}" VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
-                            <Grid ColumnSpacing="24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Matric retry interval" FontWeight="SemiBold" />
-                                    <TextBlock Text="Seconds between connection attempts" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <NumberBox Grid.Column="1" Width="180" Value="{Binding MatricRetryInterval, Mode=TwoWay}" Minimum="1" Maximum="3600" SpinButtonPlacementMode="Compact" VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-
-                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
-                            <Grid ColumnSpacing="24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Start Panel Server automatically" FontWeight="SemiBold" />
-                                    <TextBlock Text="Start the Panel Server when the application launches" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <ToggleSwitch Grid.Column="1" IsOn="{Binding AutostartPanelServer, Mode=TwoWay}" VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-
-                        <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
-                            <Grid ColumnSpacing="24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="Panel Server port" FontWeight="SemiBold" />
-                                    <TextBlock Text="Port used by the Panel Server" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <NumberBox Grid.Column="1" Width="180" Value="{Binding PanelServerPort, Mode=TwoWay}" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-
-                    </StackPanel>
-                </ScrollViewer>
+                <Frame x:Name="SettingsFrame">
+                    <Frame.ContentTransitions>
+                        <TransitionCollection>
+                            <EntranceThemeTransition FromHorizontalOffset="48" />
+                        </TransitionCollection>
+                    </Frame.ContentTransitions>
+                </Frame>
             </TabViewItem>
 
             <TabViewItem Header="Clients" IsClosable="False">

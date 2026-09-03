@@ -6,7 +6,6 @@
         public const string MatricProcessName = "MatricServer.exe";
         public const string MatricInstallDirectory = @"C:\Program Files\Ex Machina\MATRIC Desktop";
         public const string Eyecatcher = "EDFIPSRV";
-        public const string ButtonTextConfigFilename = "ButtonTextConfig.json";
 
         public const int MaxGameDataQueueSize = 250;
         public const int MaxSSEQueueSize = 250;
