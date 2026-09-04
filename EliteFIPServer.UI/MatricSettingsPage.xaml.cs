@@ -24,4 +24,28 @@ public sealed partial class MatricSettingsPage : Page
             viewModel.ResetMatricButtonTextConfigs();
         }
     }
+
+    private void ResetPageSwitches_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            viewModel.ResetMatricPageSwitchConfigs();
+        }
+    }
+
+    private void AddClientProfile_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            viewModel.AddMatricClientProfile();
+        }
+    }
+
+    private void RemoveClientProfile_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel viewModel && sender is Button button && button.DataContext is MatricClientProfileViewModel profile)
+        {
+            viewModel.RemoveMatricClientProfile(profile);
+        }
+    }
 }

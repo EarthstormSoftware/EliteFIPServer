@@ -129,13 +129,14 @@ namespace EliteFIPServer
 
         public void Stop() {
             Log.Instance.Info("Panel server stopping");
-            if (CurrentState.State == RunState.Started && PanelServerCTS != null) {
+            if ((CurrentState.State == RunState.Started || CurrentState.State == RunState.Starting) && PanelServerCTS != null) {
                 CurrentState.Set(RunState.Stopping);
                 PanelServerCTS.Cancel();
 
                 try {
                     if (PanelHost != null) {
-                        PanelHost.StopAsync(CancellationToken.None).GetAwaiter().GetResult();
+                        using var stopTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+                        PanelHost.StopAsync(stopTimeout.Token).GetAwaiter().GetResult();
                     }
                 } catch (Exception ex) {
                     Log.Instance.Warn("Panel server stop warning: {exception}", ex.ToString());

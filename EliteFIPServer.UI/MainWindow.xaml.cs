@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Shapes;
 using System.IO;
 using System;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace EliteFIPServer;
 
@@ -64,8 +65,16 @@ public sealed partial class MainWindow : Window
         serverCore.MatricClientRemoved -= OnMatricClientRemoved;
         serverCore.PanelClientConnected -= OnPanelClientConnected;
         serverCore.PanelClientDisconnected -= OnPanelClientDisconnected;
-        serverCore.Stop();
         clientRefreshTimer.Stop();
+
+        try
+        {
+            Task.Run(serverCore.Stop).Wait(TimeSpan.FromSeconds(2));
+        }
+        finally
+        {
+            Environment.Exit(0);
+        }
     }
 
     private void ClientRefreshTimer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
@@ -237,6 +246,16 @@ public sealed partial class MainWindow : Window
         UpdateOnUiThread(() => RefreshClients(clients, false));
     }
 
+    private void CopyClientValue_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.Tag is string value && !string.IsNullOrWhiteSpace(value))
+        {
+            var package = new DataPackage();
+            package.SetText(value);
+            Clipboard.SetContent(package);
+        }
+    }
+
     private void OnMatricClientAdded(object sender, MatricClientSummary client)
     {
         UpdateOnUiThread(() => AddActivity($"Matric client connected: {FormatClient(client)}"));
@@ -342,6 +361,7 @@ public sealed partial class MainWindow : Window
             }
 
             viewModel.ClientCountText = viewModel.MatricClients.Count == 1 ? "1 client" : $"{viewModel.MatricClients.Count} clients";
+            viewModel.UpdateMatricClientProfileOptions(viewModel.MatricClients);
             if (recordActivity)
             {
                 AddActivity("Matric clients refreshed");

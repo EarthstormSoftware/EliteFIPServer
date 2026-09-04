@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Microsoft.UI.Xaml.Media;
 
 namespace EliteFIPServer;
 
@@ -27,12 +28,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public MainWindowViewModel()
     {
         LoadMatricButtonTextConfigs();
+        LoadMatricPageSwitchConfigs();
+        LoadMatricClientProfiles();
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
 
     public ObservableCollection<MatricClientSummary> MatricClients { get; } = new();
     public ObservableCollection<MatricButtonTextConfigViewModel> MatricButtonTextConfigs { get; } = new();
+    public ObservableCollection<MatricPageSwitchConfigViewModel> MatricPageSwitchConfigs { get; } = new();
+    public ObservableCollection<MatricClientProfileViewModel> MatricClientProfiles { get; } = new();
     public ObservableCollection<ActivityLogEntry> ActivityLog { get; } = new();
 
     public string VersionText { get; } = $"Version {BuildInfo.Version}";
@@ -180,6 +185,108 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         MatricButtonTextConfigStore.Save(MatricButtonTextConfigs.Select(config => config.ToConfig()));
     }
 
+    public void ResetMatricPageSwitchConfigs()
+    {
+        foreach (var config in MatricPageSwitchConfigs)
+        {
+            config.PropertyChanged -= MatricPageSwitchConfig_PropertyChanged;
+        }
+
+        MatricPageSwitchConfigs.Clear();
+        LoadMatricPageSwitchConfigs(MatricPageSwitchConfigStore.GetDefaults(), true);
+    }
+
+    private void LoadMatricPageSwitchConfigs()
+    {
+        LoadMatricPageSwitchConfigs(MatricPageSwitchConfigStore.Load(), false);
+    }
+
+    private void LoadMatricPageSwitchConfigs(IEnumerable<MatricPageSwitchConfig> configs, bool save)
+    {
+        foreach (var config in configs)
+        {
+            var viewModel = new MatricPageSwitchConfigViewModel(config);
+            viewModel.PropertyChanged += MatricPageSwitchConfig_PropertyChanged;
+            MatricPageSwitchConfigs.Add(viewModel);
+        }
+
+        if (save)
+        {
+            SaveMatricPageSwitchConfigs();
+        }
+    }
+
+    private void MatricPageSwitchConfig_PropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+        SaveMatricPageSwitchConfigs();
+    }
+
+    private void SaveMatricPageSwitchConfigs()
+    {
+        MatricPageSwitchConfigStore.Save(MatricPageSwitchConfigs.Select(config => config.ToConfig()));
+    }
+
+    public void AddMatricClientProfile()
+    {
+        var profile = new MatricClientProfileViewModel(new MatricClientProfile
+        {
+            PageSwitches = MatricPageSwitchConfigStore.GetDefaults().ToList()
+        });
+        profile.PropertyChanged += MatricClientProfile_PropertyChanged;
+        MatricClientProfiles.Insert(0, profile);
+        SaveMatricClientProfiles();
+        UpdateMatricClientProfileOptions(MatricClients);
+    }
+
+    public void RemoveMatricClientProfile(MatricClientProfileViewModel profile)
+    {
+        if (profile == null)
+        {
+            return;
+        }
+
+        profile.PropertyChanged -= MatricClientProfile_PropertyChanged;
+        MatricClientProfiles.Remove(profile);
+        SaveMatricClientProfiles();
+        UpdateMatricClientProfileOptions(MatricClients);
+    }
+
+    public void UpdateMatricClientProfileOptions(IEnumerable<MatricClientSummary> clients)
+    {
+        var connectedClients = clients?.ToList() ?? new List<MatricClientSummary>();
+        foreach (var profile in MatricClientProfiles)
+        {
+            var assignedClientIds = MatricClientProfiles
+                .Where(other => !ReferenceEquals(other, profile))
+                .Select(other => other.ClientId)
+                .Where(id => !string.IsNullOrWhiteSpace(id));
+            profile.UpdateAvailableClients(connectedClients, assignedClientIds);
+        }
+    }
+
+    private void LoadMatricClientProfiles()
+    {
+        foreach (var profile in MatricClientProfileStore.Load())
+        {
+            var viewModel = new MatricClientProfileViewModel(profile);
+            viewModel.PropertyChanged += MatricClientProfile_PropertyChanged;
+            MatricClientProfiles.Add(viewModel);
+        }
+        UpdateMatricClientProfileOptions(MatricClients);
+    }
+
+    private void MatricClientProfile_PropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+        SaveMatricClientProfiles();
+    }
+
+    private void SaveMatricClientProfiles()
+    {
+        MatricClientProfileStore.Save(MatricClientProfiles
+            .Where(profile => !string.IsNullOrWhiteSpace(profile.ClientId))
+            .Select(profile => profile.ToConfig()));
+    }
+
     private void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
     {
         if (Equals(field, value))
@@ -241,6 +348,188 @@ public sealed class MatricButtonTextConfigViewModel : INotifyPropertyChanged
         OffText = OffText,
         OnText = OnText,
         UpdateButtonText = UpdateButtonText
+    };
+
+    private void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+    {
+        if (Equals(field, value))
+        {
+            return;
+        }
+
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+
+public sealed class MatricClientProfileViewModel : INotifyPropertyChanged
+{
+    private string clientId;
+    private string clientName;
+    private string deckId;
+    private MatricClientSummary selectedClient;
+
+    public ObservableCollection<MatricClientSummary> AvailableClients { get; } = new();
+
+    public MatricClientProfileViewModel(MatricClientProfile profile)
+    {
+        clientId = profile.ClientId;
+        clientName = profile.ClientName;
+        deckId = profile.DeckId;
+
+        foreach (var config in profile.PageSwitches?.Count == 4 ? profile.PageSwitches : MatricPageSwitchConfigStore.GetDefaults())
+        {
+            var viewModel = new MatricPageSwitchConfigViewModel(config);
+            viewModel.PropertyChanged += PageSwitchConfig_PropertyChanged;
+            PageSwitches.Add(viewModel);
+        }
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public ObservableCollection<MatricPageSwitchConfigViewModel> PageSwitches { get; } = new();
+
+    public string ClientId
+    {
+        get => clientId;
+        set
+        {
+            if (SetProperty(ref clientId, value))
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ClientIdBorderBrush)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ClientIdValidationText)));
+            }
+        }
+    }
+
+    public Brush ClientIdBorderBrush => string.IsNullOrWhiteSpace(ClientId)
+        ? new SolidColorBrush(Microsoft.UI.Colors.OrangeRed)
+        : new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+    public string ClientIdValidationText => string.IsNullOrWhiteSpace(ClientId) ? "Required" : string.Empty;
+
+    public string ClientName
+    {
+        get => clientName;
+        set => SetProperty(ref clientName, value);
+    }
+
+    public string DeckId
+    {
+        get => deckId;
+        set => SetProperty(ref deckId, value);
+    }
+
+    public MatricClientSummary SelectedClient
+    {
+        get => selectedClient;
+        set
+        {
+            if (value == null)
+            {
+                return;
+            }
+
+            selectedClient = value;
+            ClientId = value.Id;
+            ClientName = value.Name;
+        }
+    }
+
+    public MatricClientProfile ToConfig() => new()
+    {
+        ClientId = ClientId,
+        ClientName = ClientName,
+        DeckId = DeckId,
+        PageSwitches = PageSwitches.Select(config => config.ToConfig()).ToList()
+    };
+
+    public void UpdateAvailableClients(IEnumerable<MatricClientSummary> clients, IEnumerable<string> assignedClientIds)
+    {
+        var assigned = assignedClientIds.ToHashSet();
+        var available = clients
+            .Where(client => !string.IsNullOrWhiteSpace(client.Id) && (!assigned.Contains(client.Id) || client.Id == ClientId))
+            .ToList();
+
+        if (AvailableClients.Select(client => client.Id).SequenceEqual(available.Select(client => client.Id)))
+        {
+            return;
+        }
+
+        AvailableClients.Clear();
+        foreach (var client in available)
+        {
+            AvailableClients.Add(client);
+        }
+
+        var matchingClient = available.FirstOrDefault(client => client.Id == ClientId);
+        if (!ReferenceEquals(selectedClient, matchingClient))
+        {
+            selectedClient = matchingClient;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedClient)));
+        }
+    }
+
+    private void PageSwitchConfig_PropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PageSwitches)));
+    }
+
+    private bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+    {
+        if (Equals(field, value))
+        {
+            return false;
+        }
+
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
+    }
+}
+
+public sealed class MatricPageSwitchConfigViewModel : INotifyPropertyChanged
+{
+    private bool enabled;
+    private string pageId;
+
+    public MatricPageSwitchConfigViewModel(MatricPageSwitchConfig config)
+    {
+        State = config.State;
+        enabled = config.Enabled;
+        pageId = config.PageId;
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public string State { get; }
+
+    public string StateDisplayName => State switch
+    {
+        "InMainShip" => "In Main Ship",
+        "InFighter" => "In Fighter",
+        "InSRV" => "In SRV",
+        "OnFoot" => "On Foot",
+        _ => State
+    };
+
+    public bool Enabled
+    {
+        get => enabled;
+        set => SetProperty(ref enabled, value);
+    }
+
+    public string PageId
+    {
+        get => pageId;
+        set => SetProperty(ref pageId, value);
+    }
+
+    public MatricPageSwitchConfig ToConfig() => new()
+    {
+        State = State,
+        Enabled = Enabled,
+        PageId = PageId
     };
 
     private void SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)

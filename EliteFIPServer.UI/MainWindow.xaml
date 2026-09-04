@@ -90,6 +90,7 @@
                                     <ColumnDefinition Width="2*" />
                                     <ColumnDefinition Width="1.5*" />
                                     <ColumnDefinition Width="3*" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock Text="Name" FontWeight="SemiBold" />
@@ -106,11 +107,18 @@
                                         <ColumnDefinition Width="2*" />
                                         <ColumnDefinition Width="1.5*" />
                                         <ColumnDefinition Width="3*" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                        <Button Content="&#xE8C8;" Tag="{Binding Name}" Click="CopyClientValue_Click" ToolTipService.ToolTip="Copy name" Padding="6,2" />
+                                    </StackPanel>
                                     <TextBlock Grid.Column="1" Text="{Binding IP}" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Grid.Column="2" Text="{Binding Id}" TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Id}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                        <Button Content="&#xE8C8;" Tag="{Binding Id}" Click="CopyClientValue_Click" ToolTipService.ToolTip="Copy client ID" Padding="6,2" />
+                                    </StackPanel>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

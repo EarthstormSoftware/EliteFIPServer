@@ -17,6 +17,11 @@ namespace EliteFIPServer {
         private string AppName = "Elite FIP Server";
         private string CLIENT_ID;
         private Matric.Integration.Matric matric;
+        private bool previousInMainShip;
+        private bool previousInFighter;
+        private bool previousInSRV;
+        private bool previousOnFoot;
+        private readonly Dictionary<string, string> appliedDeckIds = new();
         
 
         // Matric Flash Worker
@@ -140,12 +145,19 @@ namespace EliteFIPServer {
 
         public void Stop() {
             Log.Instance.Info("Stopping Matric Integration");
-            if (CurrentState.State == RunState.Started) {
+            if (CurrentState.State == RunState.Started || CurrentState.State == RunState.Starting) {
                 CurrentState.Set(RunState.Stopping);
-                MatricFlashWorkerCTS.Cancel();
-                MatricFlashWorkerTask.Wait();
+                MatricFlashWorkerCTS?.Cancel();
+                if (MatricFlashWorkerTask != null && !MatricFlashWorkerTask.Wait(TimeSpan.FromSeconds(1))) {
+                    Log.Instance.Warn("Matric Flash Thread did not stop within the shutdown timeout");
+                }
             }
             matric = null;
+            previousInMainShip = false;
+            previousInFighter = false;
+            previousInSRV = false;
+            previousOnFoot = false;
+            appliedDeckIds.Clear();
             CurrentState.Set(RunState.Stopped);
         }
 
@@ -223,10 +235,12 @@ namespace EliteFIPServer {
                         button.ButtonState = !button.ButtonState;
                     }
                 }
-                if (buttons.Count > 0) {
+                if (buttons.Count > 0 && matric != null) {
                     matric.SetButtonsVisualState(CLIENT_ID, buttons);
                 }
-                Thread.Sleep(500);
+                if (token.WaitHandle.WaitOne(500)) {
+                    break;
+                }
             }
             Log.Instance.Info("Matric Flash Worker Thread ending");
         }
@@ -311,6 +325,8 @@ namespace EliteFIPServer {
                 if (MatricButtonList.ContainsKey(MatricConstants.HOT)) { MatricButtonList[MatricConstants.HOT].GameState = currentStatus.Hot; }
                 if (MatricButtonList.ContainsKey(MatricConstants.VERYCOLD)) { MatricButtonList[MatricConstants.VERYCOLD].GameState = currentStatus.VeryCold; }
                 if (MatricButtonList.ContainsKey(MatricConstants.VERYHOT)) { MatricButtonList[MatricConstants.VERYHOT].GameState = currentStatus.VeryHot; }
+
+                ApplyPageSwitch(currentStatus);
 
 
                 // Buttons and switches need extra TLC
@@ -408,6 +424,64 @@ namespace EliteFIPServer {
                         button.UpdateMatricState(matric, CLIENT_ID);
                     }
                 }
+            }
+        }
+
+        private void ApplyPageSwitch(StatusData currentStatus)
+        {
+            bool enteredMainShip = currentStatus.InMainShip && !previousInMainShip;
+            bool enteredFighter = currentStatus.InFighter && !previousInFighter;
+            bool enteredSRV = currentStatus.InSRV && !previousInSRV;
+            bool enteredOnFoot = currentStatus.OnFoot && !previousOnFoot;
+
+            previousInMainShip = currentStatus.InMainShip;
+            previousInFighter = currentStatus.InFighter;
+            previousInSRV = currentStatus.InSRV;
+            previousOnFoot = currentStatus.OnFoot;
+
+            string enteredState = enteredOnFoot ? "OnFoot" :
+                enteredSRV ? "InSRV" :
+                enteredFighter ? "InFighter" :
+                enteredMainShip ? "InMainShip" : null;
+
+            if (enteredState == null)
+            {
+                return;
+            }
+
+            var profiles = MatricClientProfileStore.Load();
+            foreach (var client in ConnectedClients)
+            {
+                var profile = profiles.FirstOrDefault(item => item.ClientId == client.Id);
+                SwitchToConfiguredPage(profile, enteredState, client.Id);
+            }
+        }
+
+        private void SwitchToConfiguredPage(MatricClientProfile profile, string state, string clientId)
+        {
+            var config = profile?.PageSwitches?.FirstOrDefault(item => item.State == state) ??
+                MatricPageSwitchConfigStore.Load().FirstOrDefault(item => item.State == state);
+            if (config == null || !config.Enabled || string.IsNullOrWhiteSpace(config.PageId) || matric == null)
+            {
+                return;
+            }
+
+            try
+            {
+                Log.Instance.Info("Switching Matric page for {state} to {pageId}", state, config.PageId);
+                if (profile != null && !string.IsNullOrWhiteSpace(profile.DeckId) && appliedDeckIds.GetValueOrDefault(clientId) != profile.DeckId.Trim())
+                {
+                    matric.SetDeck(clientId, profile.DeckId.Trim(), config.PageId.Trim());
+                    appliedDeckIds[clientId] = profile.DeckId.Trim();
+                }
+                else
+                {
+                    matric.SetActivePage(clientId, config.PageId.Trim());
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Info("Unable to switch Matric page for {state}: {error}", state, ex.Message);
             }
         }
 

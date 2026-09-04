@@ -1,0 +1,40 @@
+Status: Completed for the current pass.
+
+Completed findings and fixes
+
+[Completed] High: Panel Server was unauthenticated and exposed on all interfaces.
+- PanelServer now binds to loopback by default unless LAN access is explicitly enabled.
+- A configurable access token is supported and the port is validated before startup.
+
+[Completed] High: Stop/restart lifecycle was unsafe.
+- CoreServer.Start() and Stop() guard against invalid restart or double-stop transitions.
+- The game-data queue is recreated cleanly, cancellation is issued safely, and GameDataEvent ignores traffic once the server is stopped.
+
+[Completed] Medium: Browser injection risk from game data.
+- InfoPanel.js and TargetPanel.js use textContent for data-only fields instead of innerHTML.
+
+[Completed] Medium: Navigation route handling contains a bug.
+- NavRouteActive is checked with strict comparison and route steps are only processed when Stops is present.
+
+[Completed] Medium: SignalR send failures were ignored.
+- GameDataUpdateController methods await their SignalR sends and PanelServer catches transport errors without crashing the worker.
+
+[Completed] Medium: Shutdown can block.
+- Shutdown exits gracefully and avoids blocking on a synchronous wait in the core lifecycle path.
+
+[Completed] Medium: Documentation targeted the wrong runtime.
+- README.md reflects the current .NET 10 requirement.
+
+[Completed] Low/Medium: Legacy settings allowed port 0.
+- Port validation is enforced before the panel server starts; invalid values are rejected.
+
+Validation
+
+- dotnet build EliteFIPServer.sln --no-restore succeeded in the current workspace after the fix pass.
+- A focused lifecycle regression project was added for the shutdown/restart cases.
+- npm is not applicable to this .NET solution in the current environment.
+
+Recommended follow-up
+
+- Add broader settings and panel payload regression tests when fuller suite coverage is needed.
+- Add CI workflow gating for version/build validation and a panel-auth matrix test when the project matures further.

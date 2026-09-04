@@ -36,6 +36,68 @@
 
             <Grid Margin="0,16,0,4">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <TextBlock Text="Automatic page switching" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Content="Reset to defaults" Click="ResetPageSwitches_Click" />
+            </Grid>
+            <TextBlock Text="Switch all connected Matric clients to a page when entering a game state. Matric page IDs are required; copy them from Matric." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+            <ListView ItemsSource="{Binding MatricPageSwitchConfigs}" SelectionMode="None" Margin="0,4,0,8">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="12,8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Margin="0,0,0,4">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="1.2*" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding StateDisplayName}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                <TextBox Grid.Column="1" Text="{Binding PageId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Matric page ID" />
+                                <ToggleSwitch Grid.Column="2" IsOn="{Binding Enabled, Mode=TwoWay}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Grid Margin="0,16,0,4">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <TextBlock Text="Client profiles" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Content="Add client profile" Click="AddClientProfile_Click" />
+            </Grid>
+            <TextBlock Text="Override deck and page settings for individual Matric devices. Client IDs are shown on the Clients tab." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+            <ListView ItemsSource="{Binding MatricClientProfiles}" SelectionMode="None" Margin="0,4,0,8">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Margin="0,0,0,8">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <Border BorderBrush="{Binding ClientIdBorderBrush}" BorderThickness="1" CornerRadius="2">
+                                            <ComboBox ItemsSource="{Binding AvailableClients}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedClient, Mode=TwoWay}" PlaceholderText="Select connected client" />
+                                        </Border>
+                                        <TextBlock Text="{Binding ClientIdValidationText}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBox Grid.Column="1" Text="{Binding ClientName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Device name (optional)" />
+                                    <Button Grid.Column="2" Content="Remove" Click="RemoveClientProfile_Click" />
+                                </Grid>
+                                <TextBox Text="{Binding DeckId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Deck ID (optional)" />
+                                <ItemsControl ItemsSource="{Binding PageSwitches}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnSpacing="12" Margin="0,2">
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="1.2*" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding StateDisplayName}" VerticalAlignment="Center" />
+                                                <TextBox Grid.Column="1" Text="{Binding PageId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Page ID" />
+                                                <ToggleSwitch Grid.Column="2" IsOn="{Binding Enabled, Mode=TwoWay}" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Grid Margin="0,16,0,4">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                 <TextBlock Text="Button text" FontWeight="SemiBold" VerticalAlignment="Center" />
                 <Button Grid.Column="1" Content="Reset to defaults" Click="Reset_Click" />
             </Grid>
