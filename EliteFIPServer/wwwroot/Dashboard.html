@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Elite Dashboard</title>
+    <link rel="stylesheet" href="/Dashboard.css?v=4" />
+</head>
+<body>
+    <main>
+        <header>
+            <div class="ship-title" id="ship-title">Ship Information System</div>
+            <div class="header-actions">
+                <button id="fullscreen" class="icon-button" type="button" aria-label="Toggle fullscreen" title="Toggle fullscreen">&#x26F6;</button>
+                <button id="dashboard-settings" class="icon-button" type="button" aria-label="Configure dashboard" title="Configure dashboard">&#x2699;</button>
+            </div>
+        </header>
+        <nav class="area-nav" aria-label="Dashboards">
+            <a data-view-link="cockpit" href="/Dashboard.html#cockpit">Overview</a>
+            <a data-view-link="navigation" href="/Dashboard.html#navigation">Navigation</a>
+            <a data-view-link="combat" href="/Dashboard.html#combat">Combat</a>
+        </nav>
+        <section id="configuration-toolbar" class="configuration-toolbar" hidden aria-label="Dashboard configuration">
+            <label>Layout <input id="layout-profile" type="text" maxlength="32" /></label>
+            <button id="apply-layout-profile" type="button">Open layout</button>
+            <label>Presentation <select id="presentation-mode"><option value="auto">Automatic</option><option value="display">Passive display</option><option value="tablet">Interactive tablet</option></select></label>
+            <span id="active-layout-label"></span>
+        </section>
+        <section class="grid">
+            <article class="panel" data-widget-panel="ship" data-views="cockpit navigation combat">
+                <h2>Ship</h2><div class="panel-content">
+                    <div class="metric priority-essential"><span>Condition</span><strong id="ship-condition">--</strong></div><div class="metric priority-essential"><span>Fuel</span><strong id="ship-fuel">--</strong></div><div class="metric priority-essential"><span>Cargo</span><strong id="ship-cargo">--</strong></div><div class="metric priority-secondary"><span>Jump range</span><strong id="ship-jump-range">--</strong></div>
+                    <div class="state-strip priority-essential"><span id="ship-pips">SYS -- / ENG -- / WEP --</span><span id="ship-alerts">Nominal</span></div>
+                    <details class="priority-detail"><summary>Inventory and loadout</summary><div class="metric priority-secondary"><span>Rebuy</span><strong id="ship-rebuy">--</strong></div><div class="metric priority-secondary"><span>Materials</span><strong id="ship-materials">--</strong></div><div class="deep-detail"><h3>Cargo manifest</h3><ul id="ship-cargo-list" class="data-list"><li>No cargo data</li></ul><h3>Modules</h3><ul id="ship-module-list" class="data-list"><li>No loadout data</li></ul></div></details>
+                </div>
+            </article>
+            <article class="panel" data-widget-panel="location" data-views="cockpit navigation">
+                <h2>Location</h2><div class="panel-content">
+                    <div class="metric priority-essential"><span>System</span><strong id="location-system">--</strong></div><div class="metric priority-essential"><span>Station</span><strong id="location-station">--</strong></div><div class="metric priority-essential"><span>Body</span><strong id="location-body">--</strong></div><div class="metric priority-essential"><span>Context</span><strong id="location-context">--</strong></div>
+                    <details class="priority-detail"><summary>System and local details</summary><div class="metric priority-secondary"><span>Economy</span><strong id="location-economy">--</strong></div><div class="metric priority-secondary"><span>Security</span><strong id="location-security">--</strong></div><div class="metric priority-secondary"><span>Population</span><strong id="location-population">--</strong></div><div class="metric priority-secondary"><span>Controlling faction</span><strong id="location-faction">--</strong></div><div class="deep-detail"><div class="metric"><span>Powerplay</span><strong id="location-powerplay">--</strong></div><div class="metric"><span>Station profile</span><strong id="location-station-profile">--</strong></div><div class="metric"><span>Landing pads</span><strong id="location-pads">--</strong></div><div class="metric"><span>Station services</span><strong id="location-services">--</strong></div><div class="metric"><span>Body class</span><strong id="location-body-class">--</strong></div><div class="metric"><span>Atmosphere / volcanism</span><strong id="location-geology">--</strong></div><div class="metric"><span>Gravity / temperature</span><strong id="location-environment">--</strong></div><div class="metric"><span>Survey</span><strong id="location-survey">--</strong></div><div class="metric"><span>Coordinates</span><strong id="location-coordinates">--</strong></div><h3>System factions</h3><ul id="location-faction-list" class="data-list"><li>No faction data</li></ul><h3>Body materials</h3><ul id="location-material-list" class="data-list"><li>No body material data</li></ul></div></details>
+                </div>
+            </article>
+            <article class="panel" data-widget-panel="target" data-views="cockpit combat">
+                <h2>Target</h2><div class="panel-content"><div class="metric priority-essential"><span>Ship</span><strong id="target-ship">No target</strong></div><div class="metric priority-essential"><span>Pilot / rank</span><strong id="target-pilot">--</strong></div><div class="metric priority-essential"><span>Hull / shields</span><strong id="target-condition">--</strong></div><div class="metric priority-essential"><span>Legal / bounty</span><strong id="target-legal">--</strong></div><details class="priority-detail"><summary>Scan details</summary><div class="metric priority-secondary"><span>Scan stage</span><strong id="target-scan">--</strong></div><div class="metric priority-secondary"><span>Faction / power</span><strong id="target-affiliation">--</strong></div><div class="deep-detail"><div class="metric"><span>Squadron</span><strong id="target-squadron">--</strong></div><div class="metric"><span>Subsystem</span><strong id="target-subsystem">--</strong></div></div></details></div>
+            </article>
+            <article class="panel" data-widget-panel="activity" data-views="cockpit combat">
+                <h2>Activity</h2><div class="panel-content"><div class="metric priority-essential"><span>Mission</span><strong id="activity-mission">--</strong></div><div class="metric priority-essential"><span>Destination</span><strong id="activity-destination">--</strong></div><div class="metric priority-secondary"><span>Reward / expiry</span><strong id="activity-mission-meta">--</strong></div><div class="metric priority-secondary"><span>Last message</span><strong id="activity-message">--</strong></div><details class="priority-detail" open><summary>Recent events</summary><ul id="activity-feed" class="data-list"><li>No recent events</li></ul></details></div>
+            </article>
+            <article class="panel route-panel" data-widget-panel="route" data-views="cockpit navigation">
+                <h2>Route</h2><div class="route-summary"><div class="metric"><span>Next system</span><strong id="route-next">--</strong></div><div class="metric"><span>Remaining</span><strong id="route-remaining">--</strong></div><div class="metric"><span>Last jump</span><strong id="route-last-jump">--</strong></div></div><iframe src="/RoutePanel.html" title="Navigation route visualization"></iframe>
+            </article>
+        </section>
+        <footer class="status-bar" aria-label="Current status"><span>SHIP <strong id="status-ship">--</strong></span><span>SYSTEM <strong id="status-system">--</strong></span><span>STATION <strong id="status-station">--</strong></span><span>CONNECTION <strong id="connection">connecting</strong></span></footer>
+    </main>
+    <script src="/js/signalr/signalr.js"></script>
+    <script src="/js/panel-client.js?v=2"></script>
+    <script src="/CockpitDashboard.js?v=3"></script>
+</body>
+</html>

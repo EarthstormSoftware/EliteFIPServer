@@ -10,8 +10,13 @@ namespace EliteFIPServer
         public override async Task OnConnectedAsync()
         {
             ClientConnected?.Invoke(this, Context.ConnectionId);
-            ClientConnect.RequestDataUpdate();
             await base.OnConnectedAsync();
+            await ClientConnect.RequestDataUpdate(Context.ConnectionId);
+        }
+
+        public DateTime Ping()
+        {
+            return DateTime.UtcNow;
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)

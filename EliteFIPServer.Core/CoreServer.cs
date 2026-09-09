@@ -1,4 +1,5 @@
-﻿using EliteFIPServer.Logging;
+﻿using EliteFIPProtocol;
+using EliteFIPServer.Logging;
 using System.Collections.Concurrent;
 
 
@@ -12,17 +13,21 @@ namespace EliteFIPServer
         Navigation,
         PreviousNavRoute,
         Jump,
-        ReceivedText
+        ReceivedText,
+        Station,
+        Exploration,
+        Loadout,
+        Mission
+        ,MissionLifecycle
+        ,Cargo
+        ,Materials
+        ,Combat
+        ,System
+        ,RouteTarget
+        ,MissionCollection
+        ,Docking
     }
-    public struct GameEventTrigger {
-        public GameEventType GameEvent { get; set; }
-        public object EventData { get; set; }
-
-        public GameEventTrigger(GameEventType gameEvent, Object eventData) {
-            GameEvent = gameEvent;
-            EventData = eventData;
-        }
-    }
+    public readonly record struct GameEventTrigger(GameEventType GameEvent, object EventData);
 
     public class CoreServer {
 
@@ -33,8 +38,11 @@ namespace EliteFIPServer
         // Game Event Worker
         private CancellationTokenSource GameDataWorkerCTS;
         private Task GameDataTask;
+        private Task PanelDataTask;
+        private GameEventTrigger? PendingPanelEvent;
         private RunState GameDataWorkerState { get; set; }
         BlockingCollection<GameEventTrigger> GameDataQueue = new BlockingCollection<GameEventTrigger>(Constants.MaxGameDataQueueSize);
+        BlockingCollection<GameEventTrigger> PanelDataQueue = new BlockingCollection<GameEventTrigger>(Constants.MaxGameDataQueueSize);
 
         public EliteAPIIntegration EliteAPIIntegration { get; private set; }
 
@@ -76,9 +84,11 @@ namespace EliteFIPServer
             // Start Game Data Worker Thread
             Log.Instance.Info("Starting Game data worker");
             GameDataQueue = new BlockingCollection<GameEventTrigger>(Constants.MaxGameDataQueueSize);
+            PanelDataQueue = new BlockingCollection<GameEventTrigger>(Constants.MaxGameDataQueueSize);
             GameDataWorkerCTS?.Dispose();
             GameDataWorkerCTS = new CancellationTokenSource();
             GameDataTask = Task.Run(GameDataWorkerThread, GameDataWorkerCTS.Token);
+            PanelDataTask = Task.Run(PanelDataWorkerThread, GameDataWorkerCTS.Token);
             GameDataTask.ContinueWith(GameDataWorkerThreadEnded, TaskScheduler.Default);
 
             EliteAPIIntegration.Start();
@@ -120,9 +130,13 @@ namespace EliteFIPServer
             if (GameDataQueue != null && !GameDataQueue.IsAddingCompleted) {
                 GameDataQueue.CompleteAdding();
             }
+            if (PanelDataQueue != null && !PanelDataQueue.IsAddingCompleted) {
+                PanelDataQueue.CompleteAdding();
+            }
 
             try {
                 GameDataTask?.Wait(1500);
+                PanelDataTask?.Wait(1500);
             } catch (AggregateException) {
             }
 
@@ -133,6 +147,17 @@ namespace EliteFIPServer
         public void StopMatricIntegration() {
             Log.Instance.Info("Matric Integration stopping");
             MatricAPI.Stop();
+        }
+
+        public Task SendPanelSnapshot(string connectionId, StatusData status, ShipTargetedData target,
+            LocationData location, NavigationData navigation, NavigationData previousNavigation,
+            JumpData jump, RouteTargetData routeTarget, ReceivedTextData receivedText, StationData station,
+            ExplorationData exploration, LoadoutData loadout, MissionData mission,
+            MissionCollectionData missions, DockingData docking,
+            CargoData cargo, MaterialsData materials, SystemData system) {
+            return PanelServer.SendSnapshot(connectionId, status, target, location, navigation,
+                previousNavigation, jump, routeTarget, receivedText, station, exploration, loadout, mission, missions, docking,
+                cargo, materials, system);
         }
 
 
@@ -148,7 +173,6 @@ namespace EliteFIPServer
                     GameEventTrigger gameEventTrigger = GameDataQueue.Take(cToken);
                     if (gameEventTrigger.GameEvent != GameEventType.Empty) {
                         Log.Instance.Info("Updating {statetype} data", gameEventTrigger.GameEvent.ToString());
-                        PanelServer.UpdateGameState(gameEventTrigger.GameEvent, gameEventTrigger.EventData).GetAwaiter().GetResult();
                         MatricAPI.UpdateGameState(gameEventTrigger.GameEvent, gameEventTrigger.EventData);
                     }
                     Log.Instance.Info("Game Data Worker Thread waiting for new work");
@@ -159,6 +183,42 @@ namespace EliteFIPServer
                 }
             }
             Log.Instance.Info("Game Data Worker Thread ending");
+        }
+
+        private void PanelDataWorkerThread() {
+            Log.Instance.Info("Panel data worker thread started");
+
+            CancellationToken cToken = GameDataWorkerCTS.Token;
+            while (!cToken.IsCancellationRequested) {
+                try {
+                    GameEventTrigger gameEventTrigger;
+                    if (PendingPanelEvent.HasValue) {
+                        gameEventTrigger = PendingPanelEvent.Value;
+                        PendingPanelEvent = null;
+                    } else {
+                        gameEventTrigger = PanelDataQueue.Take(cToken);
+                    }
+                    while (IsCoalescablePanelEvent(gameEventTrigger.GameEvent) && PanelDataQueue.TryTake(out GameEventTrigger nextEvent)) {
+                        if (nextEvent.GameEvent != gameEventTrigger.GameEvent) {
+                            PendingPanelEvent = nextEvent;
+                            break;
+                        }
+                        gameEventTrigger = nextEvent;
+                    }
+                    PanelServer.UpdateGameState(gameEventTrigger.GameEvent, gameEventTrigger.EventData).GetAwaiter().GetResult();
+                } catch (OperationCanceledException) {
+                    break;
+                } catch (InvalidOperationException) {
+                    break;
+                }
+            }
+            Log.Instance.Info("Panel data worker thread ending");
+        }
+
+        private static bool IsCoalescablePanelEvent(GameEventType eventType) {
+            return eventType == GameEventType.Status ||
+                eventType == GameEventType.Target ||
+                eventType == GameEventType.Location;
         }
 
         private void GameDataWorkerThreadEnded(Task task) {
@@ -175,9 +235,10 @@ namespace EliteFIPServer
             }
 
             try {
-                GameEventTrigger newStatusEvent = new GameEventTrigger(eventType, evt);
+                GameEventTrigger newStatusEvent = new GameEventTrigger(eventType, GameDataSnapshot.Clone(eventType, evt));
                 CancellationToken cToken = GameDataWorkerCTS.Token;
                 GameDataQueue.Add(newStatusEvent, cToken);
+                PanelDataQueue.Add(newStatusEvent, cToken);
             } catch (ObjectDisposedException) {
             } catch (InvalidOperationException) {
             } catch (OperationCanceledException) {

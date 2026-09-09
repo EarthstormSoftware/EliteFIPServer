@@ -80,7 +80,9 @@ namespace EliteFIPServer
                         .SetIsOriginAllowed(_ => true);
                 }));
                 panelServerBuilder.Services.AddControllers().AddNewtonsoftJson();
-                panelServerBuilder.Services.AddSignalR();
+                panelServerBuilder.Services.AddSignalR().AddJsonProtocol(options => {
+                    options.PayloadSerializerOptions.PropertyNamingPolicy = null;
+                });
 
                 PanelHost = panelServerBuilder.Build();
 
@@ -184,10 +186,63 @@ namespace EliteFIPServer
                 } else if (eventType == GameEventType.Jump) {
                     JumpData currentJumpData = gameData as JumpData;
                     await GameDataUpdateController.SendJumpUpdate(currentJumpData);
+                } else if (eventType == GameEventType.RouteTarget) {
+                    await GameDataUpdateController.SendRouteTargetUpdate(gameData as RouteTargetData);
+                } else if (eventType == GameEventType.ReceivedText) {
+                    ReceivedTextData receivedTextData = gameData as ReceivedTextData;
+                    await GameDataUpdateController.SendReceivedTextUpdate(receivedTextData);
+                } else if (eventType == GameEventType.Station) {
+                    await GameDataUpdateController.SendStationUpdate(gameData as StationData);
+                } else if (eventType == GameEventType.Exploration) {
+                    await GameDataUpdateController.SendExplorationUpdate(gameData as ExplorationData);
+                } else if (eventType == GameEventType.Loadout) {
+                    await GameDataUpdateController.SendLoadoutUpdate(gameData as LoadoutData);
+                } else if (eventType == GameEventType.Mission) {
+                    await GameDataUpdateController.SendMissionUpdate(gameData as MissionData);
+                } else if (eventType == GameEventType.MissionCollection) {
+                    await GameDataUpdateController.SendMissionCollectionUpdate(gameData as MissionCollectionData);
+                } else if (eventType == GameEventType.MissionLifecycle) {
+                    await GameDataUpdateController.SendMissionLifecycleUpdate(gameData as MissionLifecycleData);
+                } else if (eventType == GameEventType.Docking) {
+                    await GameDataUpdateController.SendDockingUpdate(gameData as DockingData);
+                } else if (eventType == GameEventType.Cargo) {
+                    await GameDataUpdateController.SendCargoUpdate(gameData as CargoData);
+                } else if (eventType == GameEventType.Materials) {
+                    await GameDataUpdateController.SendMaterialsUpdate(gameData as MaterialsData);
+                } else if (eventType == GameEventType.Combat) {
+                    await GameDataUpdateController.SendCombatUpdate(gameData as CombatData);
+                } else if (eventType == GameEventType.System) {
+                    await GameDataUpdateController.SendSystemUpdate(gameData as SystemData);
                 }
             } catch (Exception ex) {
                 Log.Instance.Warn("Panel server update failed: {exception}", ex.ToString());
             }
+        }
+
+        public Task SendSnapshot(string connectionId, StatusData status, ShipTargetedData target,
+            LocationData location, NavigationData navigation, NavigationData previousNavigation,
+            JumpData jump, RouteTargetData routeTarget, ReceivedTextData receivedText, StationData station,
+            ExplorationData exploration, LoadoutData loadout, MissionData mission,
+            MissionCollectionData missions, DockingData docking,
+            CargoData cargo, MaterialsData materials, SystemData system) {
+            return Task.WhenAll(
+                GameDataUpdateController.SendStatusUpdate(status, connectionId),
+                GameDataUpdateController.SendTargetUpdate(target, connectionId),
+                GameDataUpdateController.SendLocationUpdate(location, connectionId),
+                GameDataUpdateController.SendNavRouteUpdate(navigation, connectionId),
+                GameDataUpdateController.SendPreviousNavRoute(previousNavigation, connectionId),
+                GameDataUpdateController.SendJumpUpdate(jump, connectionId),
+                GameDataUpdateController.SendRouteTargetUpdate(routeTarget, connectionId),
+                GameDataUpdateController.SendReceivedTextUpdate(receivedText, connectionId),
+                GameDataUpdateController.SendStationUpdate(station, connectionId),
+                GameDataUpdateController.SendExplorationUpdate(exploration, connectionId),
+                GameDataUpdateController.SendLoadoutUpdate(loadout, connectionId),
+                GameDataUpdateController.SendMissionUpdate(mission, connectionId),
+                GameDataUpdateController.SendMissionCollectionUpdate(missions, connectionId),
+                GameDataUpdateController.SendDockingUpdate(docking, connectionId),
+                GameDataUpdateController.SendCargoUpdate(cargo, connectionId),
+                GameDataUpdateController.SendMaterialsUpdate(materials, connectionId),
+                GameDataUpdateController.SendSystemUpdate(system, connectionId));
         }
     }
 }

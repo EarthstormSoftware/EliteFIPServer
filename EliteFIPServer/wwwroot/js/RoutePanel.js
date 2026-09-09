@@ -1,15 +1,12 @@
 "use strict";
 
-const connection = new signalR.HubConnectionBuilder()
-	.withUrl("/gamedataupdatehub", { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets })
-	.withAutomaticReconnect()
-	.build();
+const connection = window.panelConnection;
 
 const roundAccurately = (number, decimalPlaces) => Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces);
 
 connection.on("LocationData", function (LocationData) {
 
-	var data = JSON.parse(LocationData);
+	var data = LocationData.Data;
 	if (data != null) {
 		console.log(data);
 		if (data.SystemName != null) {			
@@ -19,11 +16,11 @@ connection.on("LocationData", function (LocationData) {
 });
 
 connection.on("NavRouteData", function (NavRouteData) {
-	var data = JSON.parse(NavRouteData);
+	var data = NavRouteData.Data;
 	if (data != null) {
 		console.log("New Nav Route");
 		console.log(data);
-		if (data.NavRouteActive = true && data.Stops.length > 0) {
+		if (data.NavRouteActive === true && Array.isArray(data.Stops) && data.Stops.length > 0) {
 			route.setSteps(data.Stops);
 		} else {
 			route.clearRoute();
@@ -32,11 +29,11 @@ connection.on("NavRouteData", function (NavRouteData) {
 });
 
 connection.on("PreviousNavRoute", function (PrevRouteData) {
-	var data = JSON.parse(PrevRouteData);
+	var data = PrevRouteData.Data;
 	if (data != null) {
 		console.log("Previous Nav Route");
 		console.log(data);
-		if (data.Stops.length > 0) {
+		if (Array.isArray(data.Stops) && data.Stops.length > 0) {
 			prevroute.setSteps(data.Stops);
 			prevroute.setCurrentSystem(data.LastSystemReached);
 		} 
@@ -45,7 +42,7 @@ connection.on("PreviousNavRoute", function (PrevRouteData) {
 
 connection.on("JumpData", function (JumpData) {
 
-	var data = JSON.parse(JumpData);
+	var data = JumpData.Data;
 	if (data != null) {
 		console.log(data);		
 		if (data.DestinationSystemName != null) {
@@ -57,9 +54,11 @@ connection.on("JumpData", function (JumpData) {
 	}
 });
 
-connection.start().catch(function (err) {
-	return console.error(err.toString());
-});
+[
+	"StatusData", "TargetData", "RouteTargetData", "ReceivedTextData", "StationData",
+	"ExplorationData", "LoadoutData", "MissionData", "MissionCollectionData", "MissionLifecycleData",
+	"DockingData", "CargoData", "MaterialsData", "CombatData", "SystemData"
+].forEach(eventName => connection.on(eventName, function () {}));
 
 function createElement(parentEl = document.body, tagName = 'div') {
 	const el = document.createElement(tagName);
@@ -212,6 +211,8 @@ class RouteClass {
 
 
 const route = new RouteClass(document.getElementById("NavRoute"));
+
+startPanelConnection();
 const prevroute = new RouteClass(document.getElementById("PrevNavRoute"));
 
 window.route = route;
