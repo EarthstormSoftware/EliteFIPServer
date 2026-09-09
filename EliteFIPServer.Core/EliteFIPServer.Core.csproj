@@ -48,5 +48,11 @@
     </None>
   </ItemGroup>
 
+  <Target Name="BuildUiWhenCoreBuilds" BeforeTargets="Build" Condition="'$(IsUiBuildTriggeredFromCore)' != 'true'">
+    <MSBuild Projects="..\EliteFIPServer.UI\EliteFIPServer.UI.csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration);Platform=$(Platform);BuildProjectReferences=false;IsUiBuildTriggeredFromCore=true" />
+  </Target>
+
 </Project>
 

@@ -16,46 +16,98 @@
         <TabView Margin="16,12,16,0" IsAddTabButtonVisible="False" CanDragTabs="False">
             <TabViewItem Header="Status" IsClosable="False">
                 <ScrollViewer>
-                    <Grid MaxWidth="680" HorizontalAlignment="Left" Padding="0,20,0,0" ColumnSpacing="16" RowSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="170" />
-                            <ColumnDefinition Width="36" />
-                            <ColumnDefinition Width="130" />
-                            <ColumnDefinition Width="140" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,24,0,0">
+                        <Border MaxWidth="760" Padding="24" CornerRadius="12" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                            <Grid RowSpacing="20">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Column="2" Text="Status" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Grid.Column="3" Text="Control" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <Grid MaxWidth="560" HorizontalAlignment="Center" ColumnSpacing="16" RowSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="170" />
+                                        <ColumnDefinition Width="36" />
+                                        <ColumnDefinition Width="130" />
+                                        <ColumnDefinition Width="140" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="1" Text="Core Server" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        <Grid Grid.Row="1" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
-                            <Ellipse x:Name="coreStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <ProgressRing x:Name="coreStatusProgress" Width="24" Height="24" />
-                        </Grid>
-                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding CoreStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        <TextBlock Grid.Row="1" Grid.Column="3" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Grid.Column="2" Text="Status" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Grid.Column="3" Text="Control" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
 
-                        <TextBlock Grid.Row="2" Text="Matric Integration" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        <Grid Grid.Row="2" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
-                            <Ellipse x:Name="matricStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <ProgressRing x:Name="matricStatusProgress" Width="24" Height="24" />
-                        </Grid>
-                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding MatricStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        <Button Grid.Row="2" Grid.Column="3" MinWidth="120" Content="{Binding MatricButtonText}" IsEnabled="{Binding MatricButtonEnabled}" Click="CmdMatric_Click" />
+                                    <TextBlock Grid.Row="1" Text="Core Server" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    <Grid Grid.Row="1" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
+                                        <Ellipse x:Name="coreStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <ProgressRing x:Name="coreStatusProgress" Width="24" Height="24" />
+                                    </Grid>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding CoreStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="3" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
-                        <TextBlock Grid.Row="3" Text="Panel Server" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        <Grid Grid.Row="3" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
-                            <Ellipse x:Name="panelStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <ProgressRing x:Name="panelStatusProgress" Width="24" Height="24" />
-                        </Grid>
-                        <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding PanelStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                        <Button Grid.Row="3" Grid.Column="3" MinWidth="120" Content="{Binding PanelButtonText}" IsEnabled="{Binding PanelButtonEnabled}" Click="CmdPanel_Click" />
+                                    <TextBlock Grid.Row="2" Text="Matric Integration" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    <Grid Grid.Row="2" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
+                                        <Ellipse x:Name="matricStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <ProgressRing x:Name="matricStatusProgress" Width="24" Height="24" />
+                                    </Grid>
+                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding MatricStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    <Button Grid.Row="2" Grid.Column="3" MinWidth="120" Content="{Binding MatricButtonText}" IsEnabled="{Binding MatricButtonEnabled}" Click="CmdMatric_Click" />
+
+                                    <TextBlock Grid.Row="3" Text="Panel Server" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    <Grid Grid.Row="3" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
+                                        <Ellipse x:Name="panelStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <ProgressRing x:Name="panelStatusProgress" Width="24" Height="24" />
+                                    </Grid>
+                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding PanelStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    <Button Grid.Row="3" Grid.Column="3" MinWidth="120" Content="{Binding PanelButtonText}" IsEnabled="{Binding PanelButtonEnabled}" Click="CmdPanel_Click" />
+                                </Grid>
+
+                                <Border Grid.Row="2" Padding="16,12" CornerRadius="8" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}">
+                                    <Grid ColumnSpacing="18" RowSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="1*" />
+                                            <ColumnDefinition Width="18" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="1*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <Rectangle Grid.RowSpan="4" Grid.Column="2" Width="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Margin="0,2" />
+
+                                        <TextBlock Text="Commander" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding CommanderText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Column="3" Text="Panel URL" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Column="4" Text="{Binding PanelUrlText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+
+                                        <TextBlock Grid.Row="1" Text="Matric" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding MatricVersionText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="1" Grid.Column="3" Text="EliteAPI" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding EliteApiVersionText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                                        <TextBlock Grid.Row="2" Text="System" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SystemText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="2" Grid.Column="3" Text="Ship" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="2" Grid.Column="4" Text="{Binding ShipText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                                        <TextBlock Grid.Row="3" Text="Build" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding BuildText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="3" Grid.Column="3" Text="Updated" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="3" Grid.Column="4" Text="{Binding LastUpdatedText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Border>
                     </Grid>
                 </ScrollViewer>
             </TabViewItem>

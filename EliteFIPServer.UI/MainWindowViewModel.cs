@@ -16,6 +16,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private bool panelButtonEnabled;
     private string clientCountText;
     private string statusMessage;
+    private string commanderText = "Commander: unavailable";
+    private string matricVersionText = "Matric: unknown";
+    private string eliteApiVersionText = "EliteAPI: unknown";
+    private string panelUrlText = "Panel URL: unavailable";
+    private string systemText = "System: unavailable";
+    private string shipText = "Ship: unavailable";
+    private string buildText = "Build: unavailable";
+    private string lastUpdatedText = "Updated: never";
     private bool enableLog;
     private bool darkMode;
     private bool autostartMatricIntegration;
@@ -94,6 +102,54 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         get => statusMessage;
         set => SetProperty(ref statusMessage, value);
+    }
+
+    public string CommanderText
+    {
+        get => commanderText;
+        set => SetProperty(ref commanderText, value);
+    }
+
+    public string MatricVersionText
+    {
+        get => matricVersionText;
+        set => SetProperty(ref matricVersionText, value);
+    }
+
+    public string EliteApiVersionText
+    {
+        get => eliteApiVersionText;
+        set => SetProperty(ref eliteApiVersionText, value);
+    }
+
+    public string PanelUrlText
+    {
+        get => panelUrlText;
+        set => SetProperty(ref panelUrlText, value);
+    }
+
+    public string SystemText
+    {
+        get => systemText;
+        set => SetProperty(ref systemText, value);
+    }
+
+    public string ShipText
+    {
+        get => shipText;
+        set => SetProperty(ref shipText, value);
+    }
+
+    public string BuildText
+    {
+        get => buildText;
+        set => SetProperty(ref buildText, value);
+    }
+
+    public string LastUpdatedText
+    {
+        get => lastUpdatedText;
+        set => SetProperty(ref lastUpdatedText, value);
     }
 
     public bool EnableLog

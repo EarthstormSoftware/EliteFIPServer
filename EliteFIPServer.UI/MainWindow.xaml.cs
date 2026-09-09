@@ -8,6 +8,7 @@ using System.IO;
 using System;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.UI;
 
 namespace EliteFIPServer;
 
@@ -47,6 +48,7 @@ public sealed partial class MainWindow : Window
         LoadSettings();
         ShowSettingsHome(this, EventArgs.Empty);
         viewModel.PropertyChanged += ViewModel_PropertyChanged;
+        UpdateRuntimeMetadata();
         UpdateAllStatus();
         RefreshClients();
         AddActivity("Starting server core...");
@@ -80,6 +82,7 @@ public sealed partial class MainWindow : Window
     private void ClientRefreshTimer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
     {
         RefreshClients(serverCore.GetConnectedMatricClients(), false);
+        UpdateRuntimeMetadata();
         serverCore.RefreshConnectedMatricClients();
     }
 
@@ -385,6 +388,34 @@ public sealed partial class MainWindow : Window
         {
             root.RequestedTheme = darkMode ? ElementTheme.Dark : ElementTheme.Light;
         }
+
+        var titleBar = AppWindow.TitleBar;
+        if (darkMode)
+        {
+            titleBar.BackgroundColor = Microsoft.UI.Colors.Black;
+            titleBar.ForegroundColor = Microsoft.UI.Colors.White;
+            titleBar.InactiveBackgroundColor = Microsoft.UI.Colors.Black;
+            titleBar.InactiveForegroundColor = Microsoft.UI.Colors.Gray;
+            titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Black;
+            titleBar.ButtonForegroundColor = Microsoft.UI.Colors.White;
+            titleBar.ButtonHoverBackgroundColor = Color.FromArgb(255, 42, 42, 42);
+            titleBar.ButtonHoverForegroundColor = Microsoft.UI.Colors.White;
+            titleBar.ButtonPressedBackgroundColor = Color.FromArgb(255, 60, 60, 60);
+            titleBar.ButtonPressedForegroundColor = Microsoft.UI.Colors.White;
+        }
+        else
+        {
+            titleBar.BackgroundColor = Microsoft.UI.Colors.White;
+            titleBar.ForegroundColor = Microsoft.UI.Colors.Black;
+            titleBar.InactiveBackgroundColor = Microsoft.UI.Colors.White;
+            titleBar.InactiveForegroundColor = Microsoft.UI.Colors.Gray;
+            titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.White;
+            titleBar.ButtonForegroundColor = Microsoft.UI.Colors.Black;
+            titleBar.ButtonHoverBackgroundColor = Color.FromArgb(255, 230, 230, 230);
+            titleBar.ButtonHoverForegroundColor = Microsoft.UI.Colors.Black;
+            titleBar.ButtonPressedBackgroundColor = Color.FromArgb(255, 210, 210, 210);
+            titleBar.ButtonPressedForegroundColor = Microsoft.UI.Colors.Black;
+        }
     }
 
     private int GetNumberBoxValue(double value, int fallback)
@@ -395,6 +426,66 @@ public sealed partial class MainWindow : Window
     private void RefreshStatusSummary()
     {
         viewModel.StatusMessage = $"{GetStateLabel(viewModel.CoreStatus)} Core | {GetStateLabel(viewModel.MatricStatus)} Matric | {GetStateLabel(viewModel.PanelStatus)} Panel";
+        UpdateRuntimeMetadata();
+    }
+
+    private void UpdateRuntimeMetadata()
+    {
+        var panelUrl = Properties.Settings.Default.PanelServerPort > 0
+            ? $"http://127.0.0.1:{Properties.Settings.Default.PanelServerPort}/"
+            : "http://127.0.0.1:4545/";
+
+        viewModel.PanelUrlText = panelUrl;
+        viewModel.BuildText = BuildInfo.Version;
+        viewModel.LastUpdatedText = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+        viewModel.MatricVersionText = GetMatricVersion();
+        viewModel.EliteApiVersionText = GetEliteApiVersion();
+        viewModel.CommanderText = GetCommanderName();
+        viewModel.SystemText = GetCurrentSystem();
+        viewModel.ShipText = GetCurrentShip();
+    }
+
+    private static string GetMatricVersion()
+    {
+        try
+        {
+            var assembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name == "MatricIntegration");
+            return assembly != null ? assembly.GetName().Version?.ToString() ?? "unknown" : "unknown";
+        }
+        catch
+        {
+            return "unknown";
+        }
+    }
+
+    private static string GetEliteApiVersion()
+    {
+        try
+        {
+            var assembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name == "EliteAPI");
+            return assembly != null ? assembly.GetName().Version?.ToString() ?? "unknown" : "unknown";
+        }
+        catch
+        {
+            return "unknown";
+        }
+    }
+
+    private string GetCommanderName()
+    {
+        return serverCore?.EliteAPIIntegration?.CurrentCommanderName ?? "unavailable";
+    }
+
+    private string GetCurrentSystem()
+    {
+        return serverCore?.EliteAPIIntegration?.CurrentSystemName ?? "unavailable";
+    }
+
+    private string GetCurrentShip()
+    {
+        return serverCore?.EliteAPIIntegration?.CurrentShipName ?? "unavailable";
     }
 
     private string GetStateLabel(string state)

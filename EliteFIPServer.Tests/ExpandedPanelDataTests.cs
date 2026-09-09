@@ -1,9 +1,35 @@
+using EliteAPI.Events.Game;
 using Xunit;
 
 namespace EliteFIPServer.Tests;
 
 public class ExpandedPanelDataTests
 {
+    [Fact]
+    public void Elite_api_snapshot_exposes_live_commander_system_and_ship_names()
+    {
+        var server = new CoreServer(Array.Empty<string>());
+        server.EliteAPIIntegration.CurrentState.Set(RunState.Started);
+
+        server.EliteAPIIntegration.HandleLoadGameEvent(new LoadGameEvent
+        {
+            Commander = "CMDR Test",
+            ShipName = "Fer-de-Lance"
+        });
+        server.EliteAPIIntegration.HandleLocationEvent(new LocationEvent
+        {
+            StarSystem = "Sol"
+        });
+        server.EliteAPIIntegration.HandleLoadoutEvent(new LoadoutEvent
+        {
+            ShipName = "Fer-de-Lance"
+        });
+
+        Assert.Equal("CMDR Test", server.EliteAPIIntegration.CurrentCommanderName);
+        Assert.Equal("Sol", server.EliteAPIIntegration.CurrentSystemName);
+        Assert.Equal("Fer-de-Lance", server.EliteAPIIntegration.CurrentShipName);
+    }
+
     [Fact]
     public void Mission_lifecycle_preserves_operation_and_identity()
     {

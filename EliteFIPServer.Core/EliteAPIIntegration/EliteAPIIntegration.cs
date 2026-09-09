@@ -34,10 +34,27 @@ namespace EliteFIPServer {
         private CargoData currentCargo = new CargoData();
         private MaterialsData currentMaterials = new MaterialsData();
         private SystemData currentSystem = new SystemData();
+        private string currentCommanderName = "unavailable";
+        private string currentSystemName = "unavailable";
+        private string currentShipName = "unavailable";
         private readonly string persistedRoutePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "EliteFIPServer",
             "PanelRoute.json");
+
+        public string CurrentCommanderName => string.IsNullOrWhiteSpace(currentCommanderName) ? "unavailable" : currentCommanderName;
+        public string CurrentSystemName {
+            get {
+                if (!string.IsNullOrWhiteSpace(currentLocation.SystemName)) { return currentLocation.SystemName; }
+                return string.IsNullOrWhiteSpace(currentSystemName) ? "unavailable" : currentSystemName;
+            }
+        }
+        public string CurrentShipName {
+            get {
+                if (!string.IsNullOrWhiteSpace(currentShipName)) { return currentShipName; }
+                return string.IsNullOrWhiteSpace(currentLoadout.Ship) ? "unavailable" : currentLoadout.Ship;
+            }
+        }
 
         public EliteAPIIntegration(CoreServer coreServer) {
             CoreServer = coreServer;
@@ -49,6 +66,8 @@ namespace EliteFIPServer {
             // Add events to watch list            
             EliteAPI.OnJson("Status", HandleStatusEvent);
             EliteAPI.On<ShipTargetedEvent>(HandleShipTargetedEvent);
+            EliteAPI.On<CommanderEvent>(HandleCommanderEvent);
+            EliteAPI.On<LoadGameEvent>(HandleLoadGameEvent);
             EliteAPI.On<LocationEvent>(HandleLocationEvent);
             EliteAPI.On<StartJumpEvent>(HandleStartJumpEvent);
             EliteAPI.On<FsdJumpEvent>(HandleFsdJumpEvent);
@@ -108,6 +127,17 @@ namespace EliteFIPServer {
                 if (journalFile == null) { return; }
 
                 var journalLines = ReadJournalLines(journalFile.FullName);
+
+                // Commander identity comes from separate journal events, so hydrate them independently of location state.
+                foreach (var identityEvent in new[] { "Commander", "LoadGame" }) {
+                    var latestIdentityLine = journalLines
+                        .Reverse()
+                        .FirstOrDefault(line => string.Equals(GetEventName(line), identityEvent, StringComparison.OrdinalIgnoreCase));
+                    if (!string.IsNullOrEmpty(latestIdentityLine)) {
+                        InvokeHydratedJournalLine(latestIdentityLine);
+                    }
+                }
+
                 var stateEvents = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                     "Location", "Docked", "Undocked", "FSDJump", "ApproachBody", "LeaveBody"
                 };
@@ -370,10 +400,28 @@ namespace EliteFIPServer {
             }
         }
 
+        public void HandleCommanderEvent(CommanderEvent commanderData) {
+            if (!IsRunning) { return; }
+
+            currentCommanderName = string.IsNullOrWhiteSpace(commanderData.Name) ? "unavailable" : commanderData.Name;
+        }
+
+        public void HandleLoadGameEvent(LoadGameEvent loadGameData) {
+            if (!IsRunning) { return; }
+
+            if (!string.IsNullOrWhiteSpace(loadGameData.Commander)) {
+                currentCommanderName = loadGameData.Commander;
+            }
+            if (!string.IsNullOrWhiteSpace(loadGameData.ShipName)) {
+                currentShipName = loadGameData.ShipName;
+            }
+        }
+
         public void HandleLocationEvent(LocationEvent currentLocationData) {
             if (!IsRunning) { return; }
 
             Log.Instance.Info("Handling Location Event");
+            currentSystemName = string.IsNullOrWhiteSpace(currentLocationData.StarSystem) ? currentSystemName : currentLocationData.StarSystem;
 
             currentLocation.LastUpdate = currentLocationData.Timestamp;
             currentLocation.SystemId = currentLocationData.SystemAddress;
@@ -709,6 +757,10 @@ namespace EliteFIPServer {
 
         public void HandleLoadoutEvent(LoadoutEvent loadoutData) {
             if (!IsRunning) { return; }
+
+            if (!string.IsNullOrWhiteSpace(loadoutData.ShipName)) {
+                currentShipName = loadoutData.ShipName;
+            }
 
             currentLoadout = new LoadoutData {
                 LastUpdate = loadoutData.Timestamp,

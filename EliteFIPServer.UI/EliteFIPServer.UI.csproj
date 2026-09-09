@@ -31,6 +31,10 @@
     <Content Include="..\EliteFIPServer.Core\wwwroot\**\*" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
+  <Target Name="UpdateBuildVersion" BeforeTargets="Build">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\UpdateBuildVersion.ps1&quot; -VersionPropsPath &quot;$(MSBuildProjectDirectory)\..\EliteFIPServer.Version.props&quot; -BuildInfoPath &quot;$(MSBuildProjectDirectory)\BuildInfo.cs&quot;" />
+  </Target>
+
   <Target Name="SignLocalDevBuild" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug' and '$(EnableDevCodeSigning)' != 'false'">
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\Sign-DevBuild.ps1&quot; -OutputDirectory &quot;$(TargetDir).&quot; -ExportCertificate" />
   </Target>
