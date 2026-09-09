@@ -20,7 +20,9 @@ namespace EliteFIPServer
                 Path.Combine(appBaseDir, "wwwroot"),
                 Path.Combine(appBaseDir, "EliteFIPServer.UI", "wwwroot"),
                 Path.Combine(appBaseDir, "..", "wwwroot"),
-                Path.Combine(appBaseDir, "..", "..", "wwwroot")
+                Path.Combine(appBaseDir, "..", "..", "wwwroot"),
+                Path.Combine(appBaseDir, "..", "..", "..", "..", "EliteFIPServer.Core", "wwwroot"),
+                Path.Combine(appBaseDir, "..", "..", "..", "..", "..", "EliteFIPServer.Core", "wwwroot")
             };
 
             foreach (var candidate in candidateDirs) {

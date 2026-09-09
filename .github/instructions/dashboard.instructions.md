@@ -1,12 +1,12 @@
 ---
 name: "Dashboard and Panel UI"
-description: "Use when changing the panel server dashboard, widgets, browser embeds, responsive layout, tablet mode, passive displays, SignalR client, or files under EliteFIPServer/wwwroot."
-applyTo: "EliteFIPServer/wwwroot/**"
+description: "Use when changing the panel server dashboard, widgets, browser embeds, responsive layout, tablet mode, passive displays, SignalR client, or files under EliteFIPServer.Core/wwwroot/."
+applyTo: "EliteFIPServer.Core/wwwroot/**"
 ---
 # Dashboard Guidelines
 
 - Read [dashboard-architecture.md](../../docs/dashboard-architecture.md) for stable data flow, widget, mode, URL, and validation contracts. Do not rediscover that structure unless the task changes it.
-- The canonical page is `EliteFIPServer/wwwroot/Dashboard.html`; legacy dashboard URLs are compatibility redirects.
+- The canonical page is `EliteFIPServer.Core/wwwroot/Dashboard.html`; legacy dashboard URLs are compatibility redirects.
 - Keep the five concepts: Ship, Location, Target, Activity, and Route. Add information within them instead of adding event-shaped widgets.
 - Passive display mode is an unattended instrument surface: no page scrolling, internal scrolling, hover dependency, or required interaction.
 - Tablet mode supports touch, responsive one/two/three-column layouts, expandable detail, and contained widget scrolling. Route spans the full grid.

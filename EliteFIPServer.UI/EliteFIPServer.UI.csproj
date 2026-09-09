@@ -26,9 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\EliteFIPServer\Images\EliteFIPServerIcon256.ico" Link="EliteFIPServerIcon256.ico" CopyToOutputDirectory="Always" />
-    <Content Include="..\EliteFIPServer\NLog.config" Link="NLog.config" CopyToOutputDirectory="Always" />
-    <Content Include="..\EliteFIPServer\wwwroot\**\*" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
+    <Content Include="..\Images\EliteFIPServerIcon256.ico" Link="EliteFIPServerIcon256.ico" CopyToOutputDirectory="Always" />
+    <Content Include="..\NLog.config" Link="NLog.config" CopyToOutputDirectory="Always" />
+    <Content Include="..\EliteFIPServer.Core\wwwroot\**\*" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <Target Name="SignLocalDevBuild" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug' and '$(EnableDevCodeSigning)' != 'false'">

@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\EliteFIPServer\libs\Matric\MatricIntegration.dll" Link="MatricIntegration.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\libs\Matric\MatricIntegration.dll" Link="MatricIntegration.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

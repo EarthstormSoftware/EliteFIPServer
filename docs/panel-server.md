@@ -43,7 +43,7 @@ If the Panel Server is running, you will see:
 
 ## Displaying Panels
 
-To display the Panels, simply use a web browser, or other suitable client (Matric iFrame for example) and target the appropriate HTML page in the \{Elite FIP Server Folder\}\\wwwroot folder.
+To display the Panels, simply use a web browser, or other suitable client (Matric iFrame for example) and target the appropriate HTML page in the Core-owned `EliteFIPServer.Core/wwwroot` folder or the deployed UI output web root.
 
 For example:  
 http://192.168.169.100:4545/InfoPanel.html

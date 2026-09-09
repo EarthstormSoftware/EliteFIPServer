@@ -2,10 +2,10 @@
 
 ## Architecture
 
-- `EliteFIPServer.UI` is the current WinUI 3 application. Build and run `EliteFIPServer.UI.exe` only.
-- `EliteFIPServer` is the deprecated WPF application. Never build or run `EliteFIPServer.exe` unless explicitly requested.
-- `EliteFIPServer.Core` owns EliteAPI ingestion, MATRIC integration, and the ASP.NET Core panel server.
-- The WinUI project hosts Core directly and links `EliteFIPServer/wwwroot/**` into its output.
+- `EliteFIPServer.UI` is the supported WinUI 3 application. Build and run `EliteFIPServer.UI.exe` only.
+- The legacy `EliteFIPServer` WPF app is retired and must not be built or launched unless explicitly requested for archival work.
+- `EliteFIPServer.Core` owns EliteAPI ingestion, MATRIC integration, the ASP.NET Core panel server, and the served browser assets under `EliteFIPServer.Core/wwwroot/**`.
+- The WinUI project hosts Core directly and copies the Core-owned web assets into its output.
 - Browser contracts are normalized DTOs owned by the server. Do not expose EliteAPI event objects directly.
 - `EliteFIPProtocol` is the sibling repository at `..\EliteFIPProtocol`; it may be changed when a shared contract belongs there.
 
@@ -17,7 +17,7 @@
 - Delegate cross-project ownership and EliteAPI inventory research to the read-only `Elite Architecture Reviewer` agent; keep only its concise result in the main context.
 - Delegate multi-viewport dashboard checks to the `Elite Dashboard Verifier` agent after implementation. Reuse one browser page and avoid opening duplicate validation tabs.
 - Use execution subagents for builds/tests and retain only command, totals, failures, PID, and URL in the main conversation.
-- Consult [elite-api-data-inventory.md](../docs/elite-api-data-inventory.md) only when EliteAPI inventory is relevant; current dashboard implementation is in `EliteFIPServer/wwwroot/Dashboard.html`, `CockpitDashboard.js`, and `Dashboard.css`.
+- Consult [elite-api-data-inventory.md](../docs/elite-api-data-inventory.md) only when EliteAPI inventory is relevant; current dashboard implementation is in `EliteFIPServer.Core/wwwroot/Dashboard.html`, `CockpitDashboard.js`, and `Dashboard.css`.
 
 ## Validation
 

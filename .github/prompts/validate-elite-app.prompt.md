@@ -10,7 +10,7 @@ tools: [read, search, execute]
 Perform the repository validation lifecycle for the affected changes.
 
 1. Inspect the current branch and working-tree status. Do not alter Git state.
-2. Stop all `EliteFIPServer.UI` processes. Never stop or start `EliteFIPServer.exe`.
+2. Stop all `EliteFIPServer.UI` processes. The legacy WPF app is retired and must not be started during validation.
 3. If the sibling `EliteFIPProtocol` has relevant changes, build `..\EliteFIPProtocol\EliteFIPProtocol\EliteFIPProtocol.csproj -c Release --nologo -v:minimal` first.
 4. Run the narrowest relevant tests requested by `${input:affectedArea}`. If no scope is supplied or shared Core behavior changed, run:
    `dotnet test .\EliteFIPServer.Tests\EliteFIPServer.Tests.csproj --no-restore --nologo`
@@ -20,4 +20,4 @@ Perform the repository validation lifecycle for the affected changes.
 7. Verify the process remains running and, when panel-server files changed, verify port 4545 and the relevant dashboard URL.
 8. Report test totals, build warning/error counts, PID, URL, and any validation not performed.
 
-Do not edit source files, commit, merge, push, poll with sleeps, or launch the deprecated WPF application.
+Do not edit source files, commit, merge, push, poll with sleeps, or launch the retired WPF application.

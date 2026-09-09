@@ -2,15 +2,15 @@
 
 ## Runtime Path
 
-`EliteFIPServer.UI` hosts `EliteFIPServer.Core`, which ingests EliteAPI journal events and companion JSON files. Core publishes normalized, versioned SignalR envelopes through `/gamedataupdatehub`. The WinUI project links `EliteFIPServer/wwwroot/**` into its output.
+`EliteFIPServer.UI` hosts `EliteFIPServer.Core`, which ingests EliteAPI journal events and companion JSON files. Core publishes normalized, versioned SignalR envelopes through `/gamedataupdatehub`. The server owns the browser assets in `EliteFIPServer.Core/wwwroot/**`, and the WinUI app copies them into its output.
 
 The active browser implementation is:
 
-- `EliteFIPServer/wwwroot/Dashboard.html`: canonical markup
-- `EliteFIPServer/wwwroot/CockpitDashboard.js`: settings, layout, and data binding
-- `EliteFIPServer/wwwroot/Dashboard.css`: passive, tablet, and embed presentation
-- `EliteFIPServer/wwwroot/js/panel-client.js`: shared SignalR connection
-- `EliteFIPServer/wwwroot/RoutePanel.html`: embedded route visualization
+- `EliteFIPServer.Core/wwwroot/Dashboard.html`: canonical markup
+- `EliteFIPServer.Core/wwwroot/CockpitDashboard.js`: settings, layout, and data binding
+- `EliteFIPServer.Core/wwwroot/Dashboard.css`: passive, tablet, and embed presentation
+- `EliteFIPServer.Core/wwwroot/js/panel-client.js`: shared SignalR connection
+- `EliteFIPServer.Core/wwwroot/RoutePanel.html`: embedded route visualization
 
 ## Information Model
 

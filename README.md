@@ -10,9 +10,9 @@ The integration with Matric allows Matric to reflect the current game state in t
 screen display rather than a traditional keyboard increases immersion and lowers the requirement to remember
 all the many key bindings you might need.
 
-Current build is available [here](https://github.com/EarthstormSoftware/EliteFIPServer/releases/)
+Current builds are produced for the active WinUI 3 app. The legacy WPF project is retired and is no longer the supported runtime path.
 
-If you are upgrading from a previous section, please double check the Runtime Pre-requisities and any upgrade notes as they might change from version to version.
+If you are upgrading from a previous release, please check the runtime prerequisites and startup notes before running the app.
 
 ---
 
@@ -52,12 +52,14 @@ Older versions of Elite FIP server, used the EliteJournalReader project to provi
 
 ## Usage
 Use at own risk :)
-1. Either use the provided installer package and install to a suitable location, or build from source
+1. Build or install the current WinUI app from this repository using the supported UI project.
 2. Start Matric and connect a client.
 3. Enable API Integration in Matric (Settings > API Integration > Enable 3rd party integration). Please note that PIN authorisation is no longer supported.
-4. Run the EliteFIPServer.exe file - a shortcut will be placed on the desktop if you used the installer
-5. Matric Integration is not enabled by default. You can start this manually from the UI, and configure it to start automatically in the Settings tab. 
-6. The Panel Server (which pubishes game data via a built-in  Web Server) can also be started manually, and configured to start automatically in the Settings tab.
+4. Run `EliteFIPServer.UI.exe` from the built output folder.
+5. Matric Integration is not enabled by default. You can start this manually from the UI, and configure it to start automatically in the Settings tab.
+6. The Panel Server (which publishes game data via a built-in web server) can also be started manually, and configured to start automatically in the Settings tab.
+
+The old WPF `EliteFIPServer.exe` app is deprecated and should not be used for current builds or support.
 
 ### Matric Authorisation
 Elite FIP Server v2 does not support Matric PIN authorisation. Please disable this in Matric.
@@ -76,7 +78,7 @@ For example: c:\Users\MyUserName\AppData\Roaming\EliteFIPServer
 starting Elite FIP Server. See Known issues for further information.
 
 ### Autostart Panel Server
-The Settings tab allows the Panel Server  to be enabled when Elite FIP server starts. See [Panel server](EliteFIPServer/PanelServer.md) for more information
+The Settings tab allows the Panel Server  to be enabled when Elite FIP server starts. See [Panel server](docs/panel-server.md) for more information
 
 ### Enable Custom Button Text
 To have Elite FIP server change button text when game state changes, you have to update the ButtonTextConfig.json file in the same folder
@@ -108,7 +110,7 @@ any settings (which triggers a reload of the config file).
    jump. This is working as intended, and is due to the sequence of events emitted by Elite Dangerous. Essentially Elite clears the route
    automatically during the last jump, before the arrival event in the final system, resulting in the route being cleared in FIP server.
    To mitigate this, Elite FIP server provides a 'Previous Route' which will show the completed route if desired. See 
-   [Panel server](EliteFIPServer/PanelServer.md) for more information
+   [Panel server](docs/panel-server.md) for more information
    
 
 ---

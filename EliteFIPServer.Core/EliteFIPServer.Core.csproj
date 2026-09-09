@@ -28,7 +28,7 @@
       <HintPath>..\..\EliteFIPProtocol\EliteFIPProtocol\bin\Release\net10.0\EliteFIPProtocol.dll</HintPath>
     </Reference>
     <Reference Include="MatricIntegration">
-      <HintPath>..\EliteFIPServer\libs\Matric\MatricIntegration.dll</HintPath>
+      <HintPath>..\libs\Matric\MatricIntegration.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
