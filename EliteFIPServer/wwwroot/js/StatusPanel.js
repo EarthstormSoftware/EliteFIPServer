@@ -1,15 +1,12 @@
-﻿"use strict";
+"use strict";
 
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/gamedataupdatehub", { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets })
-    .withAutomaticReconnect()
-    .build();
+const connection = window.panelConnection;
 
 const roundAccurately = (number, decimalPlaces) => Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces);
 
 connection.on("StatusData", function (StatusData) {
 
-    var data = JSON.parse(StatusData);
+    var data = StatusData.Data;
     if (data != null) {
         console.log(data);
         if (data.BodyName != null) { document.getElementById("BodyName").innerHTML = data.BodyName };
@@ -22,14 +19,11 @@ connection.on("StatusData", function (StatusData) {
 
 connection.on("LocationData", function (LocationData) {
 
-    var data = JSON.parse(LocationData);
+    var data = LocationData.Data;
     if (data != null) {
         console.log(data);
         if (data.SystemName != null) { document.getElementById("SystemName").innerHTML = data.SystemName };
     }
 });
 
-connection.start().catch(function (err) {
-    return console.error(err.toString());
-});
-
+startPanelConnection();

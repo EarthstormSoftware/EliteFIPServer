@@ -59,6 +59,33 @@ Target Panel (Information on currently targeted ship) | TargetPanel.html
 Info Panel (Extended information including Status, target and current route visualisation) | InfoPanel.html
 Navigation Panel (Status and navigation information incuding current route visualisation) | NavPanel.html
 Route Panel (Simple current route & previrous route visualisation) | RoutePanel.html
+Unified dashboard, complete cockpit view | Dashboard.html#cockpit
+Unified dashboard, navigation view with route visualization | Dashboard.html#navigation
+Unified dashboard, combat view | Dashboard.html#combat
+
+The dashboard is a single page with directly addressable hash views. Switching between views does not reload the
+document, so fullscreen state and the SignalR connection are retained. Use its Configure button to enable or disable,
+move, and resize widgets. Named layouts use `?layout=name`, for example
+`Dashboard.html?layout=right-monitor#navigation`. Settings and fullscreen preferences are stored separately for each
+layout. Passive display mode is scroll-free; interactive tablet mode provides touch ordering and expandable detail.
+
+Any consolidated widget can also be embedded by itself. Widget-only URLs force passive display mode, remove all
+dashboard navigation and controls, and adapt their information density to the host viewport:
+
+Widget | Direct URL
+-------|-----------
+Ship | `Dashboard.html?widget=ship`
+Location | `Dashboard.html?widget=location`
+Target | `Dashboard.html?widget=target`
+Activity | `Dashboard.html?widget=activity`
+Route | `Dashboard.html?widget=route`
+
+An optional layout name can identify a particular third-party instance, for example
+`Dashboard.html?widget=target&layout=left-target`. These URLs can be used directly in a browser source, web view, or
+iframe. The selected widget always fills the available viewport and does not require interaction.
+
+The former `CockpitDashboard.html`, `NavDashboard.html`, and `CombatDashboard.html` URLs remain as compatibility
+redirects to the corresponding views.
 
 ## Customising Panels
 

@@ -1,15 +1,12 @@
 ﻿"use strict";
 
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/gamedataupdatehub", { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets })
-    .withAutomaticReconnect()
-    .build();
+const connection = window.panelConnection;
 
 const roundAccurately = (number, decimalPlaces) => Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces);
 
 connection.on("StatusData", function (StatusData) {
 
-    var data = JSON.parse(StatusData);
+	var data = StatusData.Data;
     if (data != null) {
         console.log(data);        
         if (data.LegalState != null) { document.getElementById("LegalState").innerHTML = data.LegalState };
@@ -21,7 +18,7 @@ connection.on("StatusData", function (StatusData) {
 
 connection.on("LocationData", function (LocationData) {
 
-    var data = JSON.parse(LocationData);
+	var data = LocationData.Data;
     if (data != null) {
         console.log(data);
 		if (data.SystemName != null) {
@@ -33,7 +30,7 @@ connection.on("LocationData", function (LocationData) {
 });
 
 connection.on("NavRouteData", function (NavRouteData) {
-	var data = JSON.parse(NavRouteData);
+	var data = NavRouteData.Data;
 	if (data != null) {
 		console.log(data);
 		if (data.NavRouteActive == true && data.Stops.length > 0) {
@@ -46,7 +43,7 @@ connection.on("NavRouteData", function (NavRouteData) {
 
 connection.on("JumpData", function (JumpData) {
 
-    var data = JSON.parse(JumpData);
+	var data = JumpData.Data;
     if (data != null) {
         console.log(data);
         if (data.OriginSystemName != null) { document.getElementById("OriginSystemName").innerHTML = data.OriginSystemName };
@@ -60,10 +57,6 @@ connection.on("JumpData", function (JumpData) {
         if (data.JumpDistance != null) { document.getElementById("JumpDistance").innerHTML = roundAccurately(data.JumpDistance,2) };
         if (data.FuelUsed != null) { document.getElementById("FuelUsed").innerHTML = roundAccurately(data.FuelUsed,2) };
     }
-});
-
-connection.start().catch(function (err) {
-    return console.error(err.toString());
 });
 
 function createElement(parentEl = document.body, tagName = 'div') {
@@ -217,6 +210,8 @@ class RouteClass {
 
 
 const route = new RouteClass(document.getElementById("NavRoute"));
+
+startPanelConnection();
 
 window.route = route;
 window.addEventListener('resize', () => route.centerView());

@@ -6,10 +6,11 @@
             DataProvider = currentDataProvider;
         }
 
-        public static void RequestDataUpdate() {
+        public static Task RequestDataUpdate(string connectionId) {
             if (DataProvider != null) {
-                DataProvider.FullClientUpdate();
+                return DataProvider.FullClientUpdate(connectionId);
             }
+            return Task.CompletedTask;
         }
 
     }

@@ -1,15 +1,12 @@
-﻿"use strict";
+"use strict";
 
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/gamedataupdatehub", { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets })
-    .withAutomaticReconnect()
-    .build();
+const connection = window.panelConnection;
 
 const roundAccurately = (number, decimalPlaces) => Number(Math.round(number + "e" + decimalPlaces) + "e-" + decimalPlaces);
 
 connection.on("TargetData", function (TargetData) {
 
-    var data = JSON.parse(TargetData);
+    var data = TargetData.Data;
     if (data != null) {
         console.log(data);
 
@@ -45,7 +42,4 @@ connection.on("TargetData", function (TargetData) {
     }
 });
 
-connection.start().catch(function (err) {
-    return console.error(err.toString());
-});
-
+startPanelConnection();
