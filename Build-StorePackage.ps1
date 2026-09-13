@@ -1,7 +1,10 @@
 # Build a Microsoft Store-ready .msix by publishing EliteFIPServer.UI and packaging the output
 # directly with MakeAppx.exe. This bypasses the automated MSBuild single-project MSIX pipeline
-# (GenerateAppxPackageOnBuild / PublishAppxPackage), which does not reliably invoke the actual
-# packaging step for this project on the .NET 10 SDK — see docs/HANDOFF.md for the investigation.
+# (GenerateAppxPackageOnBuild / PublishAppxPackage) entirely — that pipeline never reliably invokes
+# actual packaging for this project on the .NET 10 SDK, and opting into it (WindowsPackageType=MSIX /
+# EnableMsixTooling=true) previously broke the normal loose-exe build too. EliteFIPServer.UI.csproj
+# stays a plain WindowsPackageType=None project; publish here is just a normal self-contained publish.
+# See docs/HANDOFF.md for the full investigation and incident writeup.
 #
 # Prerequisites:
 #   - EliteFIPServer.UI\StoreIdentity.local.json must exist with real Partner Center values
@@ -20,6 +23,7 @@ $identityJsonPath = Join-Path $root "EliteFIPServer.UI\StoreIdentity.local.json"
 $sourceManifestPath = Join-Path $root "EliteFIPServer.UI\Package.appxmanifest"
 $versionPropsPath = Join-Path $root "EliteFIPServer.Version.props"
 $generateManifestScript = Join-Path $root "Generate-StoreManifest.ps1"
+$storeBuildToolsProject = Join-Path $root "tools\StoreBuildTools\StoreBuildTools.csproj"
 $packageOutputDir = Join-Path $root "artifacts\msix"
 $packageOutputPath = Join-Path $packageOutputDir "EliteFIPServer.msix"
 
@@ -32,7 +36,7 @@ Get-Process -Name "EliteFIPServer" -ErrorAction SilentlyContinue | Stop-Process 
 Start-Sleep -Seconds 1
 
 Write-Host "Publishing EliteFIPServer.UI ($Configuration, x64)..." -ForegroundColor Cyan
-dotnet publish $uiProject -c $Configuration -p:BuildAsMsix=true -p:Platform=x64 --nologo -v:minimal
+dotnet publish $uiProject -c $Configuration -p:Platform=x64 --nologo -v:minimal
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed with exit code $LASTEXITCODE."
 }
@@ -58,6 +62,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File $generateManifestScript 
     -IdentityJsonPath $identityJsonPath
 if ($LASTEXITCODE -ne 0) {
     throw "Generate-StoreManifest.ps1 failed with exit code $LASTEXITCODE."
+}
+
+Write-Host "Ensuring a current Microsoft.Windows.SDK.BuildTools (MakeAppx.exe) is restored..." -ForegroundColor Cyan
+dotnet restore $storeBuildToolsProject --nologo -v:minimal
+if ($LASTEXITCODE -ne 0) {
+    throw "Restoring $storeBuildToolsProject failed with exit code $LASTEXITCODE."
 }
 
 $makeAppxCandidates = Get-ChildItem -Path "$env:USERPROFILE\.nuget\packages\microsoft.windows.sdk.buildtools" -Directory -ErrorAction SilentlyContinue |

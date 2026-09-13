@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Exists only to pull a current Microsoft.Windows.SDK.BuildTools (which ships MakeAppx.exe and its
+    manifest schema) into the local NuGet cache for Build-StorePackage.ps1 to find. Deliberately
+    isolated from EliteFIPServer.UI.csproj: that project also depends on an older transitive version of
+    this same package for its own resource-compilation (makepri/MRT) tooling, and bumping it there
+    caused EliteFIPServer.exe to crash on startup (PRI resource format mismatch against the
+    WindowsAppSDK runtime) — see EliteFIPServer.UI.csproj and docs/HANDOFF.md for details. This
+    project is never built, only restored, so its TargetFramework/OutputType don't matter beyond
+    being valid.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+  </ItemGroup>
+
+</Project>
