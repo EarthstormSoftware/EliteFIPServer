@@ -5,11 +5,14 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap rescap">
 
-  <!-- Identity Name, Publisher and PublisherDisplayName must exactly match the Partner Center reservation. -->
+  <!-- Identity Name, Publisher and PublisherDisplayName must exactly match the Partner Center reservation.
+       This file is committed publicly and must always keep these placeholders. Real values live in
+       EliteFIPServer.UI/StoreIdentity.local.json (gitignored, never committed) and are merged into a
+       generated copy of this manifest under obj/ only during an MSIX build (-p:BuildAsMsix=true). -->
   <Identity
     Name="REPLACE-WITH-PARTNER-CENTER-PACKAGE-IDENTITY-NAME"
     Publisher="CN=REPLACE-WITH-PARTNER-CENTER-PUBLISHER-ID"
-    Version="4.0.46.0" />
+    Version="4.0.73.0" />
 
   <Properties>
     <DisplayName>Elite FIP Server</DisplayName>
@@ -46,6 +49,36 @@
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

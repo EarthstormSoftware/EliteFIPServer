@@ -364,3 +364,7 @@ FodyWeavers.xsd
 
 # Playwright MCP output (traces, console logs, screenshots from dashboard verification)
 .playwright-mcp/
+
+# Local Microsoft Store identity (real Partner Center Package Identity Name, Publisher CN,
+# and Publisher Display Name) — never commit this. See StoreIdentity.local.json.template.
+EliteFIPServer.UI/StoreIdentity.local.json
