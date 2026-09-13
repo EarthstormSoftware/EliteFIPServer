@@ -6,7 +6,8 @@ param(
     [string]$VersionPropsPath,
     [string]$BuildInfoPath,
     [string]$ProjectPath,
-    [string]$VersionOutputPath
+    [string]$VersionOutputPath,
+    [string]$AppxManifestPath
 )
 
 if (-not $VersionPropsPath -or -not $BuildInfoPath) {
@@ -47,6 +48,19 @@ if ($versionMatch.Success) {
     Set-Content $BuildInfoPath $buildInfoContent
     if ($VersionOutputPath) {
         Set-Content $VersionOutputPath $newVersion
+    }
+
+    # Store submissions require the MSIX identity version to match, with a revision of 0.
+    if ($AppxManifestPath -and (Test-Path $AppxManifestPath)) {
+        $manifestContent = Get-Content $AppxManifestPath -Raw
+        $updatedManifest = [regex]::Replace($manifestContent, '(?<prefix>\sVersion=")\d+\.\d+\.\d+\.\d+(?<suffix>")', ('${prefix}' + $newVersion + '${suffix}'), 1)
+        if ($updatedManifest -ne $manifestContent) {
+            Set-Content $AppxManifestPath $updatedManifest
+            Write-Host "  Package.appxmanifest: $newVersion" -ForegroundColor Green
+        }
+        else {
+            Write-Host "WARNING: Could not update Identity Version in $AppxManifestPath" -ForegroundColor Yellow
+        }
     }
     
     Write-Host "Version updated successfully!" -ForegroundColor Green

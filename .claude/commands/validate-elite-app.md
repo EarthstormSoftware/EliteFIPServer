@@ -1,18 +1,14 @@
 ---
-name: "Validate Elite App"
-description: "Stop EliteFIPServer.UI, run focused or full tests, build the current WinUI app, restart it, and verify the panel server."
-argument-hint: "Optional: affected area or focused test names"
-agent: "agent"
-tools: [read, search, execute]
+description: Stop EliteFIPServer.UI, run focused or full tests, build the current WinUI app, restart it, and verify the panel server.
+argument-hint: "[optional: affected area or focused test names]"
 ---
-# Validate EliteFIPServer
 
-Perform the repository validation lifecycle for the affected changes.
+Perform the repository validation lifecycle for the affected changes: $ARGUMENTS
 
 1. Inspect the current branch and working-tree status. Do not alter Git state.
 2. Stop all `EliteFIPServer.UI` processes. The legacy WPF app is retired and must not be started during validation.
 3. If the sibling `EliteFIPProtocol` has relevant changes, build `..\EliteFIPProtocol\EliteFIPProtocol\EliteFIPProtocol.csproj -c Release --nologo -v:minimal` first.
-4. Run the narrowest relevant tests requested by `${input:affectedArea}`. If no scope is supplied or shared Core behavior changed, run:
+4. Run the narrowest relevant tests for the affected area above. If no scope is supplied or shared Core behavior changed, run:
    `dotnet test .\EliteFIPServer.Tests\EliteFIPServer.Tests.csproj --no-restore --nologo`
 5. Build:
    `dotnet build .\EliteFIPServer.UI\EliteFIPServer.UI.csproj --no-restore --nologo -v:minimal`

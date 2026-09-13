@@ -6,19 +6,55 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <AssemblyName>EliteFIPServer</AssemblyName>
     <RootNamespace>EliteFIPServer</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <UseWinUI>true</UseWinUI>
-    <WindowsPackageType>None</WindowsPackageType>
-    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <Platforms>AnyCPU;x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- MSIX packaging is opt-in via -p:BuildAsMsix=true so the loose-exe development loop still works. -->
+  <PropertyGroup Condition="'$(BuildAsMsix)' == 'true'">
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <WindowsPackageType>MSIX</WindowsPackageType>
+    <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+    <!-- Keeps the package named EliteFIPServer rather than the EliteFIPServer.UI project name. -->
+    <AppxPackageName>EliteFIPServer</AppxPackageName>
+    <AppxBundle>Never</AppxBundle>
+    <UapAppxPackageBuildMode>StoreUpload</UapAppxPackageBuildMode>
+    <!-- Store submissions are re-signed by Microsoft, so the produced package is intentionally unsigned. -->
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <AppxSymbolPackageEnabled>false</AppxSymbolPackageEnabled>
+    <AppxPackageDir>$(MSBuildProjectDirectory)\..\artifacts\msix\</AppxPackageDir>
+    <EnableDevCodeSigning>false</EnableDevCodeSigning>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BuildAsMsix)' != 'true'">
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\EliteFIPServer.Core\EliteFIPServer.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildAsMsix)' == 'true'">
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+    <Content Include="Images\**\*.png" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildAsMsix)' != 'true'">
+    <None Include="Package.appxmanifest" />
+    <None Include="Images\**\*.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,13 +62,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\Images\EliteFIPServerIcon256.ico" Link="EliteFIPServerIcon256.ico" CopyToOutputDirectory="Always" />
+    <Content Include="Images\EliteFIPServerIcon256.ico" Link="EliteFIPServerIcon256.ico" CopyToOutputDirectory="Always" />
     <Content Include="..\NLog.config" Link="NLog.config" CopyToOutputDirectory="Always" />
     <Content Include="..\EliteFIPServer.Core\wwwroot\**\*" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
   <Target Name="UpdateBuildVersion" BeforeTargets="Build">
-    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\UpdateBuildVersion.ps1&quot; -VersionPropsPath &quot;$(MSBuildProjectDirectory)\..\EliteFIPServer.Version.props&quot; -BuildInfoPath &quot;$(MSBuildProjectDirectory)\BuildInfo.cs&quot;" />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\UpdateBuildVersion.ps1&quot; -VersionPropsPath &quot;$(MSBuildProjectDirectory)\..\EliteFIPServer.Version.props&quot; -BuildInfoPath &quot;$(MSBuildProjectDirectory)\BuildInfo.cs&quot; -AppxManifestPath &quot;$(MSBuildProjectDirectory)\Package.appxmanifest&quot;" />
   </Target>
 
   <Target Name="SignLocalDevBuild" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug' and '$(EnableDevCodeSigning)' != 'false'">
