@@ -34,8 +34,8 @@ if ($ExportCertificate) {
 
 $resolvedOutputDirectory = Resolve-Path $OutputDirectory
 $fileNamesToSign = @(
-    'EliteFIPServer.UI.exe',
-    'EliteFIPServer.UI.dll',
+    'EliteFIPServer.exe',
+    'EliteFIPServer.dll',
     'EliteFIPServer.Core.dll',
     'EliteAPI.dll',
     'EliteFIPProtocol.dll'

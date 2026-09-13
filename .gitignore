@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Playwright MCP output (traces, console logs, screenshots from dashboard verification)
+.playwright-mcp/
