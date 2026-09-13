@@ -8,7 +8,8 @@
   <!-- Identity Name, Publisher and PublisherDisplayName must exactly match the Partner Center reservation.
        This file is committed publicly and must always keep these placeholders. Real values live in
        EliteFIPServer.UI/StoreIdentity.local.json (gitignored, never committed) and are merged into a
-       generated copy of this manifest under obj/ only during an MSIX build (-p:BuildAsMsix=true). -->
+       generated copy of this manifest by Generate-StoreManifest.ps1, invoked from Build-StorePackage.ps1
+       (manual MakeAppx packaging — see docs/HANDOFF.md). -->
   <Identity
     Name="REPLACE-WITH-PARTNER-CENTER-PACKAGE-IDENTITY-NAME"
     Publisher="CN=REPLACE-WITH-PARTNER-CENTER-PUBLISHER-ID"
@@ -25,7 +26,7 @@
   </Dependencies>
 
   <Resources>
-    <Resource Language="x-generate" />
+    <Resource Language="en-us" />
   </Resources>
 
   <Applications>
@@ -45,10 +46,24 @@
     </Application>
   </Applications>
 
+  <!-- runFullTrust is required, not optional, given this app's packaging model and behavior: the
+       EntryPoint above is Windows.FullTrustApplication (the classic Desktop Bridge conversion of an
+       unpackaged Win32 exe), which the MSIX schema only allows paired with runFullTrust. The app also
+       genuinely needs unrestricted OS access that no narrower capability grants: it reads
+       HKEY_LOCAL_MACHINE to locate the MATRIC companion exe (MatricLocator.cs), does arbitrary
+       file-system I/O, manages processes, and hosts a local Kestrel HTTP listener for the panel
+       dashboard. Partner Center flagging this as "requires approval" is expected for this app class,
+       not a misconfiguration — it must be justified in the submission notes, not removed. See
+       docs/HANDOFF.md. -->
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>
+
+
+
+
+
 
 
 
