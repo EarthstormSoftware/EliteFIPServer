@@ -26,6 +26,7 @@
 - Build the current app with `dotnet build .\EliteFIPServer.UI\EliteFIPServer.UI.csproj --no-restore --nologo -v:minimal`.
 - If `EliteFIPProtocol` changed, build it in Release before testing the server so the HintPath DLL is refreshed.
 - A Debug UI build runs the repository signing target; do not add a separate signing step unless the build reports a signing failure.
+- Every build also runs a pre-build version bump that rewrites `EliteFIPServer.UI/BuildInfo.cs`, `EliteFIPServer.UI/Package.appxmanifest`, and `EliteFIPServer.Version.props`. After a successful validation build, discard that churn (`git checkout -- <file>`) for whichever of those three files had no uncommitted changes before the build started, so validation never leaves the tree dirty. Never discard one that already had pre-existing uncommitted changes — that's real work, not version-bump noise.
 - After successful validation, restart `EliteFIPServer.UI` and report its PID. The panel dashboard normally listens at `http://127.0.0.1:4545/`.
 - Use the `/validate-elite-app` slash command for the complete stop, validate, build, restart loop.
 

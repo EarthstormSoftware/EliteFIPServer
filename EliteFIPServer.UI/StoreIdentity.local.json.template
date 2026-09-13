@@ -1,0 +1,6 @@
+{
+  "_comment": "Copy this file to StoreIdentity.local.json (same folder) and fill in your real Partner Center values. StoreIdentity.local.json is gitignored and must never be committed — it contains your Store publisher identity.",
+  "PackageIdentityName": "REPLACE-WITH-PARTNER-CENTER-PACKAGE-IDENTITY-NAME",
+  "Publisher": "REPLACE-WITH-PARTNER-CENTER-PUBLISHER-ID",
+  "PublisherDisplayName": "REPLACE-WITH-PARTNER-CENTER-PUBLISHER-DISPLAY-NAME"
+}

@@ -25,6 +25,10 @@
     <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
     <SelfContained>true</SelfContained>
     <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
+    <!-- GenerateAppxPackageOnBuild alone only hooks packaging to PrepareForRun (the F5/debug-run path).
+         PublishAppxPackage additionally hooks it to run after `dotnet publish`'s own Publish target,
+         which is the CLI path used for producing a real Store package. -->
+    <PublishAppxPackage>true</PublishAppxPackage>
     <!-- Keeps the package named EliteFIPServer rather than the EliteFIPServer.UI project name. -->
     <AppxPackageName>EliteFIPServer</AppxPackageName>
     <AppxBundle>Never</AppxBundle>
@@ -34,6 +38,9 @@
     <AppxSymbolPackageEnabled>false</AppxSymbolPackageEnabled>
     <AppxPackageDir>$(MSBuildProjectDirectory)\..\artifacts\msix\</AppxPackageDir>
     <EnableDevCodeSigning>false</EnableDevCodeSigning>
+    <!-- Required by the single-project MSIX pipeline for `dotnet publish` to actually invoke packaging
+         (without it, publish compiles and validates the manifest but never writes an .msix). -->
+    <PublishProfile>Properties\PublishProfiles\win10-$(Platform).pubxml</PublishProfile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(BuildAsMsix)' != 'true'">
@@ -46,7 +53,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAsMsix)' == 'true'">
-    <AppxManifest Include="Package.appxmanifest">
+    <!-- Points at a generated manifest (under obj/, gitignored) with the real Store identity merged in.
+         The tracked Package.appxmanifest keeps safe placeholders and is never modified. -->
+    <AppxManifest Include="$(IntermediateOutputPath)Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
     <Content Include="Images\**\*.png" />
@@ -61,6 +70,20 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
   </ItemGroup>
 
+  <!-- Pinned unconditionally (rather than gated on BuildAsMsix) because NuGet's restore-time
+       evaluation doesn't reliably honor a BuildAsMsix condition on these items — restore can silently
+       fall back to Microsoft.WindowsAppSDK 2.4.0's older transitive versions instead. Both are excluded
+       from compilation/output (ExcludeAssets/PrivateAssets), so pinning them has no effect on a normal
+       (non-MSIX) build. Microsoft.Windows.SDK.BuildTools 10.0.28000.2705 fixes a stale package-identity-
+       name schema regex in the older transitive 10.0.26100.4654 that rejects valid names starting with
+       an uppercase letter. GeneratePathProperty exposes $(PkgMicrosoft_Windows_SDK_BuildTools_MSIX) and
+       $(PkgSystem_Security_Permissions) for the FixWinAppSdkMsixTaskAssemblyLoad target below. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools.MSIX" Version="1.7.260610101" GeneratePathProperty="true" ExcludeAssets="all" PrivateAssets="all" />
+    <PackageReference Include="System.Security.Permissions" Version="8.0.0" GeneratePathProperty="true" ExcludeAssets="all" PrivateAssets="all" />
+  </ItemGroup>
+
   <ItemGroup>
     <Content Include="Images\EliteFIPServerIcon256.ico" Link="EliteFIPServerIcon256.ico" CopyToOutputDirectory="Always" />
     <Content Include="..\NLog.config" Link="NLog.config" CopyToOutputDirectory="Always" />
@@ -69,6 +92,32 @@
 
   <Target Name="UpdateBuildVersion" BeforeTargets="Build">
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\UpdateBuildVersion.ps1&quot; -VersionPropsPath &quot;$(MSBuildProjectDirectory)\..\EliteFIPServer.Version.props&quot; -BuildInfoPath &quot;$(MSBuildProjectDirectory)\BuildInfo.cs&quot; -AppxManifestPath &quot;$(MSBuildProjectDirectory)\Package.appxmanifest&quot;" />
+  </Target>
+
+  <!-- MSIX-only: merges the local, git-ignored Store identity (StoreIdentity.local.json) into a
+       generated manifest under obj/ so the real Partner Center identity never touches the tracked,
+       publicly-committed Package.appxmanifest. -->
+  <Target Name="GenerateStoreManifest" AfterTargets="UpdateBuildVersion" BeforeTargets="Build;_ValidatePresenceOfAppxManifestItems" Condition="'$(BuildAsMsix)' == 'true'">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\Generate-StoreManifest.ps1&quot; -SourceManifestPath &quot;$(MSBuildProjectDirectory)\Package.appxmanifest&quot; -OutputManifestPath &quot;$(MSBuildProjectDirectory)\$(IntermediateOutputPath)Package.appxmanifest&quot; -VersionPropsPath &quot;$(MSBuildProjectDirectory)\..\EliteFIPServer.Version.props&quot; -IdentityJsonPath &quot;$(MSBuildProjectDirectory)\StoreIdentity.local.json&quot;" />
+  </Target>
+
+  <!-- MSIX-only: microsoft.windows.sdk.buildtools.msix's WinAppSdkValidateAppxManifestItems task fails
+       to load System.Security.Permissions under the .NET 10 SDK — that assembly isn't shipped alongside
+       the task DLL in either its net472 or net6.0 tools folder. Copying it there (from the
+       System.Security.Permissions package referenced above) is the fix; it's not something a project's
+       own PackageReference can resolve, since MSBuild loads SDK-provided tasks independently of the
+       consuming project's dependency graph. Hooked directly to the failing target (rather than
+       BeforeTargets="Build") because this validation runs earlier, as part of the WinUI/MSIX resource
+       pipeline that Build itself depends on. -->
+  <Target Name="FixWinAppSdkMsixTaskAssemblyLoad" BeforeTargets="_ValidatePresenceOfAppxManifestItems" Condition="'$(BuildAsMsix)' == 'true' and '$(PkgSystem_Security_Permissions)' != '' and '$(PkgMicrosoft_Windows_SDK_BuildTools_MSIX)' != ''">
+    <Copy SourceFiles="$(PkgSystem_Security_Permissions)\lib\net462\System.Security.Permissions.dll"
+          DestinationFolder="$(PkgMicrosoft_Windows_SDK_BuildTools_MSIX)\tools\net472"
+          Condition="Exists('$(PkgMicrosoft_Windows_SDK_BuildTools_MSIX)\tools\net472') and !Exists('$(PkgMicrosoft_Windows_SDK_BuildTools_MSIX)\tools\net472\System.Security.Permissions.dll')"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(PkgSystem_Security_Permissions)\lib\net6.0\System.Security.Permissions.dll"
+          DestinationFolder="$(PkgMicrosoft_Windows_SDK_BuildTools_MSIX)\tools\net6.0"
+          Condition="Exists('$(PkgMicrosoft_Windows_SDK_BuildTools_MSIX)\tools\net6.0') and !Exists('$(PkgMicrosoft_Windows_SDK_BuildTools_MSIX)\tools\net6.0\System.Security.Permissions.dll')"
+          SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="SignLocalDevBuild" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug' and '$(EnableDevCodeSigning)' != 'false'">
