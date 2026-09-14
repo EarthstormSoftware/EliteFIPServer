@@ -17,6 +17,7 @@
 - Delegate cross-project ownership and EliteAPI inventory research to the read-only `Elite Architecture Reviewer` agent; keep only its concise result in the main context.
 - Delegate multi-viewport dashboard checks to the `Elite Dashboard Verifier` agent after implementation. Reuse one browser page and avoid opening duplicate validation tabs.
 - Delegate the stop/test/build/restart lifecycle to the `Elite Build Runner` agent; retain only command, totals, failures, PID, and URL in the main conversation.
+- Delegate building the Microsoft Store `.msix` package to the `Elite Store Packager` agent; retain only pack result, package path/size, and version-bump-discard status in the main conversation — never raw `dotnet publish`/`MakeAppx` output.
 - Consult [elite-api-data-inventory.md](../docs/elite-api-data-inventory.md) only when EliteAPI inventory is relevant; current dashboard implementation is in `EliteFIPServer.Core/wwwroot/Dashboard.html`, `CockpitDashboard.js`, and `Dashboard.css`.
 
 ## Validation
