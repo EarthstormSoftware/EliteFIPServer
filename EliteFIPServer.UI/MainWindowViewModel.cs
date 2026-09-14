@@ -433,7 +433,10 @@ public sealed class MatricClientProfileViewModel : INotifyPropertyChanged
         clientName = profile.ClientName;
         deckId = profile.DeckId;
 
-        foreach (var config in profile.PageSwitches?.Count == 4 ? profile.PageSwitches : MatricPageSwitchConfigStore.GetDefaults())
+        var existingSwitches = profile.PageSwitches ?? new List<MatricPageSwitchConfig>();
+        var mergedSwitches = existingSwitches.Concat(MatricPageSwitchConfigStore.GetDefaults()
+            .Where(defaultConfig => existingSwitches.All(config => config.State != defaultConfig.State)));
+        foreach (var config in mergedSwitches)
         {
             var viewModel = new MatricPageSwitchConfigViewModel(config);
             viewModel.PropertyChanged += PageSwitchConfig_PropertyChanged;
@@ -566,6 +569,8 @@ public sealed class MatricPageSwitchConfigViewModel : INotifyPropertyChanged
         "InFighter" => "In Fighter",
         "InSRV" => "In SRV",
         "OnFoot" => "On Foot",
+        "HardpointsDeployed" => "Hardpoints Deployed",
+        "HardpointsRetracted" => "Hardpoints Retracted",
         _ => State
     };
 

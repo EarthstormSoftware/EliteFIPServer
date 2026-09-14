@@ -17,7 +17,9 @@ public static class MatricPageSwitchConfigStore
         new() { State = "InMainShip", PageId = "" },
         new() { State = "InFighter", PageId = "" },
         new() { State = "InSRV", PageId = "" },
-        new() { State = "OnFoot", PageId = "" }
+        new() { State = "OnFoot", PageId = "" },
+        new() { State = "HardpointsDeployed", PageId = "" },
+        new() { State = "HardpointsRetracted", PageId = "" }
     };
 
     private static string ConfigPath => Path.Combine(
@@ -34,7 +36,7 @@ public static class MatricPageSwitchConfigStore
                 var saved = JsonConvert.DeserializeObject<List<MatricPageSwitchConfig>>(File.ReadAllText(ConfigPath));
                 if (IsValid(saved))
                 {
-                    return saved;
+                    return MergeMissingDefaults(saved);
                 }
             }
         }
@@ -63,8 +65,21 @@ public static class MatricPageSwitchConfigStore
 
     private static bool IsValid(IReadOnlyCollection<MatricPageSwitchConfig> configs) =>
         configs != null &&
-        configs.Count == Defaults.Count &&
-        Defaults.All(defaultConfig => configs.Count(config => config?.State == defaultConfig.State) == 1);
+        configs.Count > 0 &&
+        configs.All(config => !string.IsNullOrWhiteSpace(config?.State)) &&
+        configs.Select(config => config.State).Distinct().Count() == configs.Count;
+
+    private static List<MatricPageSwitchConfig> MergeMissingDefaults(List<MatricPageSwitchConfig> saved)
+    {
+        var missing = Defaults.Where(defaultConfig => saved.All(config => config.State != defaultConfig.State));
+        saved.AddRange(missing.Select(defaultConfig => new MatricPageSwitchConfig
+        {
+            State = defaultConfig.State,
+            Enabled = defaultConfig.Enabled,
+            PageId = defaultConfig.PageId
+        }));
+        return saved;
+    }
 
     private static List<MatricPageSwitchConfig> CloneDefaults() => Defaults
         .Select(config => new MatricPageSwitchConfig

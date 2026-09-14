@@ -21,6 +21,7 @@ namespace EliteFIPServer {
         private bool previousInFighter;
         private bool previousInSRV;
         private bool previousOnFoot;
+        private bool previousHardpointsDeployed;
         private readonly Dictionary<string, string> appliedDeckIds = new();
         
 
@@ -157,6 +158,7 @@ namespace EliteFIPServer {
             previousInFighter = false;
             previousInSRV = false;
             previousOnFoot = false;
+            previousHardpointsDeployed = false;
             appliedDeckIds.Clear();
             CurrentState.Set(RunState.Stopped);
         }
@@ -433,18 +435,24 @@ namespace EliteFIPServer {
             bool enteredFighter = currentStatus.InFighter && !previousInFighter;
             bool enteredSRV = currentStatus.InSRV && !previousInSRV;
             bool enteredOnFoot = currentStatus.OnFoot && !previousOnFoot;
+            bool enteredHardpointsDeployed = currentStatus.HardpointsDeployed && !previousHardpointsDeployed;
+            bool enteredHardpointsRetracted = !currentStatus.HardpointsDeployed && previousHardpointsDeployed;
 
             previousInMainShip = currentStatus.InMainShip;
             previousInFighter = currentStatus.InFighter;
             previousInSRV = currentStatus.InSRV;
             previousOnFoot = currentStatus.OnFoot;
+            previousHardpointsDeployed = currentStatus.HardpointsDeployed;
 
             string enteredState = enteredOnFoot ? "OnFoot" :
                 enteredSRV ? "InSRV" :
                 enteredFighter ? "InFighter" :
                 enteredMainShip ? "InMainShip" : null;
 
-            if (enteredState == null)
+            string enteredHardpointsState = enteredHardpointsDeployed ? "HardpointsDeployed" :
+                enteredHardpointsRetracted ? "HardpointsRetracted" : null;
+
+            if (enteredState == null && enteredHardpointsState == null)
             {
                 return;
             }
@@ -453,7 +461,14 @@ namespace EliteFIPServer {
             foreach (var client in ConnectedClients)
             {
                 var profile = profiles.FirstOrDefault(item => item.ClientId == client.Id);
-                SwitchToConfiguredPage(profile, enteredState, client.Id);
+                if (enteredState != null)
+                {
+                    SwitchToConfiguredPage(profile, enteredState, client.Id);
+                }
+                if (enteredHardpointsState != null)
+                {
+                    SwitchToConfiguredPage(profile, enteredHardpointsState, client.Id);
+                }
             }
         }
 
