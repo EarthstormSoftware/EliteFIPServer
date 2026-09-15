@@ -190,5 +190,29 @@ namespace EliteFIPServer.Properties {
                 this["WindowTop"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MinimiseToTray {
+            get {
+                return ((bool)(this["MinimiseToTray"]));
+            }
+            set {
+                this["MinimiseToTray"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool StartMinimised {
+            get {
+                return ((bool)(this["StartMinimised"]));
+            }
+            set {
+                this["StartMinimised"] = value;
+            }
+        }
     }
 }

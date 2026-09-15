@@ -20,6 +20,22 @@
                 </Grid>
             </Border>
 
+            <TextBlock Text="Window behaviour" FontWeight="SemiBold" Margin="0,16,0,4" />
+            <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                <Grid ColumnSpacing="24">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2"><TextBlock Text="Minimise to tray" FontWeight="SemiBold" /><TextBlock Text="Hide the window to a system tray icon instead of the taskbar when minimised" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" /></StackPanel>
+                    <ToggleSwitch Grid.Column="1" IsOn="{Binding MinimiseToTray, Mode=TwoWay}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                <Grid ColumnSpacing="24">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2"><TextBlock Text="Start minimised" FontWeight="SemiBold" /><TextBlock Text="Launch the application straight to the tray, with no window shown" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" /></StackPanel>
+                    <ToggleSwitch Grid.Column="1" IsOn="{Binding StartMinimised, Mode=TwoWay}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
             <TextBlock Text="Integrations" FontWeight="SemiBold" Margin="0,16,0,4" />
             <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
                 <Grid ColumnSpacing="12">

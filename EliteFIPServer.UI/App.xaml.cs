@@ -14,7 +14,20 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs launchArgs)
     {
-        window = new MainWindow(Environment.GetCommandLineArgs().Skip(1).ToArray());
+        var mainWindow = new MainWindow(Environment.GetCommandLineArgs().Skip(1).ToArray());
+        window = mainWindow;
+
+        if (Properties.Settings.Default.StartMinimised && Properties.Settings.Default.MinimiseToTray)
+        {
+            mainWindow.StartHiddenToTray();
+            return;
+        }
+
         window.Activate();
+
+        if (Properties.Settings.Default.StartMinimised)
+        {
+            (mainWindow.AppWindow.Presenter as Microsoft.UI.Windowing.OverlappedPresenter)?.Minimize();
+        }
     }
 }

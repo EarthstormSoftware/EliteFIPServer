@@ -1,5 +1,6 @@
 using EliteFIPServer.Logging;
 using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -22,6 +23,7 @@ public sealed partial class MainWindow : Window
     private readonly CoreServer serverCore;
     private readonly MainWindowViewModel viewModel = new();
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer clientRefreshTimer;
+    private readonly TrayIconService trayIconService = new();
 
     public MainWindow(string[] args)
     {
@@ -30,6 +32,10 @@ public sealed partial class MainWindow : Window
         Activated += MainWindow_Activated;
         RootGrid.DataContext = viewModel;
         SetTitleBarIcon();
+
+        trayIconService.OpenRequested += TrayIconService_OpenRequested;
+        trayIconService.ExitRequested += TrayIconService_ExitRequested;
+        AppWindow.Changed += AppWindow_Changed;
 
         serverCore = new CoreServer(args);
         clientRefreshTimer = DispatcherQueue.CreateTimer();
@@ -58,6 +64,11 @@ public sealed partial class MainWindow : Window
 
     private void MainWindow_Closed(object sender, WindowEventArgs args)
     {
+        ShutdownApp();
+    }
+
+    private void ShutdownApp()
+    {
         SaveWindowBounds();
         serverCore.CurrentState.onStateChange -= OnCoreStateChanged;
         serverCore.MatricAPI.CurrentState.onStateChange -= OnMatricStateChanged;
@@ -68,6 +79,7 @@ public sealed partial class MainWindow : Window
         serverCore.PanelClientConnected -= OnPanelClientConnected;
         serverCore.PanelClientDisconnected -= OnPanelClientDisconnected;
         clientRefreshTimer.Stop();
+        trayIconService.Dispose();
 
         try
         {
@@ -77,6 +89,47 @@ public sealed partial class MainWindow : Window
         {
             Environment.Exit(0);
         }
+    }
+
+    private void TrayIconService_OpenRequested(object sender, EventArgs args)
+    {
+        RestoreFromTray();
+    }
+
+    private void TrayIconService_ExitRequested(object sender, EventArgs args)
+    {
+        ShutdownApp();
+    }
+
+    private void RestoreFromTray()
+    {
+        trayIconService.Hide();
+        AppWindow.Show();
+        if ((AppWindow.Presenter as OverlappedPresenter)?.State == OverlappedPresenterState.Minimized)
+        {
+            (AppWindow.Presenter as OverlappedPresenter).Restore();
+        }
+
+        Activate();
+    }
+
+    private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+    {
+        if (!args.DidPresenterChange || !viewModel.MinimiseToTray)
+        {
+            return;
+        }
+
+        if (sender.Presenter is OverlappedPresenter { State: OverlappedPresenterState.Minimized })
+        {
+            trayIconService.Show();
+            sender.Hide();
+        }
+    }
+
+    public void StartHiddenToTray()
+    {
+        trayIconService.Show();
     }
 
     private void ClientRefreshTimer_Tick(Microsoft.UI.Dispatching.DispatcherQueueTimer sender, object args)
@@ -193,6 +246,8 @@ public sealed partial class MainWindow : Window
             case nameof(MainWindowViewModel.AutostartPanelServer):
             case nameof(MainWindowViewModel.PanelServerAllowLanAccess):
             case nameof(MainWindowViewModel.PanelServerPort):
+            case nameof(MainWindowViewModel.MinimiseToTray):
+            case nameof(MainWindowViewModel.StartMinimised):
                 SaveSettings();
                 break;
         }
@@ -209,6 +264,8 @@ public sealed partial class MainWindow : Window
         Properties.Settings.Default.AutostartPanelServer = viewModel.AutostartPanelServer;
         Properties.Settings.Default.PanelServerAllowLanAccess = viewModel.PanelServerAllowLanAccess;
         Properties.Settings.Default.PanelServerPort = GetNumberBoxValue(viewModel.PanelServerPort, Properties.Settings.Default.PanelServerPort);
+        Properties.Settings.Default.MinimiseToTray = viewModel.MinimiseToTray;
+        Properties.Settings.Default.StartMinimised = viewModel.StartMinimised;
         Properties.Settings.Default.Save();
 
         Log.LogEnabled(Properties.Settings.Default.EnableLog);
@@ -342,6 +399,8 @@ public sealed partial class MainWindow : Window
         viewModel.AutostartPanelServer = Properties.Settings.Default.AutostartPanelServer;
         viewModel.PanelServerAllowLanAccess = Properties.Settings.Default.PanelServerAllowLanAccess;
         viewModel.PanelServerPort = Properties.Settings.Default.PanelServerPort;
+        viewModel.MinimiseToTray = Properties.Settings.Default.MinimiseToTray;
+        viewModel.StartMinimised = Properties.Settings.Default.StartMinimised;
         ApplyTheme(Properties.Settings.Default.DarkMode);
     }
 

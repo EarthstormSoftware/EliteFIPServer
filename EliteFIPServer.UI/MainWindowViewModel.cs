@@ -32,6 +32,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private bool autostartPanelServer;
     private bool panelServerAllowLanAccess;
     private double panelServerPort;
+    private bool minimiseToTray;
+    private bool startMinimised;
 
     public MainWindowViewModel()
     {
@@ -198,6 +200,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         get => panelServerPort;
         set => SetProperty(ref panelServerPort, value);
+    }
+
+    public bool MinimiseToTray
+    {
+        get => minimiseToTray;
+        set => SetProperty(ref minimiseToTray, value);
+    }
+
+    public bool StartMinimised
+    {
+        get => startMinimised;
+        set => SetProperty(ref startMinimised, value);
     }
 
     public void ResetMatricButtonTextConfigs()
