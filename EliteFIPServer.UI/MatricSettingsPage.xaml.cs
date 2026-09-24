@@ -17,6 +17,14 @@ public sealed partial class MatricSettingsPage : Page
         BackRequested?.Invoke(this, EventArgs.Empty);
     }
 
+    private void MatricRestartInfoBar_CloseButtonClick(InfoBar sender, object e)
+    {
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            viewModel.MatricRestartRequired = false;
+        }
+    }
+
     private void Reset_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is MainWindowViewModel viewModel)

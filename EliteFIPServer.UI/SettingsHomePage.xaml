@@ -49,6 +49,11 @@
             </Border>
 
             <TextBlock Text="Panel Server settings" FontWeight="SemiBold" Margin="0,16,0,4" />
+            <InfoBar Severity="Warning" IsClosable="True" IsOpen="True"
+                     Visibility="{Binding PanelRestartRequired, Converter={StaticResource BoolToVisibilityConverter}}"
+                     Title="Restart required"
+                     Message="Panel Server settings have changed. Stop and start the Panel Server to apply them."
+                     CloseButtonClick="PanelRestartInfoBar_CloseButtonClick" />
             <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
                 <Grid ColumnSpacing="24">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>

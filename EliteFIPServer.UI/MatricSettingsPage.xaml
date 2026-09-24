@@ -12,6 +12,12 @@
             </Button>
             <TextBlock Text="Matric integration" FontSize="24" FontWeight="SemiBold" Margin="0,8,0,8" />
 
+            <InfoBar Severity="Warning" IsClosable="True" IsOpen="True"
+                     Visibility="{Binding MatricRestartRequired, Converter={StaticResource BoolToVisibilityConverter}}"
+                     Title="Restart required"
+                     Message="Matric settings have changed. Stop and start Matric integration to apply them."
+                     CloseButtonClick="MatricRestartInfoBar_CloseButtonClick" />
+
             <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
                 <Grid ColumnSpacing="24">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
@@ -41,11 +47,25 @@
             </Grid>
             <TextBlock Text="Switch all connected Matric clients to a page when entering a game state. Matric page IDs are required; copy them from Matric." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
             <ListView ItemsSource="{Binding MatricPageSwitchConfigs}" SelectionMode="None" Margin="0,4,0,8">
+                <ListView.Header>
+                    <Grid ColumnSpacing="12" Padding="12,8" Background="{ThemeResource LayerFillColorDefaultBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="400" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="State" FontWeight="SemiBold" HorizontalAlignment="Left" /><TextBlock Grid.Column="1" Text="Matric Page ID" FontWeight="SemiBold" HorizontalAlignment="Left" /><TextBlock Grid.Column="2" Text="Enabled" FontWeight="SemiBold" HorizontalAlignment="Left" />
+                    </Grid>
+                </ListView.Header>
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Border Padding="12,8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" Margin="0,0,0,4">
                             <Grid ColumnSpacing="12">
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="1.2*" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="170" />
+                                    <ColumnDefinition Width="400" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
                                 <TextBlock Text="{Binding StateDisplayName}" VerticalAlignment="Center" FontWeight="SemiBold" />
                                 <TextBox Grid.Column="1" Text="{Binding PageId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Matric page ID" />
                                 <ToggleSwitch Grid.Column="2" IsOn="{Binding Enabled, Mode=TwoWay}" VerticalAlignment="Center" />
@@ -77,14 +97,26 @@
                                     <TextBox Grid.Column="1" Text="{Binding ClientName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Device name (optional)" />
                                     <Button Grid.Column="2" Content="Remove" Click="RemoveClientProfile_Click" />
                                 </Grid>
-                                <TextBox Text="{Binding DeckId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Deck ID (optional)" />
+                                <TextBox Header="Matric deck ID" Text="{Binding DeckId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Optional" />
+                                <Grid ColumnSpacing="12" Margin="0,4,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="380" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="State" FontWeight="SemiBold" HorizontalAlignment="Left" Foreground="{ThemeResource TextFillColorSecondaryBrush}" /><TextBlock Grid.Column="1" Text="Matric Page ID" FontWeight="SemiBold" HorizontalAlignment="Left" Foreground="{ThemeResource TextFillColorSecondaryBrush}" /><TextBlock Grid.Column="2" Text="Enabled" FontWeight="SemiBold" HorizontalAlignment="Left" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </Grid>
                                 <ItemsControl ItemsSource="{Binding PageSwitches}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Grid ColumnSpacing="12" Margin="0,2">
-                                                <Grid.ColumnDefinitions><ColumnDefinition Width="1.2*" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150" />
+                                                    <ColumnDefinition Width="380" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
                                                 <TextBlock Text="{Binding StateDisplayName}" VerticalAlignment="Center" />
-                                                <TextBox Grid.Column="1" Text="{Binding PageId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Page ID" />
+                                                <TextBox Grid.Column="1" Text="{Binding PageId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Matric page ID" />
                                                 <ToggleSwitch Grid.Column="2" IsOn="{Binding Enabled, Mode=TwoWay}" VerticalAlignment="Center" />
                                             </Grid>
                                         </DataTemplate>
@@ -105,14 +137,24 @@
             <ListView ItemsSource="{Binding MatricButtonTextConfigs}" SelectionMode="None" Margin="0,4,0,16">
                 <ListView.Header>
                     <Grid ColumnSpacing="12" Padding="12,8" Background="{ThemeResource LayerFillColorDefaultBrush}">
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="1.2*" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                        <TextBlock Text="Button" FontWeight="SemiBold" /><TextBlock Grid.Column="1" Text="Off text" FontWeight="SemiBold" /><TextBlock Grid.Column="2" Text="On text" FontWeight="SemiBold" /><TextBlock Grid.Column="3" Text="Update" FontWeight="SemiBold" />
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Button" FontWeight="SemiBold" HorizontalAlignment="Left" /><TextBlock Grid.Column="1" Text="Off text" FontWeight="SemiBold" HorizontalAlignment="Left" /><TextBlock Grid.Column="2" Text="On text" FontWeight="SemiBold" HorizontalAlignment="Left" /><TextBlock Grid.Column="3" Text="Update" FontWeight="SemiBold" HorizontalAlignment="Left" />
                     </Grid>
                 </ListView.Header>
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid ColumnSpacing="12" Padding="12,6">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="1.2*" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="2*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="260" />
+                                <ColumnDefinition Width="260" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
                             <TextBlock Text="{Binding ButtonName}" VerticalAlignment="Center" />
                             <TextBox Grid.Column="1" Text="{Binding OffText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBox Grid.Column="2" Text="{Binding OnText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />

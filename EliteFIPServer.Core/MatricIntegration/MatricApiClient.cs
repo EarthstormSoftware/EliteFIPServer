@@ -10,6 +10,7 @@ namespace EliteFIPServer {
         public event EventHandler<IReadOnlyList<MatricClientSummary>> ConnectedClientsChanged;
         public event EventHandler<MatricClientSummary> ClientAdded;
         public event EventHandler<MatricClientSummary> ClientRemoved;
+        public event EventHandler<string> ConnectionFailed;
 
         public List<ClientInfo> ConnectedClients = new List<ClientInfo>();
         private Dictionary<string, MatricButton> MatricButtonList;
@@ -28,6 +29,11 @@ namespace EliteFIPServer {
         // Matric Flash Worker
         private CancellationTokenSource MatricFlashWorkerCTS;
         private Task MatricFlashWorkerTask;
+
+        // Guards against a connection attempt (e.g. a misconfigured port) that never raises
+        // OnConnectedClientsReceived or OnError, which would otherwise leave CurrentState stuck
+        // at Starting forever with no way to Stop or restart the integration.
+        private CancellationTokenSource connectWatchdogCts;
 
         public MatricApiClient() {
             MatricButtonList = CreateButtonList();
@@ -105,6 +111,7 @@ namespace EliteFIPServer {
 
             Log.Instance.Info("Starting Matric Integration");
             CurrentState.Set(RunState.Starting);
+            ConnectionFailed?.Invoke(this, null);
 
             if (matric == null) {
                 try {
@@ -113,6 +120,9 @@ namespace EliteFIPServer {
                     matric.OnError += Matric_OnError;
                 } catch (Exception e) {
                     Log.Instance.Info("Matric Exception: {exception}", e.ToString());
+                    CurrentState.Set(RunState.Stopped);
+                    ConnectionFailed?.Invoke(this, DescribeConnectionFailure(e));
+                    return;
                 }
             }
 
@@ -121,10 +131,81 @@ namespace EliteFIPServer {
             // but no further action need be triggered.
             if (matric != null) {
                 RequestConnectedClients();
+                StartConnectWatchdog();
             }
         }
 
+        private void StartConnectWatchdog() {
+            connectWatchdogCts?.Cancel();
+            connectWatchdogCts = new CancellationTokenSource();
+            CancellationToken token = connectWatchdogCts.Token;
+            TimeSpan timeout = TimeSpan.FromSeconds(Math.Max(Properties.Settings.Default.MatricRetryInterval, 5));
+
+            Task.Delay(timeout, token).ContinueWith(t => {
+                if (t.IsCanceled) {
+                    return;
+                }
+                if (CurrentState.State == RunState.Starting) {
+                    Log.Instance.Warn("Matric connection attempt timed out after {timeout}s; resetting to Stopped", timeout.TotalSeconds);
+                    TeardownMatricClient();
+                    CurrentState.Set(RunState.Stopped);
+                    ConnectionFailed?.Invoke(this, $"No response from Matric within {timeout.TotalSeconds:0}s. Check the configured port and that Matric is running.");
+                }
+            }, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
+        }
+
+        private void StopConnectWatchdog() {
+            connectWatchdogCts?.Cancel();
+            connectWatchdogCts = null;
+        }
+
+        // The vendored Matric client owns a bound socket (for the local Matric API port) that is only
+        // released by calling its own Stop()/Dispose() - simply dropping our reference leaves the socket
+        // held until the GC finalizes it, which is what caused "address already in use" when the user
+        // stopped and immediately restarted the integration.
+        //
+        // Detaching (nulling the field, unhooking events) always happens synchronously so a subsequent
+        // Start() never races against a client we're in the middle of tearing down. The actual
+        // Stop()/Dispose() calls can be deferred to a background thread when we're being torn down from
+        // inside one of the client's own event callbacks, since calling back into it re-entrantly from
+        // that same call stack risks a deadlock if it waits on its own worker thread.
+        private Matric.Integration.Matric DetachMatricClient() {
+            Matric.Integration.Matric client = matric;
+            if (client == null) {
+                return null;
+            }
+
+            matric = null;
+            client.OnConnectedClientsReceived -= Matric_OnConnectedClientsReceived;
+            client.OnError -= Matric_OnError;
+            return client;
+        }
+
+        private static void DisposeMatricClient(Matric.Integration.Matric client) {
+            if (client == null) {
+                return;
+            }
+
+            try {
+                client.Stop();
+            } catch (Exception e) {
+                Log.Instance.Warn("Matric client Stop exception: {exception}", e.ToString());
+            }
+
+            try {
+                client.Dispose();
+            } catch (Exception e) {
+                Log.Instance.Warn("Matric client Dispose exception: {exception}", e.ToString());
+            }
+        }
+
+        private void TeardownMatricClient() {
+            DisposeMatricClient(DetachMatricClient());
+        }
+
         private void CompleteStart() {
+
+            StopConnectWatchdog();
 
             // Start Matric Flash Thread
             Log.Instance.Info("Starting Matric Flash Thread");
@@ -146,6 +227,7 @@ namespace EliteFIPServer {
 
         public void Stop() {
             Log.Instance.Info("Stopping Matric Integration");
+            StopConnectWatchdog();
             if (CurrentState.State == RunState.Started || CurrentState.State == RunState.Starting) {
                 CurrentState.Set(RunState.Stopping);
                 MatricFlashWorkerCTS?.Cancel();
@@ -153,7 +235,7 @@ namespace EliteFIPServer {
                     Log.Instance.Warn("Matric Flash Thread did not stop within the shutdown timeout");
                 }
             }
-            matric = null;
+            TeardownMatricClient();
             previousInMainShip = false;
             previousInFighter = false;
             previousInSRV = false;
@@ -221,8 +303,29 @@ namespace EliteFIPServer {
                 if (ex.HResult == 10054) {
                     System.Threading.Thread.Sleep(Properties.Settings.Default.MatricRetryInterval*1000);
                     RequestConnectedClients();
+                    return;
                 }
             }
+
+            // Any other error (e.g. connection refused because of a misconfigured port) means the
+            // connection attempt has failed outright. Tear down and return to Stopped so the user
+            // isn't left with a spinner that never stops and a Start/Stop control they can't use.
+            if (CurrentState.State == RunState.Starting) {
+                StopConnectWatchdog();
+                Matric.Integration.Matric client = DetachMatricClient();
+                CurrentState.Set(RunState.Stopped);
+                ConnectionFailed?.Invoke(this, DescribeConnectionFailure(ex));
+                // This handler runs on the vendored client's own callback thread; defer the actual
+                // Stop()/Dispose() calls so we don't call back into it re-entrantly from that stack.
+                Task.Run(() => DisposeMatricClient(client));
+            }
+        }
+
+        private static string DescribeConnectionFailure(Exception ex) {
+            if (ex is System.Net.Sockets.SocketException socketEx && socketEx.HResult == 10061) {
+                return $"Connection refused on port {Properties.Settings.Default.MatricApiPort}. Check the configured Matric port and that Matric is running.";
+            }
+            return $"Unable to connect to Matric: {ex.Message}";
         }
 
         private void MatricFlashWorkerThread() {

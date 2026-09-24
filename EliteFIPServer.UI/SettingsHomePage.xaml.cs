@@ -16,4 +16,12 @@ public sealed partial class SettingsHomePage : Page
     {
         MatricSettingsRequested?.Invoke(this, EventArgs.Empty);
     }
+
+    private void PanelRestartInfoBar_CloseButtonClick(InfoBar sender, object e)
+    {
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            viewModel.PanelRestartRequired = false;
+        }
+    }
 }

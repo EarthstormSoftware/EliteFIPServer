@@ -80,7 +80,9 @@ internal sealed class RelayCommand : ICommand
         this.execute = execute;
     }
 
-    public event EventHandler CanExecuteChanged;
+    // CanExecute is always true and never changes, so this command never needs to raise the event -
+    // explicit no-op accessors avoid a field-backed event that's declared but never invoked.
+    public event EventHandler CanExecuteChanged { add { } remove { } }
 
     public bool CanExecute(object parameter) => true;
 

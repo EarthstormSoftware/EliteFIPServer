@@ -14,6 +14,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string panelButtonText;
     private bool matricButtonEnabled;
     private bool panelButtonEnabled;
+    private string matricErrorMessage;
+    private bool matricErrorVisible;
+    private string panelErrorMessage;
+    private bool panelErrorVisible;
+    private bool matricRestartRequired;
+    private bool panelRestartRequired;
     private string clientCountText;
     private string statusMessage;
     private string commanderText = "Commander: unavailable";
@@ -46,6 +52,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public ObservableCollection<MatricClientSummary> MatricClients { get; } = new();
     public ObservableCollection<MatricButtonTextConfigViewModel> MatricButtonTextConfigs { get; } = new();
+    public event EventHandler MatricButtonTextConfigChanged;
     public ObservableCollection<MatricPageSwitchConfigViewModel> MatricPageSwitchConfigs { get; } = new();
     public ObservableCollection<MatricClientProfileViewModel> MatricClientProfiles { get; } = new();
     public ObservableCollection<ActivityLogEntry> ActivityLog { get; } = new();
@@ -92,6 +99,42 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         get => panelButtonEnabled;
         set => SetProperty(ref panelButtonEnabled, value);
+    }
+
+    public string MatricErrorMessage
+    {
+        get => matricErrorMessage;
+        set => SetProperty(ref matricErrorMessage, value);
+    }
+
+    public bool MatricErrorVisible
+    {
+        get => matricErrorVisible;
+        set => SetProperty(ref matricErrorVisible, value);
+    }
+
+    public string PanelErrorMessage
+    {
+        get => panelErrorMessage;
+        set => SetProperty(ref panelErrorMessage, value);
+    }
+
+    public bool PanelErrorVisible
+    {
+        get => panelErrorVisible;
+        set => SetProperty(ref panelErrorVisible, value);
+    }
+
+    public bool MatricRestartRequired
+    {
+        get => matricRestartRequired;
+        set => SetProperty(ref matricRestartRequired, value);
+    }
+
+    public bool PanelRestartRequired
+    {
+        get => panelRestartRequired;
+        set => SetProperty(ref panelRestartRequired, value);
     }
 
     public string ClientCountText
@@ -242,12 +285,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         if (save)
         {
             SaveMatricButtonTextConfigs();
+            MatricButtonTextConfigChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
     private void MatricButtonTextConfig_PropertyChanged(object sender, PropertyChangedEventArgs args)
     {
         SaveMatricButtonTextConfigs();
+        MatricButtonTextConfigChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void SaveMatricButtonTextConfigs()
@@ -523,6 +568,18 @@ public sealed class MatricClientProfileViewModel : INotifyPropertyChanged
         var available = clients
             .Where(client => !string.IsNullOrWhiteSpace(client.Id) && (!assigned.Contains(client.Id) || client.Id == ClientId))
             .ToList();
+
+        if (!string.IsNullOrWhiteSpace(ClientId) && available.All(client => client.Id != ClientId))
+        {
+            // The configured client isn't currently connected. Keep it in the list so the dropdown
+            // still shows its saved name instead of falling back to the "Select connected client" placeholder.
+            available.Insert(0, new MatricClientSummary
+            {
+                Id = ClientId,
+                Name = string.IsNullOrWhiteSpace(ClientName) ? ClientId : $"{ClientName} (offline)",
+                IP = string.Empty
+            });
+        }
 
         if (AvailableClients.Select(client => client.Id).SequenceEqual(available.Select(client => client.Id)))
         {

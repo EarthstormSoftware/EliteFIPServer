@@ -25,6 +25,12 @@ public sealed partial class MainWindow : Window
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer clientRefreshTimer;
     private readonly TrayIconService trayIconService = new();
 
+    // Snapshot of the settings actually in effect for the currently running (or last run) service,
+    // used to detect edits that won't take effect until the service is restarted.
+    private int runningMatricApiPort;
+    private int runningPanelServerPort;
+    private bool runningPanelServerAllowLan;
+
     public MainWindow(string[] args)
     {
         InitializeComponent();
@@ -43,7 +49,10 @@ public sealed partial class MainWindow : Window
         clientRefreshTimer.Tick += ClientRefreshTimer_Tick;
         serverCore.CurrentState.onStateChange += OnCoreStateChanged;
         serverCore.MatricAPI.CurrentState.onStateChange += OnMatricStateChanged;
+        serverCore.MatricAPI.ConnectionFailed += OnMatricConnectionFailed;
         serverCore.PanelServer.CurrentState.onStateChange += OnPanelStateChanged;
+        serverCore.PanelServer.StartFailed += OnPanelStartFailed;
+        viewModel.MatricButtonTextConfigChanged += OnMatricButtonTextConfigChanged;
         serverCore.ConnectedMatricClientsChanged += OnConnectedMatricClientsChanged;
         serverCore.MatricClientAdded += OnMatricClientAdded;
         serverCore.MatricClientRemoved += OnMatricClientRemoved;
@@ -72,7 +81,10 @@ public sealed partial class MainWindow : Window
         SaveWindowBounds();
         serverCore.CurrentState.onStateChange -= OnCoreStateChanged;
         serverCore.MatricAPI.CurrentState.onStateChange -= OnMatricStateChanged;
+        serverCore.MatricAPI.ConnectionFailed -= OnMatricConnectionFailed;
         serverCore.PanelServer.CurrentState.onStateChange -= OnPanelStateChanged;
+        serverCore.PanelServer.StartFailed -= OnPanelStartFailed;
+        viewModel.MatricButtonTextConfigChanged -= OnMatricButtonTextConfigChanged;
         serverCore.ConnectedMatricClientsChanged -= OnConnectedMatricClientsChanged;
         serverCore.MatricClientAdded -= OnMatricClientAdded;
         serverCore.MatricClientRemoved -= OnMatricClientRemoved;
@@ -196,7 +208,7 @@ public sealed partial class MainWindow : Window
 
     private void CmdMatric_Click(object sender, RoutedEventArgs args)
     {
-        if (serverCore.MatricAPI.CurrentState.State == RunState.Started)
+        if (serverCore.MatricAPI.CurrentState.State is RunState.Started or RunState.Starting)
         {
             AddActivity("Stopping Matric integration...");
             serverCore.StopMatricIntegration();
@@ -251,6 +263,52 @@ public sealed partial class MainWindow : Window
                 SaveSettings();
                 break;
         }
+
+        switch (args.PropertyName)
+        {
+            case nameof(MainWindowViewModel.MatricApiPort):
+                UpdateMatricRestartRequired();
+                break;
+            case nameof(MainWindowViewModel.PanelServerPort):
+            case nameof(MainWindowViewModel.PanelServerAllowLanAccess):
+                UpdatePanelRestartRequired();
+                break;
+        }
+    }
+
+    private void OnMatricButtonTextConfigChanged(object sender, EventArgs args)
+    {
+        if (serverCore.MatricAPI.CurrentState.State != RunState.Stopped)
+        {
+            viewModel.MatricRestartRequired = true;
+        }
+    }
+
+    private void UpdateMatricRestartRequired()
+    {
+        if (serverCore.MatricAPI.CurrentState.State == RunState.Stopped)
+        {
+            return;
+        }
+
+        if (Properties.Settings.Default.MatricApiPort != runningMatricApiPort)
+        {
+            viewModel.MatricRestartRequired = true;
+        }
+    }
+
+    private void UpdatePanelRestartRequired()
+    {
+        if (serverCore.PanelServer.CurrentState.State == RunState.Stopped)
+        {
+            return;
+        }
+
+        if (Properties.Settings.Default.PanelServerPort != runningPanelServerPort ||
+            Properties.Settings.Default.PanelServerAllowLanAccess != runningPanelServerAllowLan)
+        {
+            viewModel.PanelRestartRequired = true;
+        }
     }
 
     private void SaveSettings()
@@ -270,6 +328,26 @@ public sealed partial class MainWindow : Window
 
         Log.LogEnabled(Properties.Settings.Default.EnableLog);
         ApplyTheme(Properties.Settings.Default.DarkMode);
+    }
+
+    private void MatricErrorInfoBar_CloseButtonClick(InfoBar sender, object args)
+    {
+        viewModel.MatricErrorVisible = false;
+    }
+
+    private void MatricRestartInfoBar_CloseButtonClick(InfoBar sender, object args)
+    {
+        viewModel.MatricRestartRequired = false;
+    }
+
+    private void PanelErrorInfoBar_CloseButtonClick(InfoBar sender, object args)
+    {
+        viewModel.PanelErrorVisible = false;
+    }
+
+    private void PanelRestartInfoBar_CloseButtonClick(InfoBar sender, object args)
+    {
+        viewModel.PanelRestartRequired = false;
     }
 
     private void CmdRefreshClients_Click(object sender, RoutedEventArgs args)
@@ -296,9 +374,35 @@ public sealed partial class MainWindow : Window
         UpdateOnUiThread(() => UpdateMatricStatus(state));
     }
 
+    private void OnMatricConnectionFailed(object sender, string reason)
+    {
+        UpdateOnUiThread(() =>
+        {
+            viewModel.MatricErrorVisible = !string.IsNullOrEmpty(reason);
+            if (!string.IsNullOrEmpty(reason))
+            {
+                viewModel.MatricErrorMessage = "Couldn't connect to Matric. Check the configured port and that Matric is running.";
+                AddActivity($"Matric integration failed: {reason}");
+            }
+        });
+    }
+
     private void OnPanelStateChanged(object sender, RunState state)
     {
         UpdateOnUiThread(() => UpdatePanelStatus(state));
+    }
+
+    private void OnPanelStartFailed(object sender, string reason)
+    {
+        UpdateOnUiThread(() =>
+        {
+            viewModel.PanelErrorVisible = !string.IsNullOrEmpty(reason);
+            if (!string.IsNullOrEmpty(reason))
+            {
+                viewModel.PanelErrorMessage = "Couldn't start the Panel Server. Check the configured port and that it isn't already in use.";
+                AddActivity($"Panel Server failed: {reason}");
+            }
+        });
     }
 
     private void OnConnectedMatricClientsChanged(object sender, IReadOnlyList<MatricClientSummary> clients)
@@ -365,8 +469,8 @@ public sealed partial class MainWindow : Window
     private void UpdateMatricStatus(RunState state)
     {
         viewModel.MatricStatus = state.ToString();
-        viewModel.MatricButtonText = state == RunState.Started ? "Stop Matric" : "Start Matric";
-        viewModel.MatricButtonEnabled = state is not RunState.Starting and not RunState.Stopping;
+        viewModel.MatricButtonText = state is RunState.Started or RunState.Starting ? "Stop Matric" : "Start Matric";
+        viewModel.MatricButtonEnabled = state is not RunState.Stopping;
         UpdateStatusVisual(matricStatusIndicator, matricStatusProgress, state);
         UpdateStatusIndicator(matricSummaryIndicator, state);
         RefreshStatusSummary();
@@ -375,6 +479,12 @@ public sealed partial class MainWindow : Window
         if (state == RunState.Started)
         {
             serverCore.RefreshConnectedMatricClients();
+        }
+
+        if (state is RunState.Started or RunState.Stopped)
+        {
+            runningMatricApiPort = Properties.Settings.Default.MatricApiPort;
+            viewModel.MatricRestartRequired = false;
         }
     }
 
@@ -387,6 +497,13 @@ public sealed partial class MainWindow : Window
         UpdateStatusIndicator(panelSummaryIndicator, state);
         RefreshStatusSummary();
         AddActivity($"Panel Server {state}");
+
+        if (state is RunState.Started or RunState.Stopped)
+        {
+            runningPanelServerPort = Properties.Settings.Default.PanelServerPort;
+            runningPanelServerAllowLan = Properties.Settings.Default.PanelServerAllowLanAccess;
+            viewModel.PanelRestartRequired = false;
+        }
     }
 
     private void LoadSettings()

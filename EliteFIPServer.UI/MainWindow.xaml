@@ -50,21 +50,69 @@
                                     <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding CoreStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                     <TextBlock Grid.Row="1" Grid.Column="3" Text="-" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
 
-                                    <TextBlock Grid.Row="2" Text="Matric Integration" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                    <Grid Grid.Row="2" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
-                                        <Ellipse x:Name="matricStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        <ProgressRing x:Name="matricStatusProgress" Width="24" Height="24" />
-                                    </Grid>
-                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding MatricStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                    <Button Grid.Row="2" Grid.Column="3" MinWidth="120" Content="{Binding MatricButtonText}" IsEnabled="{Binding MatricButtonEnabled}" Click="CmdMatric_Click" />
+                                    <!-- The Matric row and its banners are grouped into one grid row so the outer
+                                         RowSpacing gives a consistent gap above/below regardless of whether either
+                                         banner is open - separate rows per banner would add RowSpacing around them
+                                         even while collapsed, widening this gap versus the Core/Panel rows. -->
+                                    <StackPanel Grid.Row="2" Grid.ColumnSpan="4" Spacing="8">
+                                        <Grid ColumnSpacing="16">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="170" />
+                                                <ColumnDefinition Width="36" />
+                                                <ColumnDefinition Width="130" />
+                                                <ColumnDefinition Width="140" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Matric Integration" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            <Grid Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
+                                                <Ellipse x:Name="matricStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                <ProgressRing x:Name="matricStatusProgress" Width="24" Height="24" />
+                                            </Grid>
+                                            <TextBlock Grid.Column="2" Text="{Binding MatricStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            <Button Grid.Column="3" MinWidth="120" Content="{Binding MatricButtonText}" IsEnabled="{Binding MatricButtonEnabled}" Click="CmdMatric_Click" />
+                                        </Grid>
 
-                                    <TextBlock Grid.Row="3" Text="Panel Server" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                    <Grid Grid.Row="3" Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
-                                        <Ellipse x:Name="panelStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        <ProgressRing x:Name="panelStatusProgress" Width="24" Height="24" />
-                                    </Grid>
-                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding PanelStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                    <Button Grid.Row="3" Grid.Column="3" MinWidth="120" Content="{Binding PanelButtonText}" IsEnabled="{Binding PanelButtonEnabled}" Click="CmdPanel_Click" />
+                                        <InfoBar Severity="Error" IsClosable="True" IsOpen="True"
+                                                 Visibility="{Binding MatricErrorVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                 Title="Matric connection failed"
+                                                 Message="{Binding MatricErrorMessage}"
+                                                 CloseButtonClick="MatricErrorInfoBar_CloseButtonClick" />
+
+                                        <InfoBar Severity="Warning" IsClosable="True" IsOpen="True"
+                                                 Visibility="{Binding MatricRestartRequired, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                 Title="Restart required"
+                                                 Message="Matric settings have changed. Stop and start Matric integration to apply them."
+                                                 CloseButtonClick="MatricRestartInfoBar_CloseButtonClick" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="3" Grid.ColumnSpan="4" Spacing="8">
+                                        <Grid ColumnSpacing="16">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="170" />
+                                                <ColumnDefinition Width="36" />
+                                                <ColumnDefinition Width="130" />
+                                                <ColumnDefinition Width="140" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Panel Server" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            <Grid Grid.Column="1" Width="24" Height="24" HorizontalAlignment="Center">
+                                                <Ellipse x:Name="panelStatusIndicator" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                <ProgressRing x:Name="panelStatusProgress" Width="24" Height="24" />
+                                            </Grid>
+                                            <TextBlock Grid.Column="2" Text="{Binding PanelStatus}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                            <Button Grid.Column="3" MinWidth="120" Content="{Binding PanelButtonText}" IsEnabled="{Binding PanelButtonEnabled}" Click="CmdPanel_Click" />
+                                        </Grid>
+
+                                        <InfoBar Severity="Error" IsClosable="True" IsOpen="True"
+                                                 Visibility="{Binding PanelErrorVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                 Title="Panel Server failed to start"
+                                                 Message="{Binding PanelErrorMessage}"
+                                                 CloseButtonClick="PanelErrorInfoBar_CloseButtonClick" />
+
+                                        <InfoBar Severity="Warning" IsClosable="True" IsOpen="True"
+                                                 Visibility="{Binding PanelRestartRequired, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                 Title="Restart required"
+                                                 Message="Panel Server settings have changed. Stop and start the Panel Server to apply them."
+                                                 CloseButtonClick="PanelRestartInfoBar_CloseButtonClick" />
+                                    </StackPanel>
                                 </Grid>
 
                                 <Border Grid.Row="2" Padding="16,12" CornerRadius="8" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}">
@@ -85,23 +133,23 @@
 
                                         <Rectangle Grid.RowSpan="4" Grid.Column="2" Width="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Margin="0,2" />
 
-                                        <TextBlock Text="Commander" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Column="1" Text="{Binding CommanderText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Grid.Column="3" Text="Panel URL" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Column="4" Text="{Binding PanelUrlText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="Panel URL" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding PanelUrlText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="3" Text="Commander" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Column="4" Text="{Binding CommanderText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
-                                        <TextBlock Grid.Row="1" Text="Matric" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding MatricVersionText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Grid.Row="1" Grid.Column="3" Text="EliteAPI" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding EliteApiVersionText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="1" Text="Version" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding BuildText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="1" Grid.Column="3" Text="Ship" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding ShipText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
-                                        <TextBlock Grid.Row="2" Text="System" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SystemText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Grid.Row="2" Grid.Column="3" Text="Ship" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Row="2" Grid.Column="4" Text="{Binding ShipText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="2" Text="Matric" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MatricVersionText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="2" Grid.Column="3" Text="System" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="2" Grid.Column="4" Text="{Binding SystemText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
-                                        <TextBlock Grid.Row="3" Text="Build" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding BuildText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="3" Text="EliteAPI" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding EliteApiVersionText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                         <TextBlock Grid.Row="3" Grid.Column="3" Text="Updated" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
                                         <TextBlock Grid.Row="3" Grid.Column="4" Text="{Binding LastUpdatedText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                     </Grid>
@@ -194,7 +242,7 @@
 
                     <ListView x:Name="lstActivity" Grid.Row="1" ItemsSource="{Binding ActivityLog}" HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" SelectionMode="None">
                         <ListView.Header>
-                            <Border Padding="12,8" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                            <Border Padding="12,6" Background="{ThemeResource LayerFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                                 <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -208,15 +256,15 @@
                         </ListView.Header>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Border Padding="12,8" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                                <Border Padding="12,3" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
                                     <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Text="{Binding DisplayTime}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Message}" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding DisplayTime}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Message}" FontSize="12" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
                                     </Grid>
                                 </Border>
                             </DataTemplate>

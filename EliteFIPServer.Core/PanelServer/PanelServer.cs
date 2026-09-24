@@ -37,6 +37,7 @@ namespace EliteFIPServer
         CoreServer serverCore;
 
         public ComponentState CurrentState { get; private set; }
+        public event EventHandler<string> StartFailed;
         Task PanelServerTask;
         private CancellationTokenSource PanelServerCTS;
         private WebApplication PanelHost;
@@ -55,6 +56,7 @@ namespace EliteFIPServer
 
             Log.Instance.Info("Panel Server starting");
             CurrentState.Set(RunState.Starting);
+            StartFailed?.Invoke(this, null);
             bool panelServerStarted = false;
 
             try {
@@ -125,10 +127,19 @@ namespace EliteFIPServer
             } catch (Exception ex) {
                 Log.Instance.Error("Exception: {exception}", ex.ToString());
                 panelServerStarted = false;
+                StartFailed?.Invoke(this, DescribeStartFailure(ex));
             }
 
             CurrentState.Set(panelServerStarted ? RunState.Started : RunState.Stopped);
             Log.Instance.Info("Panel server start complete");
+        }
+
+        private static string DescribeStartFailure(Exception ex) {
+            Exception root = ex is AggregateException aggregate ? aggregate.Flatten().InnerException ?? aggregate : ex;
+            if (root is System.Net.Sockets.SocketException socketEx && socketEx.HResult == 10048) {
+                return $"Port {Properties.Settings.Default.PanelServerPort} is already in use. Check the configured Panel Server port and that no other application is using it.";
+            }
+            return $"Unable to start the Panel Server: {root.Message}";
         }
 
         public void Stop() {
@@ -139,8 +150,15 @@ namespace EliteFIPServer
 
                 try {
                     if (PanelHost != null) {
-                        using var stopTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(1));
-                        PanelHost.StopAsync(stopTimeout.Token).GetAwaiter().GetResult();
+                        var host = PanelHost;
+                        // Run the shutdown on a thread-pool thread rather than awaiting it inline: ASP.NET Core's
+                        // host shutdown can post continuations back to the calling SynchronizationContext, and
+                        // Stop() is invoked synchronously from the WinUI dispatcher thread (button click handlers),
+                        // so blocking there with GetAwaiter().GetResult() would deadlock waiting on itself.
+                        Task.Run(async () => {
+                            using var stopTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                            await host.StopAsync(stopTimeout.Token).ConfigureAwait(false);
+                        }).GetAwaiter().GetResult();
                     }
                 } catch (Exception ex) {
                     Log.Instance.Warn("Panel server stop warning: {exception}", ex.ToString());
@@ -153,6 +171,7 @@ namespace EliteFIPServer
         private void PanelServerThreadEnded(Task task) {
             if (task.Exception != null) {
                 Log.Instance.Info("Panel Server Thread Exception: {exception}", task.Exception.ToString());
+                StartFailed?.Invoke(this, DescribeStartFailure(task.Exception));
             }
             CurrentState.Set(RunState.Stopped);
             Log.Instance.Info("Panel Server Thread ended");
