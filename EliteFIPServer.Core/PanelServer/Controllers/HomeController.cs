@@ -7,9 +7,9 @@ namespace EliteFIPServer
     {
 
         [HttpGet]
-        public ContentResult Index()
+        public RedirectResult Index()
         {
-            return Content("Elite FIP Panel Server running");
+            return Redirect("/index.html");
         }
     }
 }

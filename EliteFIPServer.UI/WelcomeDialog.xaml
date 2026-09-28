@@ -1,0 +1,48 @@
+<ContentDialog
+    x:Class="EliteFIPServer.WelcomeDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Welcome to Elite FIP Server"
+    PrimaryButtonText="Open dashboard"
+    SecondaryButtonText="View help"
+    CloseButtonText="Close"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16" MaxWidth="460">
+        <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="Elite FIP Server reads live data from Elite Dangerous and shows it on a browser dashboard for a second screen or tablet. It can also drive button decks on Matric clients." />
+
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+            <TextBlock Text="1" FontSize="20" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+            <StackPanel Grid.Column="1" Spacing="2">
+                <TextBlock Text="Play Elite Dangerous" FontWeight="SemiBold" />
+                <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="There is nothing to configure. Game data is found automatically, and the Status tab shows your commander, ship and system once the game is running." />
+            </StackPanel>
+        </Grid>
+
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+            <TextBlock Text="2" FontSize="20" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+            <StackPanel Grid.Column="1" Spacing="2">
+                <TextBlock Text="Open the dashboard" FontWeight="SemiBold" />
+                <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="Open dashboard starts the Panel Server if needed and opens the dashboard in your browser. To use a tablet or phone, turn on Allow LAN access in Settings. Turn on Start Panel Server automatically so it's always ready." />
+            </StackPanel>
+        </Grid>
+
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+            <TextBlock Text="3" FontSize="20" FontWeight="SemiBold" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+            <StackPanel Grid.Column="1" Spacing="2">
+                <TextBlock Text="Optional: connect Matric" FontWeight="SemiBold" />
+                <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="If you use Matric on a phone or tablet, start Matric integration from the Status tab to send live button states and switch clients between pages of their deck automatically." />
+            </StackPanel>
+        </Grid>
+
+        <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                   Text="Help for each screen is available at any time from the ? button at the top right, or by pressing F1." />
+    </StackPanel>
+</ContentDialog>

@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:EliteFIPServer"
     mc:Ignorable="d"
     Title="Elite FIP Server">
 
@@ -13,14 +14,29 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TabView Margin="16,12,16,0" IsAddTabButtonVisible="False" CanDragTabs="False">
-            <TabViewItem Header="Status" IsClosable="False">
+        <SplitView x:Name="HelpSplitView" PanePlacement="Right" OpenPaneLength="360" DisplayMode="Overlay" IsPaneOpen="False"
+                   PaneBackground="Transparent">
+            <SplitView.Pane>
+                <local:HelpPane x:Name="HelpPaneControl" />
+            </SplitView.Pane>
+
+        <TabView x:Name="MainTabs" Margin="16,12,16,0" IsAddTabButtonVisible="False" CanDragTabs="False" SelectionChanged="MainTabs_SelectionChanged">
+            <TabView.TabStripFooter>
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,4,0" Background="Transparent" BorderThickness="0" Padding="8,6"
+                        Click="HelpToggle_Click" ToolTipService.ToolTip="Help (F1)" AutomationProperties.Name="Help">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="F1" />
+                    </Button.KeyboardAccelerators>
+                    <FontIcon Glyph="&#xE897;" FontSize="16" />
+                </Button>
+            </TabView.TabStripFooter>
+
+            <TabViewItem x:Name="StatusTab" Header="Status" IsClosable="False">
                 <ScrollViewer>
-                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,24,0,0">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0,24,0,24" Spacing="16">
                         <Border MaxWidth="760" Padding="24" CornerRadius="12" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                             <Grid RowSpacing="20">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
@@ -115,7 +131,7 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <Border Grid.Row="2" Padding="16,12" CornerRadius="8" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}">
+                                <Border Grid.Row="1" Padding="16,12" CornerRadius="8" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}">
                                     <Grid ColumnSpacing="18" RowSpacing="8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
@@ -129,12 +145,13 @@
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
 
-                                        <Rectangle Grid.RowSpan="4" Grid.Column="2" Width="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Margin="0,2" />
+                                        <Rectangle Grid.RowSpan="5" Grid.Column="2" Width="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Margin="0,2" />
 
                                         <TextBlock Text="Panel URL" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Column="1" Text="{Binding PanelUrlText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        <HyperlinkButton Grid.Column="1" Content="{Binding PanelUrlText}" Padding="0" VerticalAlignment="Top" Click="OpenDashboard_Click" ToolTipService.ToolTip="Open the dashboard on this PC" />
                                         <TextBlock Grid.Column="3" Text="Commander" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
                                         <TextBlock Grid.Column="4" Text="{Binding CommanderText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
 
@@ -152,15 +169,28 @@
                                         <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding EliteApiVersionText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
                                         <TextBlock Grid.Row="3" Grid.Column="3" Text="Updated" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
                                         <TextBlock Grid.Row="3" Grid.Column="4" Text="{Binding LastUpdatedText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" />
+
+                                        <!-- Own row at the bottom so the extra line doesn't open a gap in the right-hand column. -->
+                                        <TextBlock Grid.Row="4" Text="LAN URL" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0"
+                                                   Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding PanelLanUrlText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" IsTextSelectionEnabled="True"
+                                                   Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                   ToolTipService.ToolTip="Address for tablets and other devices on your network" />
                                     </Grid>
                                 </Border>
                             </Grid>
                         </Border>
-                    </Grid>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+                            <Button Content="Help" MinWidth="96" Click="HelpToggle_Click" />
+                            <Button Content="Open dashboard" Style="{ThemeResource AccentButtonStyle}" MinWidth="140" Click="OpenDashboard_Click"
+                                    ToolTipService.ToolTip="Open the dashboard in your browser, starting the Panel Server if needed" />
+                        </StackPanel>
+                    </StackPanel>
                 </ScrollViewer>
             </TabViewItem>
 
-            <TabViewItem Header="Settings" IsClosable="False">
+            <TabViewItem x:Name="SettingsTab" Header="Settings" IsClosable="False">
                 <Frame x:Name="SettingsFrame">
                     <Frame.ContentTransitions>
                         <TransitionCollection>
@@ -170,7 +200,7 @@
                 </Frame>
             </TabViewItem>
 
-            <TabViewItem Header="Clients" IsClosable="False">
+            <TabViewItem x:Name="ClientsTab" Header="Clients" IsClosable="False">
                 <Grid Padding="0,16,0,0" RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -229,7 +259,7 @@
                 </Grid>
             </TabViewItem>
 
-            <TabViewItem Header="Activity" IsClosable="False">
+            <TabViewItem x:Name="ActivityTab" Header="Activity" IsClosable="False">
                 <Grid Padding="0,16,0,0" RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -273,6 +303,7 @@
                 </Grid>
             </TabViewItem>
         </TabView>
+        </SplitView>
 
         <Border Grid.Row="1" Padding="8,4" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}">
             <Grid ColumnSpacing="12">

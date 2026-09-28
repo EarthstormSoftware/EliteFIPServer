@@ -31,6 +31,9 @@ public sealed partial class MainWindow : Window
     private int runningPanelServerPort;
     private bool runningPanelServerAllowLan;
 
+    private string pendingDashboardPath;
+    private bool welcomeDialogOpen;
+
     public MainWindow(string[] args)
     {
         InitializeComponent();
@@ -41,6 +44,7 @@ public sealed partial class MainWindow : Window
 
         trayIconService.OpenRequested += TrayIconService_OpenRequested;
         trayIconService.ExitRequested += TrayIconService_ExitRequested;
+        trayIconService.DashboardRequested += TrayIconService_DashboardRequested;
         AppWindow.Changed += AppWindow_Changed;
 
         serverCore = new CoreServer(args);
@@ -62,6 +66,10 @@ public sealed partial class MainWindow : Window
 
         LoadSettings();
         ShowSettingsHome(this, EventArgs.Empty);
+        HelpPaneControl.DashboardRequested += (_, path) => OpenDashboard(path);
+        HelpPaneControl.WelcomeRequested += (_, _) => _ = ShowWelcomeAsync();
+        HelpPaneControl.CloseRequested += (_, _) => HelpSplitView.IsPaneOpen = false;
+        RootGrid.SizeChanged += RootGrid_SizeChanged;
         viewModel.PropertyChanged += ViewModel_PropertyChanged;
         UpdateRuntimeMetadata();
         UpdateAllStatus();
@@ -113,6 +121,11 @@ public sealed partial class MainWindow : Window
         ShutdownApp();
     }
 
+    private void TrayIconService_DashboardRequested(object sender, EventArgs args)
+    {
+        UpdateOnUiThread(() => OpenDashboard(DashboardLinks.DashboardPath));
+    }
+
     private void RestoreFromTray()
     {
         trayIconService.Hide();
@@ -160,6 +173,115 @@ public sealed partial class MainWindow : Window
 
         Activated -= MainWindow_Activated;
         RestoreWindowPosition();
+
+        // Deferred so the dialog waits until the window is actually shown: with Start minimised to tray,
+        // the first activation happens only when the user restores the window.
+        if (!Properties.Settings.Default.FirstRunCompleted)
+        {
+            DispatcherQueue.TryEnqueue(() => _ = ShowWelcomeAsync());
+        }
+    }
+
+    private async Task ShowWelcomeAsync()
+    {
+        if (welcomeDialogOpen || Content?.XamlRoot == null)
+        {
+            return;
+        }
+
+        welcomeDialogOpen = true;
+        try
+        {
+            var dialog = new WelcomeDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                RequestedTheme = (Content as FrameworkElement)?.RequestedTheme ?? ElementTheme.Default
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
+
+            Properties.Settings.Default.FirstRunCompleted = true;
+            Properties.Settings.Default.Save();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                OpenDashboard(DashboardLinks.DashboardPath);
+            }
+            else if (result == ContentDialogResult.Secondary)
+            {
+                HelpSplitView.IsPaneOpen = true;
+            }
+        }
+        finally
+        {
+            welcomeDialogOpen = false;
+        }
+    }
+
+    private void OpenDashboard_Click(object sender, RoutedEventArgs args)
+    {
+        OpenDashboard(DashboardLinks.DashboardPath);
+    }
+
+    private void HelpToggle_Click(object sender, RoutedEventArgs args)
+    {
+        HelpSplitView.IsPaneOpen = !HelpSplitView.IsPaneOpen;
+    }
+
+    // Inline beside the content when there is room for both; otherwise overlay so the Status card isn't squeezed.
+    private void RootGrid_SizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        const double inlineMinimumWidth = 1040;
+        HelpSplitView.DisplayMode = args.NewSize.Width >= inlineMinimumWidth ? SplitViewDisplayMode.Inline : SplitViewDisplayMode.Overlay;
+    }
+
+    private void MainTabs_SelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        UpdateHelpTopic();
+    }
+
+    private void UpdateHelpTopic()
+    {
+        HelpTopic topic = MainTabs.SelectedItem switch
+        {
+            TabViewItem item when item == SettingsTab => SettingsFrame.Content is MatricSettingsPage ? HelpTopic.MatricSettings : HelpTopic.Settings,
+            TabViewItem item when item == ClientsTab => HelpTopic.Clients,
+            TabViewItem item when item == ActivityTab => HelpTopic.Activity,
+            _ => HelpTopic.Status
+        };
+
+        HelpPaneControl?.ShowTopic(topic);
+    }
+
+    private void OpenDashboard(string relativePath)
+    {
+        switch (serverCore.PanelServer.CurrentState.State)
+        {
+            case RunState.Started:
+                LaunchDashboard(relativePath);
+                break;
+            case RunState.Starting:
+                pendingDashboardPath = relativePath;
+                break;
+            case RunState.Stopped:
+                pendingDashboardPath = relativePath;
+                AddActivity("Starting Panel Server to open the dashboard...");
+                serverCore.PanelServer.Start();
+                break;
+        }
+    }
+
+    private async void LaunchDashboard(string relativePath)
+    {
+        try
+        {
+            await DashboardLinks.OpenAsync(relativePath);
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Error("Error opening dashboard: {error}", ex.ToString());
+            AddActivity("Unable to open the dashboard in the browser");
+        }
     }
 
     private void RestoreWindowBounds()
@@ -224,6 +346,7 @@ public sealed partial class MainWindow : Window
         var page = new SettingsHomePage { DataContext = viewModel };
         page.MatricSettingsRequested += ShowMatricSettings;
         SettingsFrame.Content = page;
+        UpdateHelpTopic();
     }
 
     private void ShowMatricSettings(object sender, EventArgs args)
@@ -231,6 +354,7 @@ public sealed partial class MainWindow : Window
         var page = new MatricSettingsPage { DataContext = viewModel };
         page.BackRequested += ShowSettingsHome;
         SettingsFrame.Content = page;
+        UpdateHelpTopic();
     }
 
     private void CmdPanel_Click(object sender, RoutedEventArgs args)
@@ -272,6 +396,7 @@ public sealed partial class MainWindow : Window
             case nameof(MainWindowViewModel.PanelServerPort):
             case nameof(MainWindowViewModel.PanelServerAllowLanAccess):
                 UpdatePanelRestartRequired();
+                UpdateRuntimeMetadata();
                 break;
         }
     }
@@ -504,6 +629,16 @@ public sealed partial class MainWindow : Window
             runningPanelServerAllowLan = Properties.Settings.Default.PanelServerAllowLanAccess;
             viewModel.PanelRestartRequired = false;
         }
+
+        if (state == RunState.Started && pendingDashboardPath != null)
+        {
+            LaunchDashboard(pendingDashboardPath);
+            pendingDashboardPath = null;
+        }
+        else if (state == RunState.Stopped)
+        {
+            pendingDashboardPath = null;
+        }
     }
 
     private void LoadSettings()
@@ -607,11 +742,8 @@ public sealed partial class MainWindow : Window
 
     private void UpdateRuntimeMetadata()
     {
-        var panelUrl = Properties.Settings.Default.PanelServerPort > 0
-            ? $"http://127.0.0.1:{Properties.Settings.Default.PanelServerPort}/"
-            : "http://127.0.0.1:4545/";
-
-        viewModel.PanelUrlText = panelUrl;
+        viewModel.PanelUrlText = DashboardLinks.LocalBaseUrl;
+        viewModel.PanelLanUrlText = Properties.Settings.Default.PanelServerAllowLanAccess ? DashboardLinks.LanBaseUrl : null;
         viewModel.BuildText = BuildInfo.Version;
         viewModel.LastUpdatedText = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
         viewModel.MatricVersionText = GetMatricVersion();

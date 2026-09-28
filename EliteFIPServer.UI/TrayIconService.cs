@@ -30,10 +30,12 @@ public sealed class TrayIconService : IDisposable
         // TaskbarIcon's default ContextMenuMode (PopupMenu) renders the menu with a native
         // Win32 popup and invokes each item's Command, not its Click event.
         var openItem = new MenuFlyoutItem { Text = "Open", Command = new RelayCommand(() => OpenRequested?.Invoke(this, EventArgs.Empty)) };
+        var dashboardItem = new MenuFlyoutItem { Text = "Open dashboard", Command = new RelayCommand(() => DashboardRequested?.Invoke(this, EventArgs.Empty)) };
         var exitItem = new MenuFlyoutItem { Text = "Exit", Command = new RelayCommand(() => ExitRequested?.Invoke(this, EventArgs.Empty)) };
 
         var menu = new MenuFlyout();
         menu.Items.Add(openItem);
+        menu.Items.Add(dashboardItem);
         menu.Items.Add(exitItem);
         taskbarIcon.ContextFlyout = menu;
 
@@ -42,6 +44,7 @@ public sealed class TrayIconService : IDisposable
 
     public event EventHandler OpenRequested;
     public event EventHandler ExitRequested;
+    public event EventHandler DashboardRequested;
 
     public void Show()
     {

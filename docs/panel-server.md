@@ -36,8 +36,8 @@ http://\{hostipaddress\}:\{panelserverport\}
 For example:  
 http://192.168.169.100:4545
 
-If the Panel Server is running, you will see:  
-"Elite FIP Panel Server running" in the browser.
+If the Panel Server is running, you will see the Elite FIP Server landing page,
+with links to the dashboard, its views and single-panel embeds.
 
 ---
 

@@ -1,0 +1,190 @@
+<UserControl
+    x:Class="EliteFIPServer.HelpPane"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <Style x:Key="HelpBody" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Style>
+        <Style x:Key="HelpSubheading" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,8,0,0" />
+        </Style>
+        <Style TargetType="Expander">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{ThemeResource SolidBackgroundFillColorBaseBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1,0,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Padding="16,12,8,8" ColumnSpacing="8">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="Help" FontSize="20" FontWeight="SemiBold" />
+                <TextBlock x:Name="ContextText" Style="{StaticResource HelpBody}" />
+            </StackPanel>
+            <Button Grid.Column="1" VerticalAlignment="Top" Background="Transparent" BorderThickness="0" Padding="8"
+                    Click="Close_Click" ToolTipService.ToolTip="Close help" AutomationProperties.Name="Close help">
+                <FontIcon Glyph="&#xE711;" FontSize="14" />
+            </Button>
+        </Grid>
+
+        <ScrollViewer x:Name="HelpScroller" Grid.Row="1" HorizontalContentAlignment="Stretch">
+            <StackPanel Padding="16,0,16,16" Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Open dashboard" Style="{ThemeResource AccentButtonStyle}" Tag="Dashboard.html" Click="DashboardLink_Click" />
+                    <Button Content="Welcome guide" Click="ShowWelcome_Click" />
+                </StackPanel>
+
+                <StackPanel x:Name="ContextSections" Spacing="8" Margin="0,8,0,0" />
+                <TextBlock x:Name="OtherTopicsHeading" Text="Other topics" FontWeight="SemiBold" Margin="0,12,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <StackPanel x:Name="OtherSections" Spacing="8" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Sections are moved between ContextSections and OtherSections by ShowTopic; this holder only parses them. -->
+        <StackPanel x:Name="SectionHolder" Visibility="Collapsed">
+            <Expander x:Name="GettingStartedSection" Header="Getting started">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Elite FIP Server runs alongside Elite Dangerous. It reads the game's journal and status files as you play and publishes the data to:" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  the browser dashboard (Panel Server), for a second monitor, tablet or phone" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Matric clients, phones or tablets showing button decks (Matric integration, optional)" />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Status lights" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Green means started, grey means stopped, and a spinner means it is starting or stopping. Core Server always runs. Use the buttons to start or stop Matric integration and the Panel Server." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Commander, Ship and System fill in once Elite Dangerous is running. There is no game folder to configure; the journal is found automatically under Saved Games\Frontier Developments\Elite Dangerous." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Recommended first steps" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="1.  In Settings, turn on Start Panel Server automatically." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="2.  Select Open dashboard and keep the browser tab on a second screen." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="3.  Launch Elite Dangerous. The dashboard updates live." />
+                </StackPanel>
+            </Expander>
+
+            <Expander x:Name="DashboardSection" Header="Using the dashboard">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource HelpBody}" Text="The dashboard is a web page served by the Panel Server. Open dashboard starts the Panel Server for you if needed." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="This PC" />
+                    <TextBlock Text="{Binding PanelUrlText}" IsTextSelectionEnabled="True" />
+                    <StackPanel Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Style="{StaticResource HelpSubheading}" Text="Other devices" />
+                        <TextBlock Text="{Binding PanelLanUrlText}" IsTextSelectionEnabled="True" />
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Views" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Tabs across the top of the dashboard switch between views, each showing the Ship, Location, Target, Activity and Route panels relevant to it." />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <HyperlinkButton Content="Overview" Tag="Dashboard.html#cockpit" Click="DashboardLink_Click" />
+                        <HyperlinkButton Content="Navigation" Tag="Dashboard.html#navigation" Click="DashboardLink_Click" />
+                        <HyperlinkButton Content="Combat" Tag="Dashboard.html#combat" Click="DashboardLink_Click" />
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Presentation modes" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Select the ⚙ button on the dashboard and choose a Presentation:" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Passive display: a fixed, unattended instrument screen with no scrolling or touching needed. Best for a dedicated monitor." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Interactive tablet: touch-friendly, with expandable detail and scrollable panels. Adapts to one, two or three columns." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Automatic picks one based on the device. Use the ⛶ button for full screen." />
+
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Single panels" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Show one panel on its own, filling the page, for a small screen, an OBS browser source or a Matric web view:" />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <HyperlinkButton Content="Ship" Tag="Dashboard.html?widget=ship" Click="DashboardLink_Click" />
+                        <HyperlinkButton Content="Location" Tag="Dashboard.html?widget=location" Click="DashboardLink_Click" />
+                        <HyperlinkButton Content="Target" Tag="Dashboard.html?widget=target" Click="DashboardLink_Click" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <HyperlinkButton Content="Activity" Tag="Dashboard.html?widget=activity" Click="DashboardLink_Click" />
+                        <HyperlinkButton Content="Route" Tag="Dashboard.html?widget=route" Click="DashboardLink_Click" />
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Separate layouts per device" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Each browser remembers its own dashboard settings. To keep different arrangements on one device, add ?layout=name to the address (for example Dashboard.html?layout=tablet), or enter a name under Layout in the ⚙ settings." />
+                </StackPanel>
+            </Expander>
+
+            <Expander x:Name="SettingsSection" Header="Settings explained">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Panel Server" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Allow LAN access: lets tablets, phones and other PCs on your network open the dashboard. When it's off, only this PC can." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Start Panel Server automatically: recommended, so the dashboard is always ready." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Panel Server port: only change it if another program already uses 4545." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Port and LAN changes take effect after you stop and start the Panel Server." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Window behaviour" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Minimise to tray: hides the window in the notification area when minimised. Double-click the tray icon to reopen it, or right-click it to open the dashboard or exit." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Start minimised: launches straight to the tray (or the taskbar if Minimise to tray is off). This is useful when started with Windows." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="General" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Enable logging: writes a log file. Turn it on when reporting a problem." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Matric integration: select the row to configure Matric. The switch starts it automatically at launch." />
+                </StackPanel>
+            </Expander>
+
+            <Expander x:Name="TabletSection" Header="Tablet, phone or another PC">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource HelpBody}" Text="1.  In Settings › Panel Server settings, turn on Allow LAN access." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="2.  Stop and start the Panel Server so the change takes effect." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="3.  If Windows Firewall asks, allow Elite FIP Server on private networks." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="4.  On the other device, which must be on the same network, open this PC's address in a browser:" />
+                    <TextBlock Text="{Binding PanelLanUrlText}" FontWeight="SemiBold" IsTextSelectionEnabled="True" Margin="20,0,0,0"
+                               Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Tip: use your browser's Add to Home Screen option on a tablet to open the dashboard full screen like an app." />
+                </StackPanel>
+            </Expander>
+
+            <Expander x:Name="MatricSection" Header="Matric integration (optional)">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Matric lets phones and tablets act as button panels for your PC. Each phone or tablet is a Matric client, and it loads a deck: a collection of pages of buttons. Elite FIP Server can send live ship states (lights, gear, hardpoints and so on) to those buttons and switch clients to different pages automatically as your situation changes." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Setting up" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="1.  Install Matric on this PC, connect your phone or tablet as a Matric client, and make sure Matric is running." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="2.  Check that the Matric API port matches Matric's integration port (5300 by default)." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="3.  Select Start Matric on the Status tab. If Matric asks whether to allow Elite FIP Server, accept." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="4.  Connected Matric clients appear on the Clients tab." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Options" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Retry interval: how long to wait for Matric before reporting a failed connection." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Automatic page switching: switches every connected client to a chosen page of its deck on game events such as docking or deploying hardpoints. Copy page IDs from Matric." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Client profiles: override page switching for individual clients. Copy the client ID from the Clients tab." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Button text: change the on and off labels sent to text buttons." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="After changing these, stop and start Matric integration to apply them." />
+                </StackPanel>
+            </Expander>
+
+            <Expander x:Name="ClientsSection" Header="Connected Matric clients">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource HelpBody}" Text="The Clients tab lists the Matric clients (phones or tablets running the Matric app) currently connected to Matric on this PC. It refreshes every 20 seconds, or select Refresh." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Use the copy buttons to copy a client's name or ID into a client profile under Settings › Matric integration, so that client can switch to different pages from the others." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="If the list is empty, check that Matric integration is Started on the Status tab and that the phone or tablet is connected in Matric." />
+                </StackPanel>
+            </Expander>
+
+            <Expander x:Name="TroubleshootingSection" Header="Troubleshooting">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource HelpBody}" Text="The Activity tab records service starts and stops, connections and errors. It's the first place to look when something isn't working." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Commander, Ship or System shows &quot;unavailable&quot;" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Elite Dangerous isn't running, or you haven't loaded into the game yet. The values appear after the game writes its first journal entries." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="The dashboard won't load" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Check that the Panel Server is Started on the Status tab. If it fails to start, another program may be using the port, so change Panel Server port in Settings. From another device, check that Allow LAN access is on, the server has been restarted, and Windows Firewall allows it." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="The dashboard shows dashes (--)" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="It's connected but hasn't received game data yet. Load into the game, or wait for the next journal event." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Matric won't connect" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Make sure Matric is running on this PC, that the Matric API port matches Matric's integration port, and that Elite FIP Server was allowed in Matric." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Still stuck?" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Turn on Enable logging in Settings, reproduce the problem, and include the log file when reporting an issue." />
+                </StackPanel>
+            </Expander>
+
+            <Expander x:Name="AboutSection" Header="About">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource HelpBody}" Text="{Binding VersionText}" />
+                    <HyperlinkButton Content="Project page and issues" NavigateUri="https://github.com/EarthstormSoftware/EliteFIPServer" />
+                    <HyperlinkButton Content="Privacy policy" NavigateUri="https://github.com/EarthstormSoftware/EliteFIPServer/blob/main/PRIVACY_POLICY.md" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Elite Dangerous is a trademark of Frontier Developments plc. This is an unofficial companion tool." />
+                </StackPanel>
+            </Expander>
+        </StackPanel>
+    </Grid>
+</UserControl>

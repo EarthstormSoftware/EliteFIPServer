@@ -26,6 +26,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string matricVersionText = "Matric: unknown";
     private string eliteApiVersionText = "EliteAPI: unknown";
     private string panelUrlText = "Panel URL: unavailable";
+    private string panelLanUrlText;
     private string systemText = "System: unavailable";
     private string shipText = "Ship: unavailable";
     private string buildText = "Build: unavailable";
@@ -172,6 +173,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         get => panelUrlText;
         set => SetProperty(ref panelUrlText, value);
     }
+
+    public string PanelLanUrlText
+    {
+        get => panelLanUrlText;
+        set
+        {
+            SetProperty(ref panelLanUrlText, value);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PanelLanUrlVisible)));
+        }
+    }
+
+    public bool PanelLanUrlVisible => !string.IsNullOrEmpty(panelLanUrlText);
 
     public string SystemText
     {

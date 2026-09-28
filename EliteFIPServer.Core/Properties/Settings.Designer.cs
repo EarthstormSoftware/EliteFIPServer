@@ -214,5 +214,17 @@ namespace EliteFIPServer.Properties {
                 this["StartMinimised"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool FirstRunCompleted {
+            get {
+                return ((bool)(this["FirstRunCompleted"]));
+            }
+            set {
+                this["FirstRunCompleted"] = value;
+            }
+        }
     }
 }

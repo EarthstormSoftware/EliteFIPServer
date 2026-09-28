@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Elite FIP Server</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --ink: #e7edf0;
+            --muted: #8d9aa0;
+            --line: #34434a;
+            --panel: #172126;
+            --panel-alt: #202d32;
+            --accent: #6ed6c1;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; color: var(--ink); background: #0d1417; font: 16px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+        main { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; }
+        h1 { margin: 0 0 4px; font-size: 28px; font-weight: 600; }
+        h2 { margin: 0 0 8px; font-size: 17px; font-weight: 600; }
+        p { margin: 0 0 12px; color: var(--muted); }
+        .lead { margin-bottom: 24px; }
+        section { margin-bottom: 16px; padding: 18px 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+        a { color: var(--accent); }
+        .primary { display: inline-block; margin: 4px 0 8px; padding: 12px 22px; color: #0d1417; background: var(--accent); border-radius: 6px; font-weight: 600; text-decoration: none; }
+        .primary:hover, .primary:focus-visible { filter: brightness(1.1); outline: none; }
+        .links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+        .links a { display: inline-block; padding: 7px 14px; color: var(--ink); background: var(--panel-alt); border: 1px solid var(--line); border-radius: 6px; text-decoration: none; }
+        .links a:hover, .links a:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+        code { color: var(--ink); background: var(--panel-alt); padding: 1px 5px; border-radius: 4px; font-size: 14px; overflow-wrap: anywhere; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Elite FIP Server</h1>
+        <p class="lead">Live Elite Dangerous ship, location, target, activity and route data for a second screen, tablet or phone.</p>
+
+        <section>
+            <h2>Dashboard</h2>
+            <p>Open the full dashboard. Bookmark it, or add it to your home screen on a tablet.</p>
+            <a class="primary" href="/Dashboard.html">Open dashboard</a>
+            <ul class="links" aria-label="Dashboard views">
+                <li><a href="/Dashboard.html#cockpit">Overview</a></li>
+                <li><a href="/Dashboard.html#navigation">Navigation</a></li>
+                <li><a href="/Dashboard.html#combat">Combat</a></li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Presentation</h2>
+            <p>Use the &#x2699; button on the dashboard to choose <strong>Passive display</strong> for an unattended screen, or <strong>Interactive tablet</strong> for touch with expandable detail. Use &#x26F6; for full screen.</p>
+            <p>Each browser remembers its own settings. To keep separate arrangements on one device, add <code>?layout=name</code> to the address, for example <code>/Dashboard.html?layout=tablet</code>.</p>
+        </section>
+
+        <section>
+            <h2>Single panels</h2>
+            <p>Show one panel filling the page, for small screens, OBS browser sources or a Matric web view.</p>
+            <ul class="links" aria-label="Single panels">
+                <li><a href="/Dashboard.html?widget=ship">Ship</a></li>
+                <li><a href="/Dashboard.html?widget=location">Location</a></li>
+                <li><a href="/Dashboard.html?widget=target">Target</a></li>
+                <li><a href="/Dashboard.html?widget=activity">Activity</a></li>
+                <li><a href="/Dashboard.html?widget=route">Route</a></li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Seeing dashes (--)?</h2>
+            <p>The dashboard is connected but hasn't received game data yet. Launch Elite Dangerous and load into the game on the PC running Elite FIP Server.</p>
+        </section>
+    </main>
+</body>
+</html>
