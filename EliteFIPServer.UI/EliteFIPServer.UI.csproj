@@ -50,8 +50,37 @@
     <Content Include="..\EliteFIPServer.Core\wwwroot\**\*" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
-  <Target Name="UpdateBuildVersion" BeforeTargets="Build">
-    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\UpdateBuildVersion.ps1&quot; -VersionPropsPath &quot;$(MSBuildProjectDirectory)\..\EliteFIPServer.Version.props&quot; -BuildInfoPath &quot;$(MSBuildProjectDirectory)\BuildInfo.cs&quot; -AppxManifestPath &quot;$(MSBuildProjectDirectory)\Package.appxmanifest&quot;" />
+  <!-- Runs before BeforeBuild (i.e. before reference resolution and CoreCompile) so the rewritten
+       BuildInfo.cs is what gets compiled. BeforeTargets="Build" is too late: Build's dependencies,
+       including compilation, run first, so the exe always carried the previous build's version.
+       Version.props was already imported at evaluation time, so the bumped value is read back and
+       re-applied to the version properties for GenerateAssemblyInfo.
+       The WinUI/Windows SDK targets re-enter this project's Build a second time in the same build
+       with BuildProjectReferences=false; bumping there too advanced the version by 2 per build, so
+       only the primary instance bumps and every instance applies the bumped value.
+       _BumpedVersionFile is defined inside the targets because IntermediateOutputPath is not yet set
+       when this project body is evaluated (the SDK defines it later, in Sdk.targets). -->
+  <Target Name="UpdateBuildVersion" BeforeTargets="BeforeBuild" Condition="'$(BuildProjectReferences)' != 'false'">
+    <PropertyGroup>
+      <_BumpedVersionFile>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)BumpedVersion.txt</_BumpedVersionFile>
+    </PropertyGroup>
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\UpdateBuildVersion.ps1&quot; -VersionPropsPath &quot;$(MSBuildProjectDirectory)\..\EliteFIPServer.Version.props&quot; -BuildInfoPath &quot;$(MSBuildProjectDirectory)\BuildInfo.cs&quot; -AppxManifestPath &quot;$(MSBuildProjectDirectory)\Package.appxmanifest&quot; -VersionOutputPath &quot;$(_BumpedVersionFile)&quot;" />
+  </Target>
+
+  <Target Name="ApplyBumpedVersion" AfterTargets="UpdateBuildVersion" BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <_BumpedVersionFile>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)BumpedVersion.txt</_BumpedVersionFile>
+    </PropertyGroup>
+    <ReadLinesFromFile File="$(_BumpedVersionFile)" Condition="Exists('$(_BumpedVersionFile)')">
+      <Output TaskParameter="Lines" PropertyName="_BumpedVersion" />
+    </ReadLinesFromFile>
+    <PropertyGroup Condition="'$(_BumpedVersion)' != ''">
+      <Version>$(_BumpedVersion)</Version>
+      <AssemblyVersion>$(_BumpedVersion)</AssemblyVersion>
+      <FileVersion>$(_BumpedVersion)</FileVersion>
+      <InformationalVersion>$(_BumpedVersion)</InformationalVersion>
+    </PropertyGroup>
   </Target>
 
   <Target Name="SignLocalDevBuild" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug' and '$(EnableDevCodeSigning)' != 'false'">

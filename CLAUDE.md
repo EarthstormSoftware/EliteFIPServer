@@ -17,7 +17,7 @@
 - Delegate cross-project ownership and EliteAPI inventory research to the read-only `elite-architecture-reviewer` subagent (Agent tool); keep only its concise result in the main context.
 - Delegate multi-viewport dashboard checks to the `elite-dashboard-verifier` subagent after implementation. Reuse one browser page and avoid opening duplicate validation tabs.
 - Delegate the stop/test/build/restart lifecycle to the `elite-build-runner` subagent (Agent tool); retain only command, totals, failures, PID, and URL in the main conversation.
-- Delegate building the Microsoft Store `.msix` package to the `elite-store-packager` subagent (Agent tool); retain only pack result, package path/size, and version-bump-discard status in the main conversation — never raw `dotnet publish`/`MakeAppx` output.
+- Delegate building the Microsoft Store `.msix` package to the `elite-store-packager` subagent (Agent tool); retain only pack result, package path/size, and packaged version in the main conversation — never raw `dotnet publish`/`MakeAppx` output.
 - Consult [elite-api-data-inventory.md](docs/elite-api-data-inventory.md) only when EliteAPI inventory is relevant; current dashboard implementation is in `EliteFIPServer.Core/wwwroot/Dashboard.html`, `CockpitDashboard.js`, and `Dashboard.css`.
 
 ## Validation
@@ -27,7 +27,7 @@
 - Build the current app with `dotnet build .\EliteFIPServer.UI\EliteFIPServer.UI.csproj --no-restore --nologo -v:minimal`.
 - If `EliteFIPProtocol` changed, build it in Release before testing the server so the HintPath DLL is refreshed.
 - A Debug UI build runs the repository signing target; do not add a separate signing step unless the build reports a signing failure.
-- Every build also runs a pre-build version bump that rewrites `EliteFIPServer.UI/BuildInfo.cs`, `EliteFIPServer.UI/Package.appxmanifest`, and `EliteFIPServer.Version.props`. After a successful validation build, discard that churn (`git checkout -- <file>`) for whichever of those three files had no uncommitted changes before the build started, so validation never leaves the tree dirty. Never discard one that already had pre-existing uncommitted changes — that's real work, not version-bump noise.
+- Every UI build (including the Store publish) runs a pre-build step that increments the build number by exactly one and rewrites `EliteFIPServer.UI/BuildInfo.cs`, `EliteFIPServer.UI/Package.appxmanifest`, and `EliteFIPServer.Version.props`. These bumps are intentional: keep them and commit them with the work — never `git checkout --` them. Each Store submission must carry a higher version than the last one uploaded to Partner Center (4.0.48.0 as of 2026-09-29). If `EliteFIPServer.Version.props` is ever empty or corrupted, restore it from Git and set the version to at least the last Store version before building.
 - After successful validation, restart `EliteFIPServer.UI` and report its PID. The panel dashboard normally listens at `http://127.0.0.1:4545/`.
 - Use the `/validate-elite-app` slash command for the complete stop, validate, build, restart loop.
 
