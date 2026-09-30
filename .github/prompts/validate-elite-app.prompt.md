@@ -16,8 +16,8 @@ Perform the repository validation lifecycle for the affected changes.
    `dotnet test .\EliteFIPServer.Tests\EliteFIPServer.Tests.csproj --no-restore --nologo`
 5. Build:
    `dotnet build .\EliteFIPServer.UI\EliteFIPServer.UI.csproj --no-restore --nologo -v:minimal`
-6. On success, start the newest Debug `win-x64` `EliteFIPServer.exe` under `EliteFIPServer.UI\bin`.
-7. Verify the process remains running and, when panel-server files changed, verify port 4545 and the relevant dashboard URL.
+6. On success, start the newest Debug `win-x64` `EliteFIPServer.exe` under `EliteFIPServer.UI\bin` with the `--start-panel-server` argument.
+7. Verify the process remains running, port 4545 is listening, and the relevant dashboard URL responds.
 8. Report test totals, build warning/error counts, PID, URL, and any validation not performed.
 
 Do not edit source files, commit, merge, push, poll with sleeps, or launch the retired WPF application.

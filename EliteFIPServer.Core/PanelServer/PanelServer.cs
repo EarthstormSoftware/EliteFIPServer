@@ -75,7 +75,6 @@ namespace EliteFIPServer
                     Args = serverCore.ApplicationArgs
                 });
 
-                panelServerBuilder.Services.AddMvcCore().AddMvcOptions(options => options.EnableEndpointRouting=false);
                 panelServerBuilder.Services.AddCors(cors => cors.AddPolicy("CorsPolicy", builder => {
                     builder
                         .AllowAnyMethod()
@@ -83,7 +82,6 @@ namespace EliteFIPServer
                         .AllowCredentials()
                         .SetIsOriginAllowed(_ => true);
                 }));
-                panelServerBuilder.Services.AddControllers().AddNewtonsoftJson();
                 panelServerBuilder.Services.AddSignalR().AddJsonProtocol(options => {
                     options.PayloadSerializerOptions.PropertyNamingPolicy = null;
                 });
@@ -111,9 +109,9 @@ namespace EliteFIPServer
 
                 Log.Instance.Info("Listening on {panelserverurl}", panelServerUrl);
                 PanelHost.Urls.Add(panelServerUrl);
+                PanelHost.UseDefaultFiles();
                 PanelHost.UseStaticFiles();
                 PanelHost.UseRouting();
-                PanelHost.UseMvc();
                 PanelHost.UseCors("CorsPolicy");
 
                 PanelHost.MapHub<GameDataUpdateHub>("/gamedataupdatehub");

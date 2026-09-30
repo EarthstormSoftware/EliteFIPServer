@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <None Include="$(MatricIntegrationPath)" Link="MatricIntegration.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\EliteFIPServer.Core\wwwroot\**\*" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

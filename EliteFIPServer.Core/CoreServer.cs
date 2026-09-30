@@ -58,8 +58,15 @@ namespace EliteFIPServer
         public PanelServer PanelServer { get; private set; }
 
 
+        // Starts the Panel Server for this run without changing the saved Autostart setting (used by automated testing).
+        public const string StartPanelServerSwitch = "--start-panel-server";
+        private readonly bool startPanelServerRequested;
+
         public CoreServer(string[] applicationArgs = null) {
-            ApplicationArgs = applicationArgs ?? Array.Empty<string>();
+            var args = applicationArgs ?? Array.Empty<string>();
+            startPanelServerRequested = args.Contains(StartPanelServerSwitch, StringComparer.OrdinalIgnoreCase);
+            // The remaining arguments are passed to the Panel Server's web host configuration.
+            ApplicationArgs = args.Where(arg => !string.Equals(arg, StartPanelServerSwitch, StringComparison.OrdinalIgnoreCase)).ToArray();
             CurrentState = new ComponentState();
 
             EliteAPIIntegration = new EliteAPIIntegration(this);
@@ -96,7 +103,7 @@ namespace EliteFIPServer
             if (Properties.Settings.Default.AutostartMatricIntegration) {
                 this.StartMatricIntegration();
             }
-            if (Properties.Settings.Default.AutostartPanelServer) {
+            if (Properties.Settings.Default.AutostartPanelServer || startPanelServerRequested) {
                 PanelServer.Start();
             }
 

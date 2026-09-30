@@ -37,6 +37,49 @@ public class CoreServerLifecycleTests
     }
 
     [Fact]
+    public void Start_panel_server_switch_should_not_reach_the_web_host_arguments()
+    {
+        var coreServer = new CoreServer(new[] { "--urls=http://127.0.0.1:1", CoreServer.StartPanelServerSwitch.ToUpperInvariant() });
+
+        Assert.Equal(new[] { "--urls=http://127.0.0.1:1" }, coreServer.ApplicationArgs);
+    }
+
+    [Fact]
+    public async Task PanelServer_should_serve_the_landing_page_at_the_root_url()
+    {
+        var previousPort = Properties.Settings.Default.PanelServerPort;
+        var previousLanAccess = Properties.Settings.Default.PanelServerAllowLanAccess;
+        var coreServer = new CoreServer(Array.Empty<string>());
+
+        try
+        {
+            Properties.Settings.Default.PanelServerPort = 4545;
+            Properties.Settings.Default.PanelServerAllowLanAccess = false;
+            coreServer.PanelServer.Start();
+
+            // The web host starts in the background; allow it a few seconds to begin listening.
+            using var client = new HttpClient();
+            HttpResponseMessage response = null;
+            for (var attempt = 0; attempt < 20 && response == null; attempt++)
+            {
+                try { response = await client.GetAsync("http://127.0.0.1:4545/"); }
+                catch (HttpRequestException) { await Task.Delay(250); }
+            }
+
+            Assert.NotNull(response);
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("Dashboard.html", await response.Content.ReadAsStringAsync());
+        }
+        finally
+        {
+            coreServer.PanelServer.Stop();
+            Properties.Settings.Default.PanelServerPort = previousPort;
+            Properties.Settings.Default.PanelServerAllowLanAccess = previousLanAccess;
+        }
+    }
+
+    [Fact]
     public void PanelServer_should_start_and_remain_started_on_an_available_port()
     {
         var previousPort = Properties.Settings.Default.PanelServerPort;
