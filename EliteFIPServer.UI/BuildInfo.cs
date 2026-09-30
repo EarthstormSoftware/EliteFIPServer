@@ -21,12 +21,12 @@ internal static class BuildInfo
     /// Format: Major.Minor.YYYYMMDD_BBBBB
     /// where BBBBB matches the third component of the version number.
     /// </summary>
-    public const string BuildString = "4.0.20260929_00050";
+    public const string BuildString = "4.0.20260929_00051";
 
     /// <summary>
     /// Application version (synchronized with assembly version).
     /// </summary>
-    public const string Version = "4.0.50.0";
+    public const string Version = "4.0.51.0";
 }
 
 
