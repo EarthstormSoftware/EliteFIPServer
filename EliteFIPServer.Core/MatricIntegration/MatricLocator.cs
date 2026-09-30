@@ -6,8 +6,8 @@ using System.IO;
 namespace EliteFIPServer {
 
     // Locates the MATRIC Desktop install directory so MatricIntegration.dll can be loaded from
-    // whatever copy actually ships with the user's installed MATRIC version, rather than the
-    // vendored compile-time-only stub in libs\Matric.
+    // whatever copy actually ships with the user's installed MATRIC version. The DLL is not
+    // redistributed with this app; builds only compile against it (see EliteFIPServer.Matric.props).
     public static class MatricLocator {
 
         public static string GetInstallDirectory() {

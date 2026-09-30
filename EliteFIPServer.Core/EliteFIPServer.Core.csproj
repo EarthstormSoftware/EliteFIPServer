@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\EliteFIPServer.Version.props" />
+  <Import Project="..\EliteFIPServer.Matric.props" />
 
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
@@ -28,7 +29,7 @@
       <HintPath>..\..\EliteFIPProtocol\EliteFIPProtocol\bin\Release\net10.0\EliteFIPProtocol.dll</HintPath>
     </Reference>
     <Reference Include="MatricIntegration">
-      <HintPath>..\libs\Matric\MatricIntegration.dll</HintPath>
+      <HintPath>$(MatricIntegrationPath)</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

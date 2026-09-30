@@ -1,0 +1,19 @@
+<Project>
+  <!--
+    MatricIntegration.dll is Ex Machina's proprietary library and is not redistributed in this
+    repository. Builds compile against, in order:
+      1. an explicit -p:MatricIntegrationPath=... override,
+      2. a local copy at libs\Matric\MatricIntegration.dll (gitignored),
+      3. the copy shipped with an installed MATRIC Desktop.
+    At runtime MatricAssemblyResolver loads the copy from the user's MATRIC install.
+  -->
+  <PropertyGroup>
+    <MatricIntegrationPath Condition="'$(MatricIntegrationPath)' == '' and Exists('$(MSBuildThisFileDirectory)libs\Matric\MatricIntegration.dll')">$(MSBuildThisFileDirectory)libs\Matric\MatricIntegration.dll</MatricIntegrationPath>
+    <MatricIntegrationPath Condition="'$(MatricIntegrationPath)' == ''">$(ProgramW6432)\Ex Machina\MATRIC Desktop\MatricIntegration.dll</MatricIntegrationPath>
+  </PropertyGroup>
+
+  <Target Name="CheckMatricIntegrationPath" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(MatricIntegrationPath)')"
+           Text="MatricIntegration.dll not found at '$(MatricIntegrationPath)'. Install MATRIC Desktop (https://matricapp.com), copy MatricIntegration.dll from its install folder to libs\Matric\, or build with -p:MatricIntegrationPath=&lt;path to MatricIntegration.dll&gt;." />
+  </Target>
+</Project>

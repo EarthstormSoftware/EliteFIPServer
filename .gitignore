@@ -368,3 +368,6 @@ FodyWeavers.xsd
 # Local Microsoft Store identity (real Partner Center Package Identity Name, Publisher CN,
 # and Publisher Display Name) — never commit this. See StoreIdentity.local.json.template.
 EliteFIPServer.UI/StoreIdentity.local.json
+# MatricIntegration.dll is Ex Machina's proprietary library; never commit it.
+# Builds use a local copy here if present, else the installed MATRIC Desktop copy (see EliteFIPServer.Matric.props).
+libs/Matric/

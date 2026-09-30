@@ -1,4 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\EliteFIPServer.Matric.props" />
+
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -21,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\libs\Matric\MatricIntegration.dll" Link="MatricIntegration.dll" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="$(MatricIntegrationPath)" Link="MatricIntegration.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
