@@ -3,7 +3,9 @@
 # (GenerateAppxPackageOnBuild / PublishAppxPackage) entirely — that pipeline never reliably invokes
 # actual packaging for this project on the .NET 10 SDK, and opting into it (WindowsPackageType=MSIX /
 # EnableMsixTooling=true) previously broke the normal loose-exe build too. EliteFIPServer.UI.csproj
-# stays a plain WindowsPackageType=None project; publish here is just a normal self-contained publish.
+# stays a plain WindowsPackageType=None project; publish here is just a normal publish. The Windows App
+# SDK is bundled (WindowsAppSDKSelfContained), but .NET is not: users need the .NET 10 and ASP.NET Core
+# 10 runtimes installed.
 # See docs/HANDOFF.md for the full investigation and incident writeup.
 #
 # Prerequisites:

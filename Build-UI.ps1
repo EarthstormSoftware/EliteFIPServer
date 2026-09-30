@@ -3,18 +3,9 @@ param(
     [string]$Configuration = "Debug"
 )
 
-$root = $PSScriptRoot
-$versionScript = Join-Path $root "UpdateBuildVersion.ps1"
-$versionProps = Join-Path $root "EliteFIPServer.Version.props"
-$buildInfo = Join-Path $root "EliteFIPServer.UI\BuildInfo.cs"
-$uiProject = Join-Path $root "EliteFIPServer.UI\EliteFIPServer.UI.csproj"
-
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $versionScript `
-    -VersionPropsPath $versionProps `
-    -BuildInfoPath $buildInfo
-if ($LASTEXITCODE -ne 0) {
-    exit $LASTEXITCODE
-}
+# The UI project's UpdateBuildVersion target increments the version once per build, so no
+# separate version step is needed here.
+$uiProject = Join-Path $PSScriptRoot "EliteFIPServer.UI\EliteFIPServer.UI.csproj"
 
 dotnet build $uiProject --configuration $Configuration --no-restore
 exit $LASTEXITCODE

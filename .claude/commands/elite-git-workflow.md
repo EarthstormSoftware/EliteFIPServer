@@ -5,7 +5,7 @@ argument-hint: "[action, branch, commit message, and whether to push]"
 
 Carry out the following request conservatively: $ARGUMENTS
 
-1. Stop `EliteFIPServer.UI`; never touch `EliteFIPServer.exe`.
+1. Stop the running `EliteFIPServer.UI` app (process `EliteFIPServer`). Never stop unrelated processes.
 2. Inspect the exact current branch, `git status --short`, and relevant diff before changing Git state.
 3. Do not stage unrelated, generated, ignored, user-specific, certificate, log, `bin`, or `obj` files.
 4. If the request affects the sibling `EliteFIPProtocol`, inspect and commit that repository separately. Never combine repositories conceptually into one commit.

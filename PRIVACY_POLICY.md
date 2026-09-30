@@ -1,6 +1,6 @@
 # Privacy Policy for Elite FIP Server
 
-**Last updated:** 2026-09-13
+**Last updated:** 2026-09-30
 
 This policy explains what Elite FIP Server ("the app") does and does not do with your data. The short version: the app runs entirely on your own PC and local network. It does not create accounts, does not send your data to the developer or any cloud service, and does not include advertising, analytics, or tracking.
 
@@ -18,9 +18,9 @@ Elite FIP Server reads game state from a local, running copy of Elite Dangerous 
 To do this, the app:
 
 - Reads Elite Dangerous's local journal log files (the same files Elite Dangerous itself writes to your PC) to determine current game state.
-- Reads a single Windows registry value (`HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\...`) to locate an installed copy of the Matric application on your PC, if present. Nothing is written to the registry, and this information is not transmitted anywhere.
-- Writes diagnostic log files to `%AppData%\EliteFIPServer\` on your PC, automatically rotated and deleted after 14 days, for troubleshooting purposes. These logs stay on your PC and are not automatically sent anywhere; you may be asked to share them manually if you report a bug.
-- Stores your app preferences (such as panel server port and whether LAN access is enabled) locally on your PC using standard Windows application settings.
+- Reads a single Windows registry value (`HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\...`) and, if needed, checks whether Matric is currently running, to locate an installed copy of the Matric application on your PC, if present. Nothing is written to the registry, and this information is not transmitted anywhere.
+- If you turn on logging in Settings (it is off by default), writes diagnostic log files to `%AppData%\EliteFIPServer\` on your PC, rotated daily and deleted after 14 days, for troubleshooting purposes. Errors are also recorded in the Windows Event Log on your PC. These logs stay on your PC and are not automatically sent anywhere; you may be asked to share them manually if you report a bug.
+- Stores your app preferences (such as panel server port, whether LAN access is enabled, and Matric button text) locally on your PC.
 
 ## What the app does not do
 

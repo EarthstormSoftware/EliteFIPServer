@@ -20,7 +20,7 @@ You are the read-only browser verifier for the EliteFIPServer dashboard.
 
 1. Confirm SignalR connection state and the affected values/rendering.
 2. Passive display: check overlap, page overflow, panel internal overflow, and interaction-only content.
-3. Tablet: check relevant 390px, 768px, and 1200px widths (via `browser_resize`); verify columns, Route span, horizontal overflow, and contained widget scrolling.
+3. Tablet: check relevant 390px, 768px, and 1200px widths (via `browser_resize`); verify columns, Route span, horizontal overflow, and contained widget scrolling. On a desktop browser, resizing alone does not enable tablet mode above 760px — set the `#presentation-mode` select to tablet first, or you will measure the display layout.
 4. Direct embed: verify exactly one requested widget, full host bounds, no chrome, no overflow, and live connection.
 5. For a visual change, capture one representative screenshot with `browser_take_screenshot` after measurements pass.
 

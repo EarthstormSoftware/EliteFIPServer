@@ -11,7 +11,7 @@ Only run this after the user confirms the package is live (or submitted) in Part
 
 - Tags are lightweight (no `-a`). The version tag is `v` plus the first three parts: `4.0.51.0` → `v4.0.51`.
 - `Release` is a lightweight tag that moves to the newest Store build. It is the source of truth for the last uploaded version: `git show Release:EliteFIPServer.Version.props`.
-- Earlier releases: `v4.0.48` (361b057), `v4.0.51` (7d03f56).
+- Earlier releases: `v4.0.48` (31c0c5d), `v4.0.51` (d766d00).
 
 ## Steps
 

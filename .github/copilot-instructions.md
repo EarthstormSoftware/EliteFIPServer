@@ -27,7 +27,7 @@
 - Build the current app with `dotnet build .\EliteFIPServer.UI\EliteFIPServer.UI.csproj --no-restore --nologo -v:minimal`.
 - If `EliteFIPProtocol` changed, build it in Release before testing the server so the HintPath DLL is refreshed.
 - A Debug UI build runs the repository signing target; do not add a separate signing step unless the build reports a signing failure.
-- Every UI build (including the Store publish) runs a pre-build step that increments the build number by exactly one and rewrites `EliteFIPServer.UI/BuildInfo.cs`, `EliteFIPServer.UI/Package.appxmanifest`, and `EliteFIPServer.Version.props`. These bumps are intentional: keep them and commit them with the work — never `git checkout --` them. Each Store submission must carry a higher version than the last one uploaded to Partner Center (4.0.48.0 as of 2026-09-29). If `EliteFIPServer.Version.props` is ever empty or corrupted, restore it from Git and set the version to at least the last Store version before building.
+- Every UI build (including the Store publish) runs a pre-build step that increments the build number by exactly one and rewrites `EliteFIPServer.UI/BuildInfo.cs`, `EliteFIPServer.UI/Package.appxmanifest`, and `EliteFIPServer.Version.props`. These bumps are intentional: keep them and commit them with the work — never `git checkout --` them. Each Store submission must carry a higher version than the last one uploaded to Partner Center. The `Release` Git tag marks that build; read its version with `git show Release:EliteFIPServer.Version.props` (4.0.51.0 as of 2026-09-30). If `EliteFIPServer.Version.props` is ever empty or corrupted, restore it from Git and set the version to at least the last Store version before building.
 - After successful validation, restart `EliteFIPServer.UI` and report its PID. The panel dashboard normally listens at `http://127.0.0.1:4545/`.
 - Use the `/validate-elite-app` prompt for the complete stop, validate, build, restart loop.
 
@@ -36,6 +36,7 @@
 - Do not commit, merge, create/delete branches, or push unless explicitly requested.
 - Before Git state changes, inspect the current branch and exact porcelain status.
 - Use the `/elite-git-workflow` prompt for branch, commit, and merge requests.
+- Once a Store build is live, commit its version bump, add a lightweight `vX.Y.Z` tag, and move the lightweight `Release` tag to the same commit (`git tag -f Release`; pushing it needs `git push -f origin Release`).
 
 ## Continuity
 

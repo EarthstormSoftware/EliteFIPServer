@@ -2,64 +2,66 @@
 
 Elite FIP Server is a .NET app which uses [EliteAPI](https://github.com/Somfic/EliteAPI) to 
 read Elite Dangerous game information, and feed it to [Matric](https://matricapp.com) via the Matric 
-Integration API. It also makes some game data available via a self-hosted web server, allowing the data 
-to be viewed via browser or browser based viwer, and the display of that data to be customised.
+Integration API. It also makes game data available via a self-hosted web server, allowing the data 
+to be viewed in a browser dashboard (for example on a second screen or tablet), and the display of that data to be customised.
 
 The integration with Matric allows Matric to reflect the current game state in the UI, with particular respect to button/toggle state 
 (such as Landing Gear or Lights), and also other information like current target data. Using a custom touch
 screen display rather than a traditional keyboard increases immersion and lowers the requirement to remember
 all the many key bindings you might need.
 
-Current builds are produced for the active WinUI 3 app. The legacy WPF project is retired and is no longer the supported runtime path.
+Elite FIP Server v4 is a WinUI 3 app and is available from the Microsoft Store. The older WPF app (v3 and earlier) is retired and no longer supported.
 
 If you are upgrading from a previous release, please check the runtime prerequisites and startup notes before running the app.
 
 ---
 
 ## Runtime Pre-requisites
-- Elite FIP Server is a .NET 10 application and requires the appropriate [runtime](https://dotnet.microsoft.com/download/dotnet/10.0/runtime)
-  to be installed.
+- Elite FIP Server is a .NET 10 application. Install both of these from the [.NET 10 download page](https://dotnet.microsoft.com/download/dotnet/10.0):
+  - .NET Runtime 10 (x64)
+  - ASP.NET Core Runtime 10 (x64), used by the built-in Panel Server
 
-  For the desktop UI, install the .NET 10 Desktop runtime. The panel server also requires the ASP.NET Core runtime / hosting bundle for the built-in web host.
-
-- [Matric v2.x and the MatricIntegration.dll](https://matricapp.com)  
-  Elite FIP Server supports integration with Matric v2.x via the MatricIntegration.dll provided in the Matric installation folder.
-  This DLL **must** be copied to the Elite FIP Server folder or an exception will occur and the pre-packaged installation includes
-  this file.
-  
+- [Matric v2.x](https://matricapp.com) (optional, only needed for Matric integration)  
+  Elite FIP Server uses the MatricIntegration.dll that ships with Matric. It is not included with Elite FIP Server;
+  the app finds it in your Matric installation folder automatically.
 
 ---
 
 ## Build Pre-Requisites
-Aside from various libraries which VS will highlight if missing, and which are available via Nu Package Manager,
+Aside from various libraries which Visual Studio will highlight if missing, and which are available via NuGet,
 Elite FIP Server requires the following:
 
-- [EliteAPI](https://github.com/Somfic/EliteAPI)
-- [EliteFIPProtocol](https://github.com/EarthstormSoftware/EliteFIPProtocol)
-- [MatricIntegration.dll](https://matricapp.com)
+- [EliteAPI](https://github.com/Somfic/EliteAPI), built in Release, in a sibling folder (`..\EliteAPI`)
+- [EliteFIPProtocol](https://github.com/EarthstormSoftware/EliteFIPProtocol), built in Release, in a sibling folder (`..\EliteFIPProtocol`)
+- MatricIntegration.dll. This is Ex Machina's library and is not included in this repository. The build uses the first of:
+  1. a path passed with `-p:MatricIntegrationPath=<path to MatricIntegration.dll>`
+  2. a copy you place in `libs\Matric\MatricIntegration.dll` (gitignored)
+  3. an installed [Matric Desktop](https://matricapp.com) (`C:\Program Files\Ex Machina\MATRIC Desktop`)
 
-To build the current UI and Core projects with one synchronized version increment, run from the repository root:
+To build the app, run from the repository root:
 
 ```powershell
 .\Build-UI.ps1
 ```
 
-This increments the shared version once, then builds the UI and its Core project reference. Running `dotnet build` directly does not increment the version.
+or build `EliteFIPServer.UI\EliteFIPServer.UI.csproj` directly. Every build increments the build number and updates
+`EliteFIPServer.Version.props`, `EliteFIPServer.UI\BuildInfo.cs` and `EliteFIPServer.UI\Package.appxmanifest`.
 
-Older versions of Elite FIP server, used the EliteJournalReader project to provide in-game events.
+Older versions of Elite FIP Server used the EliteJournalReader project to provide in-game events.
 
 ---
 
 ## Usage
 Use at own risk :)
-1. Build or install the current WinUI app from this repository using the supported UI project.
+1. Install Elite FIP Server from the Microsoft Store, or build it from this repository.
 2. Start Matric and connect a client.
 3. Enable API Integration in Matric (Settings > API Integration > Enable 3rd party integration). Please note that PIN authorisation is no longer supported.
-4. Run `EliteFIPServer.UI.exe` from the built output folder.
-5. Matric Integration is not enabled by default. You can start this manually from the UI, and configure it to start automatically in the Settings tab.
-6. The Panel Server (which publishes game data via a built-in web server) can also be started manually, and configured to start automatically in the Settings tab.
+4. Start Elite FIP Server (`EliteFIPServer.exe` if you built it yourself).
+5. Matric Integration is not enabled by default. You can start it from the Status tab, and set it to start automatically in Settings > Matric integration.
+6. The Panel Server (which publishes game data via a built-in web server) can also be started from the Status tab, or with the Open dashboard button,
+   and set to start automatically in the Settings tab.
 
-The old WPF `EliteFIPServer.exe` app is deprecated and should not be used for current builds or support.
+Help for each screen is available from the ? button at the top right of the app, or by pressing F1.
 
 ### Matric Authorisation
 Elite FIP Server v2 does not support Matric PIN authorisation. Please disable this in Matric.
@@ -73,40 +75,34 @@ In the 'Settings' panel the Enable Logging option will enable or disable logging
 off. When enabled, the log is located in the User AppData\Roaming\EliteFIPServer folder.
 For example: c:\Users\MyUserName\AppData\Roaming\EliteFIPServer
 
-### Autostart Matric Integration
-**Not recommended** The Settings tab allows Matric Integration to be enabled when Elite FIP server starts. This should only be enabled if you always start Matric before
-starting Elite FIP Server. See Known issues for further information.
+### Matric Integration Settings
+Settings > Matric integration lets you:
+- start Matric Integration automatically when Elite FIP Server starts
+- change the Matric API port and the retry interval between connection attempts
+- switch all connected Matric clients to a page of their deck automatically when you enter a game state
+- set up client profiles, which override deck and page settings for individual Matric devices (client IDs are shown on the Clients tab)
+- customise button text (see below)
+
+If Matric isn't running when Matric Integration starts, the connection attempt fails and Matric Integration returns to Stopped.
+Start Matric, then start Matric Integration again from the Status tab.
 
 ### Autostart Panel Server
-The Settings tab allows the Panel Server  to be enabled when Elite FIP server starts. See [Panel server](docs/panel-server.md) for more information
+The Settings tab allows the Panel Server to be started when Elite FIP Server starts. See [Panel server](docs/panel-server.md) for more information.
 
 ### Enable Custom Button Text
-To have Elite FIP server change button text when game state changes, you have to update the ButtonTextConfig.json file in the same folder
-where the Elite FIP Server is run from. A sample file is provided with all currently customisable buttons (the button names match those
-described in the current feature section below). You should not change the button name, only the Off/On text for those buttons you want to customise,
-and the flag to enable the update for that button.
+Elite FIP Server can change the text of a button, as well as its state, when game state changes. To set this up, go to
+Settings > Matric integration > Button text. For each supported button (the names match those in the feature section below),
+set the Off and On text and tick Update to enable it. For example, for HudMode you could set the Off text to "Combat" and the
+On text to "Analysis". Reset to defaults restores the original text.
 
-For example, to have Elite FIP Server change the button state for the HudMode button, edit the following line:
-```
-{"ButtonName": "HudMode", "OffText":"Hud Mode", "OnText":"Hud Mode", "UpdateButtonText": false},
-```
-to something like 
-```
-{"ButtonName": "HudMode", "OffText":"Combat", "OnText":"Analysis", "UpdateButtonText": true},
-```
-Save the file and either restart Elite FIP Server or go to the Settings panel and click save without changing 
-any settings (which triggers a reload of the config file).
+Your button text is saved in `%AppData%\EliteFIPServer\MatricButtonTextConfig.json`.
 
 
 ---
 
 ## Known Issues
 
- - You must start Matric before starting Matric Integration in Elite FIP Server (either manually or automatically). If you start 
-   Matric Integration in Elite FIP Server before starting Matric, the Integration capability will fail and cannot be started unless
-   you restart Elite FIP Server. It is therefore not recommended to enable Autostart of Matric integration at this time.
-
- - When you arrive at the final destination system of a planned route, the route information will disappear during the final hyerspace
+ - When you arrive at the final destination system of a planned route, the route information will disappear during the final hyperspace
    jump. This is working as intended, and is due to the sequence of events emitted by Elite Dangerous. Essentially Elite clears the route
    automatically during the last jump, before the arrival event in the final system, resulting in the route being cleared in FIP server.
    To mitigate this, Elite FIP server provides a 'Previous Route' which will show the completed route if desired. See 
@@ -148,10 +144,10 @@ For use with multi-position switches. All simple toggle controls support use of 
 Specific controls supporting more than 2-way switches might be added later - if you have a specific use case, please contact the developer.
 
 #### Slider (sld) 
-Used to create Guages. Specific values will depend on the button.
+Used to create Gauges. Specific values will depend on the button.
 
 #### Text (txt)
-A flat text field, used for lables and text information like target data. These are special cases and information is provided below.
+A flat text field, used for labels and text information like target data. These are special cases and information is provided below.
 
 ### Button Support Matrix
 
@@ -227,11 +223,21 @@ Status labels  | StatusLabel|  | x | Fixed label for Status panel
 
 Text displays require a text button, of sufficient width and height to display the full text. If the text button
 is not large enough for the content, the behaviour is 'undefined'.
-Text size is per standard Matric setting, but for text which combines multiple Elite data points in one display,  eeach field is defined on a new line. 
+Text size is per standard Matric setting, but for text which combines multiple Elite data points in one display, each field is defined on a new line. 
 
 
 ---
 # Change History
+
+### v4.0
+- New WinUI 3 desktop app, available from the Microsoft Store
+- Updated to .NET 10
+- New unified browser dashboard with cockpit, navigation and combat views, passive display and tablet modes,
+  named layouts, and single-widget embeds
+- Much more game data on the dashboard (including loadout, cargo, materials, missions, stations, exploration and docking)
+- Matric: automatic page switching, per-client profiles, and button text editing in the app
+- Optional LAN access for the Panel Server
+- MatricIntegration.dll is now found in the Matric installation folder instead of being copied next to the app
 
 ### v3.2.0
 - Significant internal refactoring
@@ -261,7 +267,7 @@ Text size is per standard Matric setting, but for text which combines multiple E
 - Enabled updates to all connected Matric clients
 - Renamed button identifiers for consistency (breaking change)
 - Added new button types (Warning and Switch)
-- Added additional Status indictors
+- Added additional Status indicators
 
 
 
@@ -276,7 +282,7 @@ Text size is per standard Matric setting, but for text which combines multiple E
 
 ---
 # Thanks to...
-- Somfic and all the contributers to EliteAPI
+- Somfic and all the contributors to EliteAPI
 - AnarchyZG - the developer of Matric, both for the software and the support
 - The developers and contributors to EliteJournalReader
 - The developers and contributors to all the other open tools and packages that made this feasible. 
