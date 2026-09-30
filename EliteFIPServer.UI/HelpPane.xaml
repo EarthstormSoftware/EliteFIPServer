@@ -116,6 +116,7 @@
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Panel Server port: only change it if another program already uses 4545." />
                     <TextBlock Style="{StaticResource HelpBody}" Text="Port and LAN changes take effect after you stop and start the Panel Server." />
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="Window behaviour" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Start with Windows: launches Elite FIP Server when you sign in. If you turn it off in Task Manager, turn it back on in Settings › Apps › Startup." />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Minimise to tray: hides the window in the notification area when minimised. Double-click the tray icon to reopen it, or right-click it to open the dashboard or exit." />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Start minimised: launches straight to the tray (or the taskbar if Minimise to tray is off). This is useful when started with Windows." />
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="General" />
@@ -132,7 +133,8 @@
                     <TextBlock Style="{StaticResource HelpBody}" Text="4.  On the other device, which must be on the same network, open this PC's address in a browser:" />
                     <TextBlock Text="{Binding PanelLanUrlText}" FontWeight="SemiBold" IsTextSelectionEnabled="True" Margin="20,0,0,0"
                                Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    <TextBlock Style="{StaticResource HelpBody}" Text="Tip: use your browser's Add to Home Screen option on a tablet to open the dashboard full screen like an app." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Or select the QR code button next to the LAN URL on the Status tab and scan it with the device's camera." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Tip: use your browser's Add to Home Screen option on a tablet to give the dashboard its own icon. On an iPad it then opens full screen like an app." />
                 </StackPanel>
             </Expander>
 

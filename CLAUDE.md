@@ -3,7 +3,7 @@
 ## Architecture
 
 - `EliteFIPServer.UI` is the supported WinUI 3 application. Its output assembly is `EliteFIPServer.exe`; build and run that only.
-- The legacy `EliteFIPServer` WPF app is retired and must not be built or launched unless explicitly requested for archival work.
+- The former WPF app (v3 and earlier) is retired; its source was removed in commit efe64d8 and survives only in Git history and the `v3.x` tags.
 - `EliteFIPServer.Core` owns EliteAPI ingestion, MATRIC integration, the ASP.NET Core panel server, and the served browser assets under `EliteFIPServer.Core/wwwroot/**`. See [EliteFIPServer.Core/CLAUDE.md](EliteFIPServer.Core/CLAUDE.md) and [EliteFIPServer.Core/wwwroot/CLAUDE.md](EliteFIPServer.Core/wwwroot/CLAUDE.md) for scoped guidance.
 - The WinUI project hosts Core directly and copies the Core-owned web assets into its output.
 - Browser contracts are normalized DTOs owned by the server. Do not expose EliteAPI event objects directly.

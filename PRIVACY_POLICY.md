@@ -18,7 +18,8 @@ Elite FIP Server reads game state from a local, running copy of Elite Dangerous 
 To do this, the app:
 
 - Reads Elite Dangerous's local journal log files (the same files Elite Dangerous itself writes to your PC) to determine current game state.
-- Reads a single Windows registry value (`HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\...`) and, if needed, checks whether Matric is currently running, to locate an installed copy of the Matric application on your PC, if present. Nothing is written to the registry, and this information is not transmitted anywhere.
+- Reads a single Windows registry value (`HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\...`) and, if needed, checks whether Matric is currently running, to locate an installed copy of the Matric application on your PC, if present. This information is not transmitted anywhere.
+- If you turn on **Start with Windows** in Settings (it is off by default), registers the app to start when you sign in. The Microsoft Store version uses the standard Windows startup setting, which you can also change in Task Manager or Settings › Apps › Startup; other versions add a single entry under `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run`, which is removed when you turn the option off. Apart from this, the app writes nothing to the registry.
 - If you turn on logging in Settings (it is off by default), writes diagnostic log files to `%AppData%\EliteFIPServer\` on your PC (the Microsoft Store version may keep this folder in the app's own storage instead), rotated daily and deleted after 14 days, for troubleshooting purposes. Errors are also recorded in the Windows Event Log on your PC. These logs stay on your PC and are not automatically sent anywhere; you may be asked to share them manually if you report a bug.
 - Stores your app preferences (such as panel server port, whether LAN access is enabled, and Matric button text) locally on your PC.
 
@@ -27,11 +28,12 @@ To do this, the app:
 - It does not require or create a user account, sign-in, or Frontier account credentials.
 - It does not transmit your game data, journal contents, logs, or settings to the developer or to any cloud or third-party service.
 - It does not include advertising, analytics, crash-reporting services, or usage tracking.
+- It does not load fonts, scripts, or other content from the internet.
 - It does not sell or share your data, because it does not collect any data off your device in the first place.
 
 ## Third-party content
 
-The web dashboard's stylesheet loads a font from Google Fonts (`fonts.googleapis.com`) when the dashboard page is opened in a browser. Loading this font causes your browser to make a direct request to Google, which may see the requesting device's IP address, subject to [Google's own privacy policy](https://policies.google.com/privacy). This only happens when you actively open the dashboard page in a browser; no other part of the app contacts Google or any other third party.
+None. The dashboard's pages, scripts and fonts are all served by the app itself, so opening the dashboard in a browser does not contact Google or any other third party. The QR code shown for the dashboard's network address is also created on your PC.
 
 ## Children's privacy
 

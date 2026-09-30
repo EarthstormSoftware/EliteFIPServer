@@ -31,6 +31,13 @@
             <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
                 <Grid ColumnSpacing="24">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2"><TextBlock Text="Start with Windows" FontWeight="SemiBold" /><TextBlock x:Name="StartWithWindowsDescription" Text="Launch the application when you sign in to Windows" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" /></StackPanel>
+                    <ToggleSwitch x:Name="StartWithWindowsToggle" Grid.Column="1" IsEnabled="False" Toggled="StartWithWindows_Toggled" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                <Grid ColumnSpacing="24">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <StackPanel Spacing="2"><TextBlock Text="Minimise to tray" FontWeight="SemiBold" /><TextBlock Text="Hide the window to a system tray icon instead of the taskbar when minimised" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" /></StackPanel>
                     <ToggleSwitch Grid.Column="1" IsOn="{Binding MinimiseToTray, Mode=TwoWay}" VerticalAlignment="Center" />
                 </Grid>

@@ -173,9 +173,26 @@
                                         <!-- Own row at the bottom so the extra line doesn't open a gap in the right-hand column. -->
                                         <TextBlock Grid.Row="4" Text="LAN URL" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Margin="0,0,8,0"
                                                    Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding PanelLanUrlText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" IsTextSelectionEnabled="True"
-                                                   Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}"
-                                                   ToolTipService.ToolTip="Address for tablets and other devices on your network" />
+                                        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                                                    Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <TextBlock Text="{Binding PanelLanUrlText}" Foreground="{ThemeResource TextFillColorPrimaryBrush}" IsTextSelectionEnabled="True" VerticalAlignment="Center"
+                                                       ToolTipService.ToolTip="Address for tablets and other devices on your network" />
+                                            <Button Padding="4" VerticalAlignment="Center" AutomationProperties.Name="Show QR code"
+                                                    ToolTipService.ToolTip="Show a QR code to scan with a tablet or phone">
+                                                <FontIcon Glyph="&#xED14;" FontSize="14" />
+                                                <Button.Flyout>
+                                                    <Flyout Opening="LanQrFlyout_Opening">
+                                                        <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                                            <!-- White backing so it scans in dark mode too. -->
+                                                            <Border Background="White" Padding="8" CornerRadius="4" HorizontalAlignment="Center">
+                                                                <Image x:Name="LanQrImage" Width="200" Height="200" />
+                                                            </Border>
+                                                            <TextBlock Text="Scan with a tablet or phone camera" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
                             </Grid>

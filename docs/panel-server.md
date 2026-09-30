@@ -23,7 +23,17 @@ URLs that include the port; the provided pages themselves don't need changing.
 
 By default the Panel Server only accepts connections from the PC it runs on (`http://127.0.0.1:4545`). To use the
 dashboard on a tablet, phone or another PC, turn on **Allow LAN access** in the Settings tab. The Status tab then shows
-the LAN URL to use on the other device. Windows may ask you to allow Elite FIP Server through the firewall.
+the LAN URL to use on the other device; select the QR code button next to it and scan the code with the device's
+camera to open it without typing. Windows may ask you to allow Elite FIP Server through the firewall.
+
+### Adding the dashboard to a tablet's home screen
+
+Open the dashboard view and layout you want on the tablet, then use the browser's **Add to Home Screen** (or
+**Install app**) option. The icon reopens that same view and layout. On an iPad or iPhone it opens full screen,
+like an app. Most Android browsers only allow full-screen web apps from secure (HTTPS) sites, so there the icon
+opens the dashboard in a normal browser tab; use the dashboard's fullscreen button instead.
+
+The dashboard needs no internet connection: its fonts and scripts are all served by Elite FIP Server.
 
 ### Troubleshooting
 

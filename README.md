@@ -92,6 +92,12 @@ Start Matric, then start Matric Integration again from the Status tab.
 ### Autostart Panel Server
 The Settings tab allows the Panel Server to be started when Elite FIP Server starts. See [Panel server](docs/panel-server.md) for more information.
 
+### Start with Windows
+Turn on Settings > Start with Windows to launch Elite FIP Server when you sign in. Combine it with Start minimised
+(and Minimise to tray) and the automatic start options to have everything running in the background, ready for the game.
+In the Microsoft Store version you can also turn it off in Task Manager (Startup apps) or Settings > Apps > Startup;
+if you turn it off there, turn it back on there too.
+
 ### Enable Custom Button Text
 Elite FIP Server can change the text of a button, as well as its state, when game state changes. To set this up, go to
 Settings > Matric integration > Button text. For each supported button (the names match those in the feature section below),
@@ -239,7 +245,10 @@ Text size is per standard Matric setting, but for text which combines multiple E
   named layouts, and single-widget embeds
 - Much more game data on the dashboard (including loadout, cargo, materials, missions, stations, exploration and docking)
 - Matric: automatic page switching, per-client profiles, and button text editing in the app
-- Optional LAN access for the Panel Server
+- Optional LAN access for the Panel Server, with a QR code to open the dashboard on a tablet or phone
+- Start with Windows option
+- The dashboard's fonts are served by the app, so it works without an internet connection and contacts no third parties
+- The dashboard can be added to a tablet's home screen with its own icon
 - MatricIntegration.dll is now found in the Matric installation folder instead of being copied next to the app
 
 ### v3.2.0

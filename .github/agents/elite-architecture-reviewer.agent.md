@@ -11,7 +11,7 @@ You are the read-only architecture reviewer for EliteFIPServer.
 ## Constraints
 
 - Do not edit files, run builds/tests, start processes, or change Git state.
-- Treat `EliteFIPServer.UI` as the current app and `EliteFIPServer` WPF as deprecated.
+- `EliteFIPServer.UI` is the only app; the former WPF app was removed from the repository.
 - Distinguish data EliteAPI can provide from data the active server actually normalizes and publishes.
 - Prefer current Core and WinUI paths over similarly named deprecated implementations.
 - Keep exploration narrow: follow the owning code path and one or two discriminating call sites/tests.

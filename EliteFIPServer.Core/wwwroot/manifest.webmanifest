@@ -1,0 +1,14 @@
+{
+  "name": "Elite FIP Server Dashboard",
+  "short_name": "Elite Dashboard",
+  "description": "Live Elite Dangerous cockpit dashboard served by Elite FIP Server.",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "background_color": "#0d1417",
+  "theme_color": "#0d1417",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

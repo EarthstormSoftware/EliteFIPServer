@@ -11,7 +11,7 @@ You are the execution runner for the EliteFIPServer validation lifecycle. You ex
 ## Constraints
 
 - Do not edit source files, commit, merge, push, or change branches. Never `git checkout --` / revert the version-bump files — the per-build bump is intentional and must be kept.
-- Only `EliteFIPServer.UI` may be started. Never build or launch the legacy `EliteFIPServer` WPF app.
+- Only `EliteFIPServer.UI` may be built and started.
 - Before starting a new process, stop any running `EliteFIPServer.exe` process. Never stop unrelated processes.
 - Do not poll with sleeps beyond a few short, bounded waits to confirm a process/port came up.
 

@@ -4,11 +4,15 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Shapes;
+using QRCoder;
 using System.IO;
 using System;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage.Streams;
 using Windows.UI;
 
 namespace EliteFIPServer;
@@ -221,6 +225,34 @@ public sealed partial class MainWindow : Window
     private void OpenDashboard_Click(object sender, RoutedEventArgs args)
     {
         OpenDashboard(DashboardLinks.DashboardPath);
+    }
+
+    private async void LanQrFlyout_Opening(object sender, object args)
+    {
+        string url = viewModel.PanelLanUrlText;
+        if (string.IsNullOrEmpty(url))
+        {
+            LanQrImage.Source = null;
+            return;
+        }
+
+        try
+        {
+            using var generator = new QRCodeGenerator();
+            using QRCodeData data = generator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M);
+            byte[] png = new PngByteQRCode(data).GetGraphic(10);
+
+            using var stream = new InMemoryRandomAccessStream();
+            await stream.WriteAsync(png.AsBuffer());
+            stream.Seek(0);
+            var bitmap = new BitmapImage();
+            await bitmap.SetSourceAsync(stream);
+            LanQrImage.Source = bitmap;
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Warn("Unable to create the LAN URL QR code: {error}", ex.Message);
+        }
     }
 
     private void HelpToggle_Click(object sender, RoutedEventArgs args)

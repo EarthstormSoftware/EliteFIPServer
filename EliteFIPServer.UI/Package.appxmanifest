@@ -2,8 +2,9 @@
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  IgnorableNamespaces="uap uap5 rescap">
 
   <!-- Identity Name, Publisher and PublisherDisplayName must exactly match the Partner Center reservation.
        This file is committed publicly and must always keep these placeholders. Real values live in
@@ -13,7 +14,7 @@
   <Identity
     Name="REPLACE-WITH-PARTNER-CENTER-PACKAGE-IDENTITY-NAME"
     Publisher="CN=REPLACE-WITH-PARTNER-CENTER-PUBLISHER-ID"
-    Version="4.0.60.0" />
+    Version="4.0.61.0" />
 
   <Properties>
     <DisplayName>Elite FIP Server</DisplayName>
@@ -43,6 +44,12 @@
           Square310x310Logo="Images\LargeTile.png" />
         <uap:SplashScreen Image="Images\SplashScreen.png" BackgroundColor="transparent" />
       </uap:VisualElements>
+      <!-- Lets the user choose "Start with Windows" in Settings; off until they turn it on. -->
+      <Extensions>
+        <uap5:Extension Category="windows.startupTask" Executable="$targetnametoken$.exe" EntryPoint="$targetentrypoint$">
+          <uap5:StartupTask TaskId="EliteFIPServerStartup" Enabled="false" DisplayName="Elite FIP Server" />
+        </uap5:Extension>
+      </Extensions>
     </Application>
   </Applications>
 
