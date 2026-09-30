@@ -12,11 +12,12 @@ public class VersioningBuildTests
         var uiProjectPath = Path.Combine(repoRoot, "EliteFIPServer.UI", "EliteFIPServer.UI.csproj");
 
         var projectXml = XDocument.Load(uiProjectPath);
-        var buildTarget = projectXml.Descendants("Target")
-            .FirstOrDefault(target => (string)target.Attribute("BeforeTargets") == "Build");
+        var bumpTarget = projectXml.Descendants("Target")
+            .FirstOrDefault(target => target.ToString().Contains("UpdateBuildVersion.ps1", StringComparison.OrdinalIgnoreCase));
 
-        Assert.NotNull(buildTarget);
-        Assert.Contains("UpdateBuildVersion.ps1", buildTarget!.ToString(), StringComparison.OrdinalIgnoreCase);
+        // BeforeTargets="Build" runs after compilation, so the exe would carry the previous build's version.
+        Assert.NotNull(bumpTarget);
+        Assert.Equal("BeforeBuild", (string)bumpTarget!.Attribute("BeforeTargets"));
     }
 
     [Fact]
