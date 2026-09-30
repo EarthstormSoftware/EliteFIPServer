@@ -9,6 +9,8 @@ public partial class App : Application
     public App()
     {
         MatricAssemblyResolver.Register();
+        // NLog logs by default; apply the saved Enable logging choice before anything else logs.
+        Logging.Log.LogEnabled(Properties.Settings.Default.EnableLog);
         InitializeComponent();
     }
 
