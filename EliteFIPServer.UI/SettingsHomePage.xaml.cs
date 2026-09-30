@@ -17,6 +17,11 @@ public sealed partial class SettingsHomePage : Page
         MatricSettingsRequested?.Invoke(this, EventArgs.Empty);
     }
 
+    private async void OpenLogFolder_Click(object sender, RoutedEventArgs e)
+    {
+        await LogFolder.OpenAsync();
+    }
+
     private void PanelRestartInfoBar_CloseButtonClick(InfoBar sender, object e)
     {
         if (DataContext is MainWindowViewModel viewModel)

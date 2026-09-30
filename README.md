@@ -72,8 +72,11 @@ will receive game state updates
 
 ### Enable Logging
 In the 'Settings' panel the Enable Logging option will enable or disable logging. By default logging is turned 
-off. When enabled, the log is located in the User AppData\Roaming\EliteFIPServer folder.
-For example: c:\Users\MyUserName\AppData\Roaming\EliteFIPServer
+off. Select 'Open log folder' in the 'Settings' panel to open the folder that holds the log.
+It is normally the User AppData\Roaming\EliteFIPServer folder,
+for example: c:\Users\MyUserName\AppData\Roaming\EliteFIPServer.
+The Microsoft Store version may keep it in the app's own storage under AppData\Local\Packages instead,
+so the button is the easiest way to find it.
 
 ### Matric Integration Settings
 Settings > Matric integration lets you:

@@ -80,6 +80,65 @@ public class CoreServerLifecycleTests
     }
 
     [Fact]
+    public async Task PanelServer_should_refuse_other_origins_and_host_names()
+    {
+        var previousPort = Properties.Settings.Default.PanelServerPort;
+        var previousLanAccess = Properties.Settings.Default.PanelServerAllowLanAccess;
+        var coreServer = new CoreServer(Array.Empty<string>());
+
+        try
+        {
+            Properties.Settings.Default.PanelServerPort = 4545;
+            Properties.Settings.Default.PanelServerAllowLanAccess = false;
+            coreServer.PanelServer.Start();
+
+            using var client = new HttpClient();
+            async Task<HttpResponseMessage> SendAsync(string origin = null, string host = null)
+            {
+                for (var attempt = 0; ; attempt++)
+                {
+                    using var request = new HttpRequestMessage(HttpMethod.Get, "http://127.0.0.1:4545/Dashboard.html");
+                    if (origin != null) request.Headers.Add("Origin", origin);
+                    if (host != null) request.Headers.Host = host;
+                    try { return await client.SendAsync(request); }
+                    catch (HttpRequestException) when (attempt < 20) { await Task.Delay(250); }
+                }
+            }
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, (await SendAsync()).StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.OK, (await SendAsync(origin: "http://127.0.0.1:4545")).StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.Forbidden, (await SendAsync(origin: "https://example.com")).StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.Forbidden, (await SendAsync(origin: "null")).StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.BadRequest, (await SendAsync(host: "rebind.example.com:4545")).StatusCode);
+        }
+        finally
+        {
+            coreServer.PanelServer.Stop();
+            Properties.Settings.Default.PanelServerPort = previousPort;
+            Properties.Settings.Default.PanelServerAllowLanAccess = previousLanAccess;
+        }
+    }
+
+    [Theory]
+    [InlineData(null, "127.0.0.1:4545", true)]
+    [InlineData("http://127.0.0.1:4545", "127.0.0.1:4545", true)]
+    [InlineData("http://192.168.1.20:4545", "192.168.1.20:4545", true)]
+    [InlineData("http://localhost:4545", "127.0.0.1:4545", false)]
+    [InlineData("https://example.com", "127.0.0.1:4545", false)]
+    [InlineData("null", "127.0.0.1:4545", false)]
+    public void IsSameOriginRequest_should_only_accept_the_servers_own_origin(string origin, string host, bool expected)
+    {
+        var context = new Microsoft.AspNetCore.Http.DefaultHttpContext();
+        context.Request.Host = new Microsoft.AspNetCore.Http.HostString(host);
+        if (origin != null)
+        {
+            context.Request.Headers.Origin = origin;
+        }
+
+        Assert.Equal(expected, PanelServer.IsSameOriginRequest(context.Request));
+    }
+
+    [Fact]
     public void PanelServer_should_start_and_remain_started_on_an_available_port()
     {
         var previousPort = Properties.Settings.Default.PanelServerPort;

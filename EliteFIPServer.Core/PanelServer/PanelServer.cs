@@ -75,13 +75,10 @@ namespace EliteFIPServer
                     Args = serverCore.ApplicationArgs
                 });
 
-                panelServerBuilder.Services.AddCors(cors => cors.AddPolicy("CorsPolicy", builder => {
-                    builder
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials()
-                        .SetIsOriginAllowed(_ => true);
-                }));
+                if (!Properties.Settings.Default.PanelServerAllowLanAccess) {
+                    // Only answer to loopback host names, so a website can't reach the server through a DNS name it points at 127.0.0.1.
+                    panelServerBuilder.Configuration["AllowedHosts"] = "localhost;127.0.0.1;[::1]";
+                }
                 panelServerBuilder.Services.AddSignalR().AddJsonProtocol(options => {
                     options.PayloadSerializerOptions.PropertyNamingPolicy = null;
                 });
@@ -91,6 +88,16 @@ namespace EliteFIPServer
                 if (PanelHost.Environment.IsDevelopment()) {
                     PanelHost.UseDeveloperExceptionPage();
                 }
+
+                // The dashboard is served by this server, so it never needs cross-origin access. Refuse requests
+                // made by pages from other sites, including WebSocket connections, which CORS does not cover.
+                PanelHost.Use(async (context, next) => {
+                    if (!IsSameOriginRequest(context.Request)) {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return;
+                    }
+                    await next();
+                });
 
                 var authToken = Properties.Settings.Default.PanelServerAccessToken;
                 if (!string.IsNullOrWhiteSpace(authToken)) {
@@ -112,7 +119,6 @@ namespace EliteFIPServer
                 PanelHost.UseDefaultFiles();
                 PanelHost.UseStaticFiles();
                 PanelHost.UseRouting();
-                PanelHost.UseCors("CorsPolicy");
 
                 PanelHost.MapHub<GameDataUpdateHub>("/gamedataupdatehub");
                 var hubContext = PanelHost.Services.GetService(typeof(IHubContext<GameDataUpdateHub>)) as IHubContext<GameDataUpdateHub>;
@@ -130,6 +136,17 @@ namespace EliteFIPServer
 
             CurrentState.Set(panelServerStarted ? RunState.Started : RunState.Stopped);
             Log.Instance.Info("Panel server start complete");
+        }
+
+        // Browsers send Origin on cross-origin requests and WebSocket upgrades. Requests without it come from
+        // same-origin page loads or non-browser clients.
+        public static bool IsSameOriginRequest(HttpRequest request) {
+            string origin = request.Headers.Origin;
+            if (string.IsNullOrEmpty(origin)) {
+                return true;
+            }
+            return Uri.TryCreate(origin, UriKind.Absolute, out var originUri)
+                && string.Equals(originUri.Authority, request.Host.Value, StringComparison.OrdinalIgnoreCase);
         }
 
         private static string DescribeStartFailure(Exception ex) {

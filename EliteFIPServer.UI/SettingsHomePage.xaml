@@ -15,6 +15,13 @@
             <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
                 <Grid ColumnSpacing="24">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2"><TextBlock Text="Log files" FontWeight="SemiBold" /><TextBlock Text="Open the folder that holds the log files and saved settings" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" /></StackPanel>
+                    <Button Grid.Column="1" Content="Open log folder" Click="OpenLogFolder_Click" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                <Grid ColumnSpacing="24">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <StackPanel Spacing="2"><TextBlock Text="Dark mode" FontWeight="SemiBold" /><TextBlock Text="Use the dark application theme" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" /></StackPanel>
                     <ToggleSwitch Grid.Column="1" IsOn="{Binding DarkMode, Mode=TwoWay}" VerticalAlignment="Center" />
                 </Grid>
