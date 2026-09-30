@@ -18,7 +18,7 @@ Background: the automated MSBuild single-project MSIX pipeline (`GenerateAppxPac
 
 ## Lifecycle
 
-1. Inspect current branch and porcelain Git status, and note the current `<Version>` in `EliteFIPServer.Version.props` (baseline for step 4).
+1. Inspect current branch and porcelain Git status, and note the current `<Version>` in `EliteFIPServer.Version.props` (baseline for step 4). Read the last Store release version with `git show Release:EliteFIPServer.Version.props`; the `Release` tag marks the last uploaded build. The package will be baseline + 1 build. If that would not be strictly higher than the Release version, stop before packaging and report both versions. If the `Release` tag doesn't exist, report that and continue.
 2. Stop all running `EliteFIPServer.exe` processes.
 3. Run `.\Build-StorePackage.ps1` (add `-Configuration Debug` only if asked). This internally: publishes the UI project (which triggers the same pre-build version-bump target the normal build does), generates the Store manifest, restores `Microsoft.Windows.SDK.BuildTools` into the isolated `tools\StoreBuildTools\StoreBuildTools.csproj` cache, locates `makeappx.exe`, and packs `artifacts\msix\EliteFIPServer.msix`.
 4. Publishing runs the same pre-build step as a normal build, incrementing the build number by one and rewriting `BuildInfo.cs`, `Package.appxmanifest`, and `EliteFIPServer.Version.props`. Leave these changes in place (never revert them). Read the `Identity` `Version` from the generated `EliteFIPServer.UI\bin\x64\<Configuration>\net10.0-windows10.0.19041.0\win-x64\AppxManifest.xml` and confirm it equals the new `EliteFIPServer.Version.props` version, which must be exactly one build above the step-1 baseline.
@@ -32,7 +32,7 @@ Report only:
 - Branch and whether the working tree was as expected (one line).
 - Pack result: succeeded / failed, with the thrown error message if it failed (e.g. missing `StoreIdentity.local.json`, missing `makeappx.exe`).
 - Package path and size.
-- Packaged Identity version (and the baseline it was bumped from). Remind the caller it must exceed the last version uploaded to Partner Center and that the bumped version files should be committed.
+- Packaged Identity version, the baseline it was bumped from, and the last Store release version from the `Release` tag. Remind the caller that the bumped version files should be committed and that `/elite-release` should be run once the package is live.
 - Any spot-checked manifest fields, only if you were asked to check them.
 
 Never paste raw `dotnet publish`/`MakeAppx` per-file payload console output into your report.
