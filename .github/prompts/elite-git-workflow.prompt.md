@@ -12,7 +12,7 @@ Carry out `${input:gitRequest}` conservatively.
 1. Stop the running `EliteFIPServer.UI` app (process `EliteFIPServer`). Never stop unrelated processes.
 2. Inspect the exact current branch, `git status --short`, and relevant diff before changing Git state.
 3. Do not stage unrelated, generated, ignored, user-specific, certificate, log, `bin`, or `obj` files.
-4. If the request affects the sibling `EliteFIPProtocol`, inspect and commit that repository separately. Never combine repositories conceptually into one commit.
+4. If the request affects a sibling repository (such as `EliteAPI`), inspect and commit that repository separately. Never combine repositories conceptually into one commit.
 5. Use non-interactive Git commands. Preserve the user's requested capitalization and exact commit message.
 6. Before merging, require a clean source branch, switch to lowercase `main`, and use an explicit merge commit unless the user requests another strategy.
 7. Stop on conflicts; report paths and do not invent a resolution.

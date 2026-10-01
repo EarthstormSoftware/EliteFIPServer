@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Elite Dashboard" />
-    <link rel="stylesheet" href="/Dashboard.css?v=5" />
+    <link rel="stylesheet" href="/Dashboard.css?v=15" />
 </head>
 <body>
     <main>
@@ -20,6 +20,8 @@
             <div class="ship-title" id="ship-title">Ship Information System</div>
             <div class="header-actions">
                 <button id="fullscreen" class="icon-button" type="button" aria-label="Toggle fullscreen" title="Toggle fullscreen">&#x26F6;</button>
+                <button id="layout-settings-button" class="icon-button" type="button" aria-label="Layout settings" title="Layout settings" aria-haspopup="dialog" hidden>&#x2630;</button>
+                <button id="dashboard-cancel" class="icon-button" type="button" aria-label="Discard layout changes" title="Discard changes" hidden>&#x21B6;</button>
                 <button id="dashboard-settings" class="icon-button" type="button" aria-label="Configure dashboard" title="Configure dashboard">&#x2699;</button>
             </div>
         </header>
@@ -29,23 +31,56 @@
             <a data-view-link="combat" href="/Dashboard.html#combat">Combat</a>
         </nav>
         <section id="configuration-toolbar" class="configuration-toolbar" hidden aria-label="Dashboard configuration">
-            <label>Layout <input id="layout-profile" type="text" maxlength="32" /></label>
-            <button id="apply-layout-profile" type="button">Open layout</button>
-            <label>Presentation <select id="presentation-mode"><option value="auto">Automatic</option><option value="display">Passive display</option><option value="tablet">Interactive tablet</option></select></label>
             <span id="active-layout-label"></span>
+            <span class="edit-hint">Drag a panel to move it; drag its corner to resize. Panels in the way move down.</span>
+            <span id="layout-warning" class="layout-warning" role="status" hidden></span>
         </section>
+        <dialog id="layout-settings-dialog" class="layout-dialog" aria-labelledby="layout-settings-title">
+            <form method="dialog">
+                <div class="layout-dialog-header"><h2 id="layout-settings-title">Layout settings</h2><button type="submit" class="dialog-close" aria-label="Close" title="Close">&#x00D7;</button></div>
+                <section>
+                    <h3>Layout</h3>
+                    <p class="dialog-note">This browser is using <strong id="current-layout-name">default</strong>. Each layout keeps its own panels, positions and presentation; use different ones for different devices or screens.</p>
+                    <label class="dialog-field">Name <input id="layout-profile" type="text" maxlength="32" list="known-layouts" autocomplete="off" /></label>
+                    <datalist id="known-layouts"></datalist>
+                    <div class="dialog-actions">
+                        <button id="apply-layout-profile" type="button" title="Open the layout with this name, or start a new one">Switch to</button>
+                        <button id="copy-layout-profile" type="button" title="Save this layout under the new name and open it">Save as copy</button>
+                        <button id="rename-layout-profile" type="button" title="Move this layout to the new name">Rename</button>
+                    </div>
+                    <p id="layout-name-message" class="dialog-note" role="status"></p>
+                </section>
+                <section>
+                    <h3>Presentation</h3>
+                    <label class="dialog-field">Mode <select id="presentation-mode"><option value="auto">Automatic</option><option value="display">Passive display</option><option value="tablet">Interactive touch</option></select></label>
+                    <p class="dialog-note">Passive display fits the screen with no scrolling. Interactive touch stacks panels in a scrolling list for phones and tablets. Automatic chooses by screen size and touch.</p>
+                </section>
+                <section>
+                    <h3>Theme <span class="dialog-scope">this device</span></h3>
+                    <label class="dialog-field">Colours <select id="dashboard-theme"><option value="teal">Teal</option><option value="orange">Elite orange</option><option value="blue">Blue</option><option value="green">Green</option><option value="night">Night red</option><option value="contrast">High contrast</option></select></label>
+                </section>
+                <section>
+                    <h3>This view</h3>
+                    <p id="orientation-note" class="dialog-note"></p>
+                    <div class="dialog-actions"><button id="copy-orientation-layout" type="button">Copy positions from <span id="other-orientation-name">portrait</span></button><button id="reset-view-layout" type="button">Reset <span id="reset-view-name">view</span> to default</button></div>
+                    <p class="dialog-note">Reset puts back the default panels and positions for this view, in both orientations. Cancel (&#x21B6;) undoes either.</p>
+                </section>
+            </form>
+        </dialog>
         <section class="grid">
             <article class="panel" data-widget-panel="ship" data-views="cockpit navigation combat">
                 <h2>Ship</h2><div class="panel-content">
-                    <div class="metric priority-essential"><span>Condition</span><strong id="ship-condition">--</strong></div><div class="metric priority-essential"><span>Fuel</span><strong id="ship-fuel">--</strong></div><div class="metric priority-essential"><span>Cargo</span><strong id="ship-cargo">--</strong></div><div class="metric priority-secondary"><span>Jump range</span><strong id="ship-jump-range">--</strong></div>
+                    <div class="metric priority-essential"><span id="ship-condition-label">Condition</span><strong id="ship-condition">--</strong></div><div class="metric priority-essential"><span>Fuel</span><strong id="ship-fuel">--</strong></div><div class="metric priority-essential"><span>Cargo</span><strong id="ship-cargo">--</strong></div><div class="metric priority-secondary"><span>Jump range</span><strong id="ship-jump-range">--</strong></div><div class="metric priority-secondary"><span>Modules</span><strong id="ship-modules">--</strong></div>
+                    <div class="ship-flags priority-secondary" id="ship-flags" aria-label="Ship state"><span data-flag="LandingGearDown">GEAR</span><span data-flag="HardpointsDeployed">HARDPOINTS</span><span data-flag="CargoScoopDeployed">SCOOP</span><span data-flag="FlightAssistOff">FA OFF</span><span data-flag="LightsOn">LIGHTS</span><span data-flag="NightVision">NIGHT VIS</span><span data-flag="HudAnalysisMode">ANALYSIS</span><span data-flag="ScoopingFuel">FUEL SCOOP</span><span data-flag="FsdCooldown">FSD COOLDOWN</span></div>
                     <div class="state-strip priority-essential"><span id="ship-pips">SYS -- / ENG -- / WEP --</span><span id="ship-alerts">Nominal</span></div>
-                    <details class="priority-detail"><summary>Inventory and loadout</summary><div class="metric priority-secondary"><span>Rebuy</span><strong id="ship-rebuy">--</strong></div><div class="metric priority-secondary"><span>Materials</span><strong id="ship-materials">--</strong></div><div class="deep-detail"><h3>Cargo manifest</h3><ul id="ship-cargo-list" class="data-list"><li>No cargo data</li></ul><h3>Modules</h3><ul id="ship-module-list" class="data-list"><li>No loadout data</li></ul></div></details>
+                    <details class="priority-detail"><summary>Inventory and loadout</summary><div class="metric priority-secondary"><span>Credits</span><strong id="ship-credits">--</strong></div><div class="metric priority-secondary"><span>Fire group / weapon</span><strong id="ship-firegroup">--</strong></div><div class="metric priority-secondary"><span>Rebuy</span><strong id="ship-rebuy">--</strong></div><div class="metric priority-secondary"><span>Materials</span><strong id="ship-materials">--</strong></div><div class="metric priority-secondary"><span>Suit / loadout</span><strong id="ship-suit">--</strong></div><div class="deep-detail"><h3>Cargo manifest</h3><ul id="ship-cargo-list" class="data-list"><li>No cargo data</li></ul><h3>Modules</h3><ul id="ship-module-list" class="data-list"><li>No loadout data</li></ul><h3>Materials, fullest first</h3><ul id="ship-material-list" class="data-list"><li>No materials data</li></ul><h3>Ship locker</h3><ul id="ship-locker-list" class="data-list"><li>No ship locker data</li></ul></div></details>
                 </div>
             </article>
             <article class="panel" data-widget-panel="location" data-views="cockpit navigation">
                 <h2>Location</h2><div class="panel-content">
                     <div class="metric priority-essential"><span>System</span><strong id="location-system">--</strong></div><div class="metric priority-essential"><span>Station</span><strong id="location-station">--</strong></div><div class="metric priority-essential"><span>Body</span><strong id="location-body">--</strong></div><div class="metric priority-essential"><span>Context</span><strong id="location-context">--</strong></div>
-                    <details class="priority-detail"><summary>System and local details</summary><div class="metric priority-secondary"><span>Economy</span><strong id="location-economy">--</strong></div><div class="metric priority-secondary"><span>Security</span><strong id="location-security">--</strong></div><div class="metric priority-secondary"><span>Population</span><strong id="location-population">--</strong></div><div class="metric priority-secondary"><span>Controlling faction</span><strong id="location-faction">--</strong></div><div class="deep-detail"><div class="metric"><span>Powerplay</span><strong id="location-powerplay">--</strong></div><div class="metric"><span>Station profile</span><strong id="location-station-profile">--</strong></div><div class="metric"><span>Landing pads</span><strong id="location-pads">--</strong></div><div class="metric"><span>Station services</span><strong id="location-services">--</strong></div><div class="metric"><span>Body class</span><strong id="location-body-class">--</strong></div><div class="metric"><span>Atmosphere / volcanism</span><strong id="location-geology">--</strong></div><div class="metric"><span>Gravity / temperature</span><strong id="location-environment">--</strong></div><div class="metric"><span>Survey</span><strong id="location-survey">--</strong></div><div class="metric"><span>Coordinates</span><strong id="location-coordinates">--</strong></div><h3>System factions</h3><ul id="location-faction-list" class="data-list"><li>No faction data</li></ul><h3>Body materials</h3><ul id="location-material-list" class="data-list"><li>No body material data</li></ul></div></details>
+                    <div class="metric priority-secondary"><span>Destination</span><strong id="location-destination">--</strong></div><div class="metric priority-secondary"><span>Altitude / heading</span><strong id="location-approach">--</strong></div>
+                    <details class="priority-detail"><summary>System and local details</summary><div class="metric priority-secondary"><span>Economy</span><strong id="location-economy">--</strong></div><div class="metric priority-secondary"><span>Security</span><strong id="location-security">--</strong></div><div class="metric priority-secondary"><span>Legal status</span><strong id="location-legal">--</strong></div><div class="metric priority-secondary"><span>Population</span><strong id="location-population">--</strong></div><div class="metric priority-secondary"><span>Controlling faction</span><strong id="location-faction">--</strong></div><div class="deep-detail"><div class="metric"><span>Powerplay</span><strong id="location-powerplay">--</strong></div><div class="metric"><span>Station profile</span><strong id="location-station-profile">--</strong></div><div class="metric"><span>Station faction</span><strong id="location-station-faction">--</strong></div><div class="metric"><span>System government</span><strong id="location-government">--</strong></div><div class="metric"><span>Rings</span><strong id="location-rings">--</strong></div><div class="metric"><span>Landing pads</span><strong id="location-pads">--</strong></div><div class="metric"><span>Station services</span><strong id="location-services">--</strong></div><div class="metric"><span>Body class</span><strong id="location-body-class">--</strong></div><div class="metric"><span>Atmosphere / volcanism</span><strong id="location-geology">--</strong></div><div class="metric"><span>Gravity / temperature</span><strong id="location-environment">--</strong></div><div class="metric"><span>Survey</span><strong id="location-survey">--</strong></div><div class="metric"><span>Coordinates</span><strong id="location-coordinates">--</strong></div><h3>System factions</h3><ul id="location-faction-list" class="data-list"><li>No faction data</li></ul><h3>Body materials</h3><ul id="location-material-list" class="data-list"><li>No body material data</li></ul></div></details>
                 </div>
             </article>
             <article class="panel" data-widget-panel="target" data-views="cockpit combat">
@@ -55,13 +90,56 @@
                 <h2>Activity</h2><div class="panel-content"><div class="metric priority-essential"><span>Mission</span><strong id="activity-mission">--</strong></div><div class="metric priority-essential"><span>Destination</span><strong id="activity-destination">--</strong></div><div class="metric priority-secondary"><span>Reward / expiry</span><strong id="activity-mission-meta">--</strong></div><div class="metric priority-secondary"><span>Last message</span><strong id="activity-message">--</strong></div><details class="priority-detail" open><summary>Recent events</summary><ul id="activity-feed" class="data-list"><li>No recent events</li></ul></details></div>
             </article>
             <article class="panel route-panel" data-widget-panel="route" data-views="cockpit navigation">
-                <h2>Route</h2><div class="route-summary"><div class="metric"><span>Next system</span><strong id="route-next">--</strong></div><div class="metric"><span>Remaining</span><strong id="route-remaining">--</strong></div><div class="metric"><span>Last jump</span><strong id="route-last-jump">--</strong></div></div><iframe src="/RoutePanel.html" title="Navigation route visualization"></iframe>
+                <h2>Route</h2><div class="route-summary"><div class="metric"><span>Next system</span><strong id="route-next">--</strong></div><div class="metric"><span>Remaining</span><strong id="route-remaining">--</strong></div><div class="metric"><span>Last jump</span><strong id="route-last-jump">--</strong></div></div><iframe id="route-frame" src="/RoutePanel.html" title="Navigation route visualization"></iframe>
+            </article>
+            <!-- data-default-views: the views a widget appears in until the user adds or removes it; the others offer it under "+". -->
+            <article class="panel" data-widget-panel="exploration" data-views="cockpit navigation" data-default-views="navigation">
+                <h2>Exploration</h2><div class="panel-content">
+                    <div class="metric priority-essential"><span>Bodies found</span><strong id="exploration-discovery">--</strong></div><div class="metric priority-essential"><span>Estimated value</span><strong id="exploration-value">--</strong></div><div class="metric priority-essential"><span>Best to map</span><strong id="exploration-best">--</strong></div>
+                    <div class="metric priority-secondary"><span>Mapped</span><strong id="exploration-mapped">--</strong></div><div class="metric priority-secondary"><span>Signals</span><strong id="exploration-signals">--</strong></div>
+                    <details class="priority-detail"><summary>Scanned bodies</summary><ul id="exploration-body-list" class="data-list"><li>No bodies scanned in this system</li></ul></details>
+                </div>
+            </article>
+            <article class="panel" data-widget-panel="exobiology" data-views="cockpit navigation" data-default-views="navigation">
+                <h2>Exobiology</h2><div class="panel-content">
+                    <div class="metric priority-essential"><span>Sampling</span><strong id="exobiology-species">--</strong></div><div class="metric priority-essential"><span>Samples / value</span><strong id="exobiology-progress">--</strong></div><div class="metric priority-essential"><span>Sample spacing</span><strong id="exobiology-spacing">--</strong></div>
+                    <div class="metric priority-secondary"><span>Unsold</span><strong id="exobiology-unsold">--</strong></div><div class="metric priority-secondary"><span>This body</span><strong id="exobiology-body">--</strong></div>
+                    <details class="priority-detail"><summary>Unsold species</summary><div class="metric priority-secondary"><span>Last sale</span><strong id="exobiology-last-sale">--</strong></div><ul id="exobiology-unsold-list" class="data-list"><li>No unsold organic data</li></ul></details>
+                </div>
+            </article>
+            <article class="panel" data-widget-panel="commander" data-views="cockpit navigation combat" data-default-views="combat">
+                <h2>Commander</h2><div class="panel-content">
+                    <div class="metric priority-essential"><span>Combat rank</span><strong id="commander-combat">--</strong></div><div class="metric priority-essential"><span>Unredeemed bounties</span><strong id="commander-bounties">--</strong></div><div class="metric priority-essential"><span>Unredeemed bonds</span><strong id="commander-bonds">--</strong></div>
+                    <div class="metric priority-secondary"><span>Powerplay</span><strong id="commander-powerplay">--</strong></div><div class="metric priority-secondary"><span>Reputation</span><strong id="commander-reputation">--</strong></div><div class="metric priority-secondary"><span>Engineers</span><strong id="commander-engineers">--</strong></div>
+                    <details class="priority-detail"><summary>Ranks and engineers</summary><ul id="commander-rank-list" class="data-list"><li>No rank data</li></ul><h3>Engineers</h3><ul id="commander-engineer-list" class="data-list"><li>No engineer data</li></ul></details>
+                </div>
+            </article>
+            <article class="panel" data-widget-panel="trade" data-views="cockpit navigation" data-default-views="cockpit">
+                <h2>Mining and Trade</h2><div class="panel-content">
+                    <div class="metric priority-essential"><span>Last prospect</span><strong id="trade-prospect">--</strong></div><div class="metric priority-essential"><span>Refined this session</span><strong id="trade-refined">--</strong></div><div class="metric priority-essential"><span>Session profit</span><strong id="trade-profit">--</strong></div>
+                    <div class="metric priority-secondary"><span>Best cargo price here</span><strong id="trade-best-price">--</strong></div><div class="metric priority-secondary"><span>Last sale</span><strong id="trade-last-sale">--</strong></div>
+                    <details class="priority-detail"><summary>Prices and refining</summary><div class="metric"><span>Market</span><strong id="trade-market">--</strong></div><ul id="trade-price-list" class="data-list"><li>No market data for your cargo</li></ul><h3>Refined</h3><ul id="trade-refined-list" class="data-list"><li>Nothing refined this session</li></ul><h3>Prospect contents</h3><ul id="trade-prospect-list" class="data-list"><li>No asteroid prospected</li></ul></details>
+                </div>
+            </article>
+            <article class="panel" data-widget-panel="carrier" data-views="cockpit navigation" data-default-views="">
+                <h2>Fleet Carrier</h2><div class="panel-content">
+                    <div class="metric priority-essential"><span>Carrier</span><strong id="carrier-name">--</strong></div><div class="metric priority-essential"><span>Tritium</span><strong id="carrier-fuel">--</strong></div><div class="metric priority-essential"><span>Jump</span><strong id="carrier-jump">--</strong></div>
+                    <div class="metric priority-secondary"><span>Balance</span><strong id="carrier-balance">--</strong></div><div class="metric priority-secondary"><span>Free space</span><strong id="carrier-space">--</strong></div>
+                    <details class="priority-detail"><summary>Carrier details</summary><div class="metric"><span>Reserve</span><strong id="carrier-reserve">--</strong></div><div class="metric"><span>Docking access</span><strong id="carrier-access">--</strong></div><div class="metric"><span>Updated</span><strong id="carrier-updated">--</strong></div></details>
+                </div>
+            </article>
+            <article class="panel" data-widget-panel="missions" data-views="cockpit navigation combat" data-default-views="navigation">
+                <h2>Missions</h2><div class="panel-content">
+                    <div class="metric priority-essential"><span>Active</span><strong id="missions-count">--</strong></div><div class="metric priority-essential"><span>Next to expire</span><strong id="missions-next">--</strong></div><div class="metric priority-essential"><span>Total reward</span><strong id="missions-reward">--</strong></div>
+                    <div class="metric priority-secondary"><span>Destinations</span><strong id="missions-destinations">--</strong></div>
+                    <details class="priority-detail"><summary>Mission list</summary><ul id="missions-list" class="data-list"><li>No active missions</li></ul><h3>Recent results</h3><ul id="missions-results" class="data-list"><li>No completed or failed missions</li></ul></details>
+                </div>
             </article>
         </section>
-        <footer class="status-bar" aria-label="Current status"><span>SHIP <strong id="status-ship">--</strong></span><span>SYSTEM <strong id="status-system">--</strong></span><span>STATION <strong id="status-station">--</strong></span><span>CONNECTION <strong id="connection">connecting</strong></span></footer>
+        <footer class="status-bar" aria-label="Current status"><span>SHIP <strong id="status-ship">--</strong></span><span>SYSTEM <strong id="status-system">--</strong></span><span>STATION <strong id="status-station">--</strong></span><span>CREDITS <strong id="status-credits">--</strong></span><span>CONNECTION <strong id="connection">connecting</strong></span></footer>
     </main>
     <script src="/js/signalr/signalr.js?v=10.0.11"></script>
     <script src="/js/panel-client.js?v=2"></script>
-    <script src="/CockpitDashboard.js?v=3"></script>
+    <script src="/CockpitDashboard.js?v=18"></script>
 </body>
 </html>

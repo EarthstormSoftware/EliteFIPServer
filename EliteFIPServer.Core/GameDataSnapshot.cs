@@ -1,4 +1,3 @@
-using EliteFIPProtocol;
 using System.Text.Json;
 
 namespace EliteFIPServer;
@@ -32,6 +31,14 @@ internal static class GameDataSnapshot
             GameEventType.Materials => Clone<MaterialsData>(data),
             GameEventType.Combat => Clone<CombatData>(data),
             GameEventType.System => Clone<SystemData>(data),
+            GameEventType.SystemExploration => Clone<SystemExplorationData>(data),
+            GameEventType.Exobiology => Clone<ExobiologyData>(data),
+            GameEventType.Commander => Clone<CommanderData>(data),
+            GameEventType.CombatEarnings => Clone<CombatEarningsData>(data),
+            GameEventType.Mining => Clone<MiningData>(data),
+            GameEventType.Trade => Clone<TradeData>(data),
+            GameEventType.Carrier => Clone<CarrierData>(data),
+            GameEventType.OnFoot => Clone<OnFootData>(data),
             _ => data
         };
     }

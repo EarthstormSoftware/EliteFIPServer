@@ -37,6 +37,8 @@ namespace EliteFIPServer.Properties {
         public bool PanelServerAllowLanAccess { get; set; }
         public string PanelServerAccessToken { get; set; } = "";
         public int PanelServerPort { get; set; } = 4545;
+        // Serve files from the custom panels folder (PanelServer.CustomPanelsPath) ahead of the built-in pages.
+        public bool UseCustomPanels { get; set; } = true;
         public int MatricApiPort { get; set; } = 5300;
         public bool AutostartMatricIntegration { get; set; }
         public int MatricRetryInterval { get; set; } = 30;

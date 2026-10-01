@@ -34,6 +34,7 @@ public sealed partial class MainWindow : Window
     private int runningMatricApiPort;
     private int runningPanelServerPort;
     private bool runningPanelServerAllowLan;
+    private bool runningUseCustomPanels;
 
     private string pendingDashboardPath;
     private bool welcomeDialogOpen;
@@ -413,6 +414,7 @@ public sealed partial class MainWindow : Window
             case nameof(MainWindowViewModel.MatricRetryInterval):
             case nameof(MainWindowViewModel.AutostartPanelServer):
             case nameof(MainWindowViewModel.PanelServerAllowLanAccess):
+            case nameof(MainWindowViewModel.UseCustomPanels):
             case nameof(MainWindowViewModel.PanelServerPort):
             case nameof(MainWindowViewModel.MinimiseToTray):
             case nameof(MainWindowViewModel.StartMinimised):
@@ -427,6 +429,7 @@ public sealed partial class MainWindow : Window
                 break;
             case nameof(MainWindowViewModel.PanelServerPort):
             case nameof(MainWindowViewModel.PanelServerAllowLanAccess):
+            case nameof(MainWindowViewModel.UseCustomPanels):
                 UpdatePanelRestartRequired();
                 UpdateRuntimeMetadata();
                 break;
@@ -462,7 +465,8 @@ public sealed partial class MainWindow : Window
         }
 
         if (Properties.Settings.Default.PanelServerPort != runningPanelServerPort ||
-            Properties.Settings.Default.PanelServerAllowLanAccess != runningPanelServerAllowLan)
+            Properties.Settings.Default.PanelServerAllowLanAccess != runningPanelServerAllowLan ||
+            Properties.Settings.Default.UseCustomPanels != runningUseCustomPanels)
         {
             viewModel.PanelRestartRequired = true;
         }
@@ -478,6 +482,7 @@ public sealed partial class MainWindow : Window
         Properties.Settings.Default.MatricRetryInterval = GetNumberBoxValue(viewModel.MatricRetryInterval, Properties.Settings.Default.MatricRetryInterval);
         Properties.Settings.Default.AutostartPanelServer = viewModel.AutostartPanelServer;
         Properties.Settings.Default.PanelServerAllowLanAccess = viewModel.PanelServerAllowLanAccess;
+        Properties.Settings.Default.UseCustomPanels = viewModel.UseCustomPanels;
         Properties.Settings.Default.PanelServerPort = GetNumberBoxValue(viewModel.PanelServerPort, Properties.Settings.Default.PanelServerPort);
         Properties.Settings.Default.MinimiseToTray = viewModel.MinimiseToTray;
         Properties.Settings.Default.StartMinimised = viewModel.StartMinimised;
@@ -659,7 +664,15 @@ public sealed partial class MainWindow : Window
         {
             runningPanelServerPort = Properties.Settings.Default.PanelServerPort;
             runningPanelServerAllowLan = Properties.Settings.Default.PanelServerAllowLanAccess;
+            runningUseCustomPanels = Properties.Settings.Default.UseCustomPanels;
             viewModel.PanelRestartRequired = false;
+        }
+
+        if (state == RunState.Started && serverCore.PanelServer.CustomPanelFileCount > 0)
+        {
+            var replaced = serverCore.PanelServer.ReplacedBuiltInFiles;
+            AddActivity($"Serving {serverCore.PanelServer.CustomPanelFileCount} custom panel files" +
+                (replaced.Count > 0 ? $", replacing the built-in {string.Join(", ", replaced)}" : ""));
         }
 
         if (state == RunState.Started && pendingDashboardPath != null)
@@ -682,6 +695,7 @@ public sealed partial class MainWindow : Window
         viewModel.MatricRetryInterval = Properties.Settings.Default.MatricRetryInterval;
         viewModel.AutostartPanelServer = Properties.Settings.Default.AutostartPanelServer;
         viewModel.PanelServerAllowLanAccess = Properties.Settings.Default.PanelServerAllowLanAccess;
+        viewModel.UseCustomPanels = Properties.Settings.Default.UseCustomPanels;
         viewModel.PanelServerPort = Properties.Settings.Default.PanelServerPort;
         viewModel.MinimiseToTray = Properties.Settings.Default.MinimiseToTray;
         viewModel.StartMinimised = Properties.Settings.Default.StartMinimised;

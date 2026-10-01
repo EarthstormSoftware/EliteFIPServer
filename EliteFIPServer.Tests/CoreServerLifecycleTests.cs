@@ -3,8 +3,86 @@ using Xunit;
 
 namespace EliteFIPServer.Tests;
 
-public class CoreServerLifecycleTests
+public class CoreServerLifecycleTests : IDisposable
 {
+    private readonly string customPanelsPath = Path.Combine(Path.GetTempPath(), "EliteFIPServerTests", Guid.NewGuid().ToString("N"));
+    private readonly string previousCustomPanelsPath = PanelServer.CustomPanelsPath;
+
+    // Keeps the real Documents\EliteFIPServer\Panels folder out of these tests; tests that want custom panels create this folder.
+    public CoreServerLifecycleTests()
+    {
+        PanelServer.CustomPanelsPath = customPanelsPath;
+    }
+
+    public void Dispose()
+    {
+        PanelServer.CustomPanelsPath = previousCustomPanelsPath;
+        if (Directory.Exists(customPanelsPath)) Directory.Delete(customPanelsPath, true);
+    }
+
+    // Safe Matric teardown swaps this private socket field; if a Matric update renames it, teardown falls back
+    // to a plain Dispose, which can crash the process when a packet is being handled.
+    [Fact]
+    public void Matric_client_still_has_the_socket_field_teardown_swaps()
+    {
+        Assert.NotNull(MatricApiClient.MatricSocketField);
+        Assert.Equal(typeof(System.Net.Sockets.UdpClient), MatricApiClient.MatricSocketField.FieldType);
+    }
+
+    [Fact]
+    public async Task PanelServer_should_serve_custom_panels_ahead_of_built_in_files()
+    {
+        var previousPort = Properties.Settings.Default.PanelServerPort;
+        var previousLanAccess = Properties.Settings.Default.PanelServerAllowLanAccess;
+        var previousUseCustomPanels = Properties.Settings.Default.UseCustomPanels;
+        Directory.CreateDirectory(Path.Combine(customPanelsPath, "js"));
+        File.WriteAllText(Path.Combine(customPanelsPath, "Dashboard.html"), "custom dashboard");
+        File.WriteAllText(Path.Combine(customPanelsPath, "MyPanel.html"), "my own panel");
+        File.WriteAllText(Path.Combine(customPanelsPath, "js", "extra.js"), "// extra");
+        var coreServer = new CoreServer(Array.Empty<string>());
+
+        try
+        {
+            Properties.Settings.Default.PanelServerPort = 4545;
+            Properties.Settings.Default.PanelServerAllowLanAccess = false;
+            Properties.Settings.Default.UseCustomPanels = true;
+            coreServer.PanelServer.Start();
+
+            using var client = new HttpClient();
+            async Task<HttpResponseMessage> GetAsync(string path)
+            {
+                for (var attempt = 0; ; attempt++)
+                {
+                    try { return await client.GetAsync("http://127.0.0.1:4545" + path); }
+                    catch (HttpRequestException) when (attempt < 20) { await Task.Delay(250); }
+                }
+            }
+
+            Assert.Equal("custom dashboard", await (await GetAsync("/Dashboard.html")).Content.ReadAsStringAsync());
+            Assert.Equal("my own panel", await (await GetAsync("/MyPanel.html")).Content.ReadAsStringAsync());
+            Assert.Equal(System.Net.HttpStatusCode.OK, (await GetAsync("/js/extra.js")).StatusCode);
+            // Built-in files that aren't replaced, including the landing page, are still served.
+            Assert.Contains("Dashboard.html", await (await GetAsync("/")).Content.ReadAsStringAsync());
+            Assert.Equal(System.Net.HttpStatusCode.OK, (await GetAsync("/Dashboard.css")).StatusCode);
+            // Pages revalidate so updates reach long-running displays; versioned assets stay cacheable.
+            Assert.True((await GetAsync("/Dashboard.html")).Headers.CacheControl?.NoCache);
+            Assert.True((await GetAsync("/")).Headers.CacheControl?.NoCache);
+            Assert.Null((await GetAsync("/Dashboard.css")).Headers.CacheControl);
+            // Nothing outside the folder can be reached.
+            Assert.Equal(System.Net.HttpStatusCode.NotFound, (await GetAsync("/..%2f..%2fsettings.json")).StatusCode);
+
+            Assert.Equal(3, coreServer.PanelServer.CustomPanelFileCount);
+            Assert.Equal(new[] { "Dashboard.html" }, coreServer.PanelServer.ReplacedBuiltInFiles);
+        }
+        finally
+        {
+            coreServer.PanelServer.Stop();
+            Properties.Settings.Default.PanelServerPort = previousPort;
+            Properties.Settings.Default.PanelServerAllowLanAccess = previousLanAccess;
+            Properties.Settings.Default.UseCustomPanels = previousUseCustomPanels;
+        }
+    }
+
     [Fact]
     public void Stop_should_not_throw_when_called_after_start()
     {

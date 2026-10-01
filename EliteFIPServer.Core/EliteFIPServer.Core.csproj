@@ -23,9 +23,6 @@
     <Reference Include="EliteAPI">
       <HintPath>..\..\EliteAPI\EliteAPI\bin\Release\netstandard2.0\EliteAPI.dll</HintPath>
     </Reference>
-    <Reference Include="EliteFIPProtocol">
-      <HintPath>..\..\EliteFIPProtocol\EliteFIPProtocol\bin\Release\net10.0\EliteFIPProtocol.dll</HintPath>
-    </Reference>
     <Reference Include="MatricIntegration">
       <HintPath>$(MatricIntegrationPath)</HintPath>
       <Private>False</Private>

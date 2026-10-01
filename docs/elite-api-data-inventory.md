@@ -20,7 +20,7 @@ Inventory source: `EliteAPI.dll` 5.0.0.0 and `EliteFIPProtocol.dll` 1.0.23331.0,
 | `Loadout` | `HandleLoadoutEvent` | `LoadoutData` | Ship identity, hull, cargo capacity, jump range, fuel capacity, rebuy, modules | P0: cockpit dashboard |
 | `MissionAccepted` | `HandleMissionAcceptedEvent` | `MissionData` | Mission identity, objective, destination, expiry, reward, commodity/count | P1: mission dashboard |
 
-This table is the 2026-09-04 baseline. The server now also publishes `CargoData`, `MaterialsData`, `StationData`, `SystemData`, `DockingData`, `CombatData`, `RouteTargetData`, `MissionCollectionData`, and `MissionLifecycleData`; check `PanelServer` and `EliteAPIIntegration` for the current set before relying on the rows above.
+This table is the 2026-09-04 baseline. The server now also publishes `CargoData`, `MaterialsData`, `StationData`, `SystemData`, `DockingData`, `CombatData`, `RouteTargetData`, `MissionCollectionData`, `MissionLifecycleData`, and `SystemExplorationData` (from `Scan`, `FSSDiscoveryScan`, `FSSAllBodiesFound`, `SAAScanComplete` and `SAASignalsFound`; `MissionRedirected` also updates the active missions); check `PanelServer` and `EliteAPIIntegration` for the current set before relying on the rows above.
 
 ## Available API areas for later phases
 

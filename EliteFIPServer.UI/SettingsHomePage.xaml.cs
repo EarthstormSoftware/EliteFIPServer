@@ -77,6 +77,20 @@ public sealed partial class SettingsHomePage : Page
         await LogFolder.OpenAsync();
     }
 
+    private async void OpenPanelsFolder_Click(object sender, RoutedEventArgs e)
+    {
+        string folder = PanelServer.CustomPanelsPath;
+        try
+        {
+            Directory.CreateDirectory(folder);
+            await Windows.System.Launcher.LaunchFolderPathAsync(folder);
+        }
+        catch (Exception ex)
+        {
+            Logging.Log.Instance.Warn("Unable to open the custom panels folder {path}: {error}", folder, ex.Message);
+        }
+    }
+
     private void PanelRestartInfoBar_CloseButtonClick(InfoBar sender, object e)
     {
         if (DataContext is MainWindowViewModel viewModel)

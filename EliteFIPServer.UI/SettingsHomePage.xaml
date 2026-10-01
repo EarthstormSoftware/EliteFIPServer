@@ -85,6 +85,16 @@
             <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
                 <Grid ColumnSpacing="24">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2"><TextBlock Text="Custom panels" FontWeight="SemiBold" /><TextBlock Text="Serve your own pages, and your edited copies of the built-in ones, from the panels folder in Documents" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" /></StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Content="Open panels folder" Click="OpenPanelsFolder_Click" VerticalAlignment="Center" />
+                        <ToggleSwitch IsOn="{Binding UseCustomPanels, Mode=TwoWay}" VerticalAlignment="Center" MinWidth="0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Padding="16,12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+                <Grid ColumnSpacing="24">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <StackPanel Spacing="2"><TextBlock Text="Panel Server port" FontWeight="SemiBold" /><TextBlock Text="Port used by the Panel Server" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" /></StackPanel>
                     <NumberBox Grid.Column="1" Width="180" Value="{Binding PanelServerPort, Mode=TwoWay}" Minimum="1" Maximum="65535" SpinButtonPlacementMode="Compact" VerticalAlignment="Center" />
                 </Grid>

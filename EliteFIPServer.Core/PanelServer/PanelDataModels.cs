@@ -153,6 +153,17 @@ public sealed class MissionSummaryData
     public string Name { get; init; }
     public bool IsPassengerMission { get; init; }
     public long ExpiresInSeconds { get; init; }
+    // Filled from MissionAccepted when it was seen; missions only listed by the Missions event at login
+    // have just the fields above, with Expiry worked out from ExpiresInSeconds.
+    public DateTime Expiry { get; init; }
+    public string Faction { get; init; }
+    public string DestinationSystem { get; init; }
+    public string DestinationStation { get; init; }
+    public long Reward { get; init; }
+    public int Count { get; init; }
+    public string Commodity { get; init; }
+    public string Target { get; init; }
+    public bool IsWing { get; init; }
 }
 
 public sealed class DockingData

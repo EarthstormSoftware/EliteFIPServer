@@ -57,7 +57,8 @@ connection.on("JumpData", function (JumpData) {
 [
 	"StatusData", "TargetData", "RouteTargetData", "ReceivedTextData", "StationData",
 	"ExplorationData", "LoadoutData", "MissionData", "MissionCollectionData", "MissionLifecycleData",
-	"DockingData", "CargoData", "MaterialsData", "CombatData", "SystemData"
+	"DockingData", "CargoData", "MaterialsData", "CombatData", "SystemData", "SystemExplorationData", "ExobiologyData",
+	"CommanderData", "CombatEarningsData", "MiningData", "TradeData", "CarrierData", "OnFootData"
 ].forEach(eventName => connection.on(eventName, function () {}));
 
 function createElement(parentEl = document.body, tagName = 'div') {
@@ -72,13 +73,15 @@ class SystemClass {
 	labelEl;
 	starClass;
 
-	constructor(parentEl, name, starClass, ID) {
+	constructor(parentEl, name, starClass, ID, jumpDistance) {
 		// Set the main properties
 		this.el = createElement(parentEl, 'li');
 		this.labelEl = createElement(this.el, 'span');
 		this.labelEl.innerHTML = name;
 		this.starClass = starClass;
 		this.ID = ID;
+		// Light years from the previous stop; routes saved before coordinates were recorded have none.
+		if (jumpDistance > 0) { this.labelEl.dataset.hop = `${jumpDistance.toFixed(1)} ly`; }
 
 		// Determine additional properties
 		if (/\d/.test(name)) { this.el.classList.add('compact'); }
@@ -129,7 +132,7 @@ class RouteClass {
 		this.systemList = {};
 		this.steps = steps;
 		steps.forEach((step, index) => {
-			const system = new SystemClass(this.routeEl, step.SystemName, step.Class, step.SystemId);
+			const system = new SystemClass(this.routeEl, step.SystemName, step.Class, step.SystemId, step.JumpDistance);
 			this.systemList[step.SystemName] = system;
 			if (this.currentLocation) {
 				if (this.currentLocation == step.SystemName) {

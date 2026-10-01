@@ -18,7 +18,7 @@ You are the read-only architecture reviewer for EliteFIPServer.
 
 1. Locate the concrete anchor named in the request.
 2. Trace ownership through `EliteFIPServer.UI`, `EliteFIPServer.Core`, PanelServer, and `wwwroot` only as needed.
-3. Check the sibling `..\EliteFIPProtocol` contract when shared DTO fields matter.
+3. Check the panel DTOs in `EliteFIPServer.Core/PanelServer` (`GameStateModels.cs`, `PanelDataModels.cs`, `ExtendedPanelDataModels.cs`) when DTO fields matter.
 4. For EliteAPI questions, inspect the sibling `..\EliteAPI` event source and classify fields as ingested, dropped, or unhandled.
 5. Identify the smallest implementation surface and cheapest validation.
 

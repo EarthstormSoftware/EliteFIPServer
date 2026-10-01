@@ -1,4 +1,4 @@
-﻿using EliteFIPProtocol;
+﻿
 using Microsoft.AspNetCore.SignalR;
 using System.Threading;
 
@@ -67,6 +67,10 @@ namespace EliteFIPServer
         public Task SendMaterialsUpdate(MaterialsData data, string connectionId = null) => SendAsync("MaterialsData", data, connectionId);
         public Task SendCombatUpdate(CombatData data, string connectionId = null) => SendAsync("CombatData", data, connectionId);
         public Task SendSystemUpdate(SystemData data, string connectionId = null) => SendAsync("SystemData", data, connectionId);
+        public Task SendSystemExplorationUpdate(SystemExplorationData data, string connectionId = null) => SendAsync("SystemExplorationData", data, connectionId);
+        public Task SendExobiologyUpdate(ExobiologyData data, string connectionId = null) => SendAsync("ExobiologyData", data, connectionId);
+        // For event families listed in PanelServer.PanelEventNames; the envelope serializes data by its runtime type.
+        public Task Send(string eventType, object data, string connectionId = null) => SendAsync(eventType, data, connectionId);
 
         private Task SendAsync<T>(string eventType, T data, string connectionId = null)
         {

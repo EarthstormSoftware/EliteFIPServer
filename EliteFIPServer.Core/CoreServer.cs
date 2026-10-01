@@ -1,4 +1,4 @@
-﻿using EliteFIPProtocol;
+﻿
 using EliteFIPServer.Logging;
 using System.Collections.Concurrent;
 
@@ -26,6 +26,14 @@ namespace EliteFIPServer
         ,RouteTarget
         ,MissionCollection
         ,Docking
+        ,SystemExploration
+        ,Exobiology
+        ,Commander
+        ,CombatEarnings
+        ,Mining
+        ,Trade
+        ,Carrier
+        ,OnFoot
     }
     public readonly record struct GameEventTrigger(GameEventType GameEvent, object EventData);
 
@@ -161,10 +169,11 @@ namespace EliteFIPServer
             JumpData jump, RouteTargetData routeTarget, ReceivedTextData receivedText, StationData station,
             ExplorationData exploration, LoadoutData loadout, MissionData mission,
             MissionCollectionData missions, DockingData docking,
-            CargoData cargo, MaterialsData materials, SystemData system) {
+            CargoData cargo, MaterialsData materials, SystemData system, SystemExplorationData systemExploration,
+            ExobiologyData exobiology, IEnumerable<(GameEventType EventType, object Data)> additional) {
             return PanelServer.SendSnapshot(connectionId, status, target, location, navigation,
                 previousNavigation, jump, routeTarget, receivedText, station, exploration, loadout, mission, missions, docking,
-                cargo, materials, system);
+                cargo, materials, system, systemExploration, exobiology, additional);
         }
 
 

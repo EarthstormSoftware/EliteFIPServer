@@ -1,6 +1,9 @@
-﻿using EliteFIPProtocol;
+﻿
 using EliteFIPServer.Logging;
 using Matric.Integration;
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace EliteFIPServer {
@@ -192,6 +195,44 @@ namespace EliteFIPServer {
                 Log.Instance.Warn("Matric client Stop exception: {exception}", e.ToString());
             }
 
+            CloseMatricSocket(client);
+        }
+
+        // The Matric client's receive callback re-arms with BeginReceive on its udpClient field without checking
+        // whether the client was stopped. If Dispose closes the socket while a callback is handling a packet,
+        // that BeginReceive throws ObjectDisposedException on a thread-pool thread, which ends the process.
+        // So the field is first pointed at a placeholder socket that a running callback can safely re-arm on;
+        // the real socket is closed now, and the placeholder (by Dispose) once any such callback has finished.
+        internal static readonly FieldInfo MatricSocketField =
+            typeof(Matric.Integration.Matric).GetField("udpClient", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static readonly TimeSpan PlaceholderSocketLifetime = TimeSpan.FromSeconds(10);
+
+        private static void CloseMatricSocket(Matric.Integration.Matric client) {
+            UdpClient socket = null;
+            try {
+                if (MatricSocketField?.GetValue(client) is UdpClient original) {
+                    MatricSocketField.SetValue(client, new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)));
+                    socket = original;
+                }
+            } catch (Exception e) {
+                Log.Instance.Warn("Matric socket swap failed; disposing directly: {exception}", e.ToString());
+            }
+
+            if (socket == null) {
+                // A Matric version without the expected field: fall back to a plain Dispose.
+                DisposeMatricClientNow(client);
+                return;
+            }
+
+            try {
+                socket.Dispose();
+            } catch (Exception e) {
+                Log.Instance.Warn("Matric socket close exception: {exception}", e.ToString());
+            }
+            Task.Delay(PlaceholderSocketLifetime).ContinueWith(_ => DisposeMatricClientNow(client), TaskScheduler.Default);
+        }
+
+        private static void DisposeMatricClientNow(Matric.Integration.Matric client) {
             try {
                 client.Dispose();
             } catch (Exception e) {

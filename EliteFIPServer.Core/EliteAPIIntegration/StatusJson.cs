@@ -139,5 +139,8 @@ namespace EliteFIPServer {
 
         [JsonProperty("StarClass")]
         public string StarClass { get; set; }
+
+        [JsonProperty("StarPos")]
+        public double[] StarPos { get; set; } = Array.Empty<double>();
     }
 }

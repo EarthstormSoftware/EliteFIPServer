@@ -7,7 +7,7 @@ Perform the repository validation lifecycle for the affected changes: $ARGUMENTS
 
 1. Inspect the current branch and working-tree status. Do not alter Git state.
 2. Stop all `EliteFIPServer.UI` processes.
-3. If the sibling `EliteFIPProtocol` has relevant changes, build `..\EliteFIPProtocol\EliteFIPProtocol\EliteFIPProtocol.csproj -c Release --nologo -v:minimal` first.
+3. If the sibling `EliteAPI` has relevant changes, build it in Release first.
 4. Run the narrowest relevant tests for the affected area above. If no scope is supplied or shared Core behavior changed, run:
    `dotnet test .\EliteFIPServer.Tests\EliteFIPServer.Tests.csproj --no-restore --nologo`
 5. Build:

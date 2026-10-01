@@ -1,3 +1,11 @@
+/* Dashboard.html sets data-theme on this frame's <html>; values mirror the panel/ink/accent/warning/muted tokens in Dashboard.css. */
+:root { --route-bg: #172126; --route-ink: #e7edf0; --route-accent: #6ed6c1; --route-on: #f2bd63; --route-off: #6d7d83; }
+:root[data-theme="orange"] { --route-bg: #1b130c; --route-ink: #f6e6d4; --route-accent: #ff9a2e; --route-on: #ffd34d; --route-off: #8a6a4c; }
+:root[data-theme="blue"] { --route-bg: #121b2a; --route-ink: #e4ecf7; --route-accent: #72b6ff; --route-on: #f2bd63; --route-off: #6b7c96; }
+:root[data-theme="green"] { --route-bg: #111d14; --route-ink: #e2f1e5; --route-accent: #7ee08a; --route-on: #f2c863; --route-off: #6c8672; }
+:root[data-theme="night"] { --route-bg: #0b0404; --route-ink: #d98080; --route-accent: #ff5a4a; --route-on: #ffa060; --route-off: #6e3434; }
+:root[data-theme="contrast"] { --route-bg: #000; --route-ink: #fff; --route-accent: #3cf0ff; --route-on: #ffd400; --route-off: #a0a0a0; }
+
 html, body {
     height: 100%;
     overflow: hidden;
@@ -5,8 +13,8 @@ html, body {
 
 body {
     display: block;
-    background: #172126;
-    color: #e7edf0;
+    background: var(--route-bg);
+    color: var(--route-ink);
     font-family: 'Barlow Condensed', sans-serif;
     text-shadow: none;
 }
@@ -41,15 +49,36 @@ body {
 }
 
 .route-container li {
-    --color-theme: #6ed6c1;
-    --color-on: #f2bd63;
-    --color-off: #6d7d83;
+    --color-theme: var(--route-accent);
+    --color-on: var(--route-on);
+    --color-off: var(--route-off);
     --color-off-alpha: .65;
 }
 
 .route-container li > span {
     font-family: 'Space Mono', monospace;
     font-size: 10px;
+}
+
+/* Jump distance from the previous stop, as a second label line. */
+.route-container li > span[data-hop]::after {
+    content: attr(data-hop);
+    display: block;
+    margin-top: 2px;
+    opacity: .7;
+}
+
+@media (orientation: landscape) {
+    /* Labels above the line put the distance on top, so the name stays next to its star as it does below. */
+    .route-container li:nth-child(odd) > span[data-hop] {
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: center;
+    }
+
+    .route-container li:nth-child(odd) > span[data-hop]::after {
+        margin: 0 0 2px;
+    }
 }
 
 .route-container li::after {

@@ -39,6 +39,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private bool autostartPanelServer;
     private bool panelServerAllowLanAccess;
     private double panelServerPort;
+    private bool useCustomPanels;
     private bool minimiseToTray;
     private bool startMinimised;
 
@@ -250,6 +251,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         get => panelServerAllowLanAccess;
         set => SetProperty(ref panelServerAllowLanAccess, value);
+    }
+
+    public bool UseCustomPanels
+    {
+        get => useCustomPanels;
+        set => SetProperty(ref useCustomPanels, value);
     }
 
     public double PanelServerPort

@@ -1,10 +1,11 @@
-﻿using EliteFIPProtocol;
+﻿
 using EliteFIPServer.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using System.IO;
 
@@ -33,6 +34,15 @@ namespace EliteFIPServer
 
             return Path.GetFullPath(Path.Combine(appBaseDir, "wwwroot"));
         }
+
+        // Users' own and edited pages. Documents, not AppData, because a Store install redirects AppData into
+        // the package's private storage where users wouldn't find it; the built-in wwwroot is read-only there.
+        public static string CustomPanelsPath { get; set; } = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "EliteFIPServer", "Panels");
+
+        // Relative paths of custom panel files that replace built-in ones, for the running server.
+        public IReadOnlyList<string> ReplacedBuiltInFiles { get; private set; } = Array.Empty<string>();
+        public int CustomPanelFileCount { get; private set; }
 
         CoreServer serverCore;
 
@@ -84,6 +94,7 @@ namespace EliteFIPServer
                 });
 
                 PanelHost = panelServerBuilder.Build();
+                UseCustomPanels(webRootPath);
 
                 if (PanelHost.Environment.IsDevelopment()) {
                     PanelHost.UseDeveloperExceptionPage();
@@ -117,7 +128,15 @@ namespace EliteFIPServer
                 Log.Instance.Info("Listening on {panelserverurl}", panelServerUrl);
                 PanelHost.Urls.Add(panelServerUrl);
                 PanelHost.UseDefaultFiles();
-                PanelHost.UseStaticFiles();
+                PanelHost.UseStaticFiles(new StaticFileOptions {
+                    // Pages must revalidate (cheap via ETag) so long-running displays and home-screen icons pick up
+                    // new asset ?v= versions after an update; the versioned CSS/JS keep normal caching.
+                    OnPrepareResponse = context => {
+                        if (context.File.Name.EndsWith(".html", StringComparison.OrdinalIgnoreCase)) {
+                            context.Context.Response.Headers.CacheControl = "no-cache";
+                        }
+                    }
+                });
                 PanelHost.UseRouting();
 
                 PanelHost.MapHub<GameDataUpdateHub>("/gamedataupdatehub");
@@ -136,6 +155,35 @@ namespace EliteFIPServer
 
             CurrentState.Set(panelServerStarted ? RunState.Started : RunState.Stopped);
             Log.Instance.Info("Panel server start complete");
+        }
+
+        // Files in the custom panels folder are served in place of built-in files with the same path, and
+        // alongside them otherwise. PhysicalFileProvider refuses paths outside its folder and hidden files.
+        private void UseCustomPanels(string webRootPath) {
+            ReplacedBuiltInFiles = Array.Empty<string>();
+            CustomPanelFileCount = 0;
+            string customPath = CustomPanelsPath;
+            if (!Properties.Settings.Default.UseCustomPanels || string.IsNullOrWhiteSpace(customPath) || !Directory.Exists(customPath)) {
+                return;
+            }
+
+            var customFiles = Directory.EnumerateFiles(customPath, "*", SearchOption.AllDirectories)
+                .Select(file => Path.GetRelativePath(customPath, file))
+                .ToArray();
+            CustomPanelFileCount = customFiles.Length;
+            ReplacedBuiltInFiles = customFiles
+                .Where(file => File.Exists(Path.Combine(webRootPath, file)))
+                .Select(file => file.Replace('\\', '/'))
+                .OrderBy(file => file, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            PanelHost.Environment.WebRootFileProvider = new CompositeFileProvider(
+                new PhysicalFileProvider(Path.GetFullPath(customPath)),
+                PanelHost.Environment.WebRootFileProvider);
+            Log.Instance.Info("Serving {count} custom panel files from {path}", CustomPanelFileCount, customPath);
+            foreach (string file in ReplacedBuiltInFiles) {
+                Log.Instance.Info("Custom panel file replaces the built-in {file}", file);
+            }
         }
 
         // Browsers send Origin on cross-origin requests and WebSocket upgrades. Requests without it come from
@@ -249,6 +297,12 @@ namespace EliteFIPServer
                     await GameDataUpdateController.SendCombatUpdate(gameData as CombatData);
                 } else if (eventType == GameEventType.System) {
                     await GameDataUpdateController.SendSystemUpdate(gameData as SystemData);
+                } else if (eventType == GameEventType.SystemExploration) {
+                    await GameDataUpdateController.SendSystemExplorationUpdate(gameData as SystemExplorationData);
+                } else if (eventType == GameEventType.Exobiology) {
+                    await GameDataUpdateController.SendExobiologyUpdate(gameData as ExobiologyData);
+                } else if (PanelEventNames.TryGetValue(eventType, out string eventName)) {
+                    await GameDataUpdateController.Send(eventName, gameData);
                 }
             } catch (Exception ex) {
                 Log.Instance.Warn("Panel server update failed: {exception}", ex.ToString());
@@ -260,8 +314,12 @@ namespace EliteFIPServer
             JumpData jump, RouteTargetData routeTarget, ReceivedTextData receivedText, StationData station,
             ExplorationData exploration, LoadoutData loadout, MissionData mission,
             MissionCollectionData missions, DockingData docking,
-            CargoData cargo, MaterialsData materials, SystemData system) {
-            return Task.WhenAll(
+            CargoData cargo, MaterialsData materials, SystemData system, SystemExplorationData systemExploration,
+            ExobiologyData exobiology, IEnumerable<(GameEventType EventType, object Data)> additional) {
+            var additionalSends = additional
+                .Where(item => item.Data != null && PanelEventNames.ContainsKey(item.EventType))
+                .Select(item => GameDataUpdateController.Send(PanelEventNames[item.EventType], item.Data, connectionId));
+            return Task.WhenAll(additionalSends.Append(Task.WhenAll(
                 GameDataUpdateController.SendStatusUpdate(status, connectionId),
                 GameDataUpdateController.SendTargetUpdate(target, connectionId),
                 GameDataUpdateController.SendLocationUpdate(location, connectionId),
@@ -278,7 +336,19 @@ namespace EliteFIPServer
                 GameDataUpdateController.SendDockingUpdate(docking, connectionId),
                 GameDataUpdateController.SendCargoUpdate(cargo, connectionId),
                 GameDataUpdateController.SendMaterialsUpdate(materials, connectionId),
-                GameDataUpdateController.SendSystemUpdate(system, connectionId));
+                GameDataUpdateController.SendSystemUpdate(system, connectionId),
+                GameDataUpdateController.SendSystemExplorationUpdate(systemExploration, connectionId),
+                GameDataUpdateController.SendExobiologyUpdate(exobiology, connectionId))));
         }
+
+        // SignalR message names for event families sent without a dedicated controller method.
+        internal static readonly IReadOnlyDictionary<GameEventType, string> PanelEventNames = new Dictionary<GameEventType, string> {
+            [GameEventType.Commander] = "CommanderData",
+            [GameEventType.CombatEarnings] = "CombatEarningsData",
+            [GameEventType.Mining] = "MiningData",
+            [GameEventType.Trade] = "TradeData",
+            [GameEventType.Carrier] = "CarrierData",
+            [GameEventType.OnFoot] = "OnFootData"
+        };
     }
 }

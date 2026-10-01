@@ -32,7 +32,7 @@ public sealed partial class HelpPane : UserControl
     {
         (string context, Expander[] relevant) = topic switch
         {
-            HelpTopic.Settings => ("Settings", new[] { SettingsSection, TabletSection }),
+            HelpTopic.Settings => ("Settings", new[] { SettingsSection, TabletSection, CustomPanelsSection }),
             HelpTopic.MatricSettings => ("Matric integration settings", new[] { MatricSection }),
             HelpTopic.Clients => ("Clients", new[] { ClientsSection }),
             HelpTopic.Activity => ("Activity", new[] { TroubleshootingSection }),

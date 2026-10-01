@@ -75,10 +75,19 @@
                     <StackPanel Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                         <TextBlock Style="{StaticResource HelpSubheading}" Text="Other devices" />
                         <TextBlock Text="{Binding PanelLanUrlText}" IsTextSelectionEnabled="True" />
+                        <TextBlock Style="{StaticResource HelpBody}" Text="To open it on a tablet or phone without typing, select the QR code button next to the LAN URL on the Status tab and scan the code with the device's camera." />
                     </StackPanel>
 
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="Views" />
-                    <TextBlock Style="{StaticResource HelpBody}" Text="Tabs across the top of the dashboard switch between views, each showing the Ship, Location, Target, Activity and Route panels relevant to it." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Tabs across the top of the dashboard switch between views, each showing the panels relevant to it." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Exploration: how many of the system's bodies you've scanned, their estimated value, the best body to map, and any biological or geological signals. Values are estimates." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Exobiology: the species you're sampling, how many samples you have, and whether you're far enough from the earlier ones for the next. It also totals the organic data you haven't sold yet. Values are estimates." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Missions: your active missions, soonest to expire first, with destinations and rewards." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="These three start on the Navigation view." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Commander: your ranks and progress, standing with the superpowers, Powerplay, engineers, and bounty vouchers and combat bonds you haven't handed in. Starts on the Combat view." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Mining and Trade: your last prospector result, tons refined per hour, profit this session, and what the last market you opened pays for your cargo. Starts on the Complete Cockpit view." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Fleet Carrier: your carrier's tritium, balance, space and next jump. It isn't shown until you add it." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="To add a panel to another view, select ⚙ and then +." />
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <HyperlinkButton Content="Overview" Tag="Dashboard.html#cockpit" Click="DashboardLink_Click" />
                         <HyperlinkButton Content="Navigation" Tag="Dashboard.html#navigation" Click="DashboardLink_Click" />
@@ -86,9 +95,9 @@
                     </StackPanel>
 
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="Presentation modes" />
-                    <TextBlock Style="{StaticResource HelpBody}" Text="Select the ⚙ button on the dashboard and choose a Presentation:" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Select ⚙ on the dashboard to arrange panels: drag to move, drag a corner to resize, and panels in the way move down. ✓ keeps your changes and ↶ discards them. While arranging, ☰ opens layout settings, where you choose a Presentation:" />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Passive display: a fixed, unattended instrument screen with no scrolling or touching needed. Best for a dedicated monitor." />
-                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Interactive tablet: touch-friendly, with expandable detail and scrollable panels. Adapts to one, two or three columns." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Interactive touch: touch-friendly, with expandable detail and scrollable panels. Adapts to one, two or three columns." />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Automatic picks one based on the device. Use the ⛶ button for full screen." />
 
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="Single panels" />
@@ -102,9 +111,19 @@
                         <HyperlinkButton Content="Activity" Tag="Dashboard.html?widget=activity" Click="DashboardLink_Click" />
                         <HyperlinkButton Content="Route" Tag="Dashboard.html?widget=route" Click="DashboardLink_Click" />
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <HyperlinkButton Content="Exploration" Tag="Dashboard.html?widget=exploration" Click="DashboardLink_Click" />
+                        <HyperlinkButton Content="Exobiology" Tag="Dashboard.html?widget=exobiology" Click="DashboardLink_Click" />
+                        <HyperlinkButton Content="Missions" Tag="Dashboard.html?widget=missions" Click="DashboardLink_Click" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <HyperlinkButton Content="Commander" Tag="Dashboard.html?widget=commander" Click="DashboardLink_Click" />
+                        <HyperlinkButton Content="Mining and Trade" Tag="Dashboard.html?widget=trade" Click="DashboardLink_Click" />
+                        <HyperlinkButton Content="Fleet Carrier" Tag="Dashboard.html?widget=carrier" Click="DashboardLink_Click" />
+                    </StackPanel>
 
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="Separate layouts per device" />
-                    <TextBlock Style="{StaticResource HelpBody}" Text="Each browser remembers its own dashboard settings. To keep different arrangements on one device, add ?layout=name to the address (for example Dashboard.html?layout=tablet), or enter a name under Layout in the ⚙ settings." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Each browser remembers its own dashboard settings. To keep different arrangements on one device, add ?layout=name to the address (for example Dashboard.html?layout=tablet), or open ⚙ then ☰ to switch to, copy or rename a layout." />
                 </StackPanel>
             </Expander>
 
@@ -114,13 +133,16 @@
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Allow LAN access: lets tablets, phones and other PCs on your network open the dashboard. When it's off, only this PC can." />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Start Panel Server automatically: recommended, so the dashboard is always ready." />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Panel Server port: only change it if another program already uses 4545." />
-                    <TextBlock Style="{StaticResource HelpBody}" Text="Port and LAN changes take effect after you stop and start the Panel Server." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Custom panels: serves your own pages from the panels folder. See Custom panels below." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Port, LAN and custom panel changes take effect after you stop and start the Panel Server." />
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="Window behaviour" />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Start with Windows: launches Elite FIP Server when you sign in. If you turn it off in Task Manager, turn it back on in Settings › Apps › Startup." />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Minimise to tray: hides the window in the notification area when minimised. Double-click the tray icon to reopen it, or right-click it to open the dashboard or exit." />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Start minimised: launches straight to the tray (or the taskbar if Minimise to tray is off). This is useful when started with Windows." />
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="General" />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Enable logging: writes a log file. Turn it on when reporting a problem." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Open log folder: opens the folder that holds the log files and saved settings." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="•  Dark mode: switches this app between its dark and light themes. The dashboard is always dark." />
                     <TextBlock Style="{StaticResource HelpBody}" Text="•  Matric integration: select the row to configure Matric. The switch starts it automatically at launch." />
                 </StackPanel>
             </Expander>
@@ -134,7 +156,22 @@
                     <TextBlock Text="{Binding PanelLanUrlText}" FontWeight="SemiBold" IsTextSelectionEnabled="True" Margin="20,0,0,0"
                                Visibility="{Binding PanelLanUrlVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
                     <TextBlock Style="{StaticResource HelpBody}" Text="Or select the QR code button next to the LAN URL on the Status tab and scan it with the device's camera." />
-                    <TextBlock Style="{StaticResource HelpBody}" Text="Tip: use your browser's Add to Home Screen option on a tablet to give the dashboard its own icon. On an iPad it then opens full screen like an app." />
+                    <TextBlock Style="{StaticResource HelpSubheading}" Text="Add it to the home screen" />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Open the view and layout you want, then use the browser's Add to Home Screen option. The icon reopens that same view. On an iPad or iPhone it opens full screen like an app; on Android it opens in a browser tab, so use the dashboard's ⛶ button for full screen." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="The dashboard doesn't need an internet connection; everything it uses comes from this PC." />
+                </StackPanel>
+            </Expander>
+
+            <Expander x:Name="CustomPanelsSection" Header="Custom panels">
+                <StackPanel Spacing="6">
+                    <TextBlock Style="{StaticResource HelpBody}" Text="You can make your own panels, or change the built-in pages, without them being lost when Elite FIP Server updates." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="1.  In Settings › Panel Server settings, select Open panels folder. This creates Documents\EliteFIPServer\Panels." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="2.  Put your files there. A file with the same name and path as a built-in one (for example Dashboard.css or js\StatusPanel.js) is used instead of it; other files are added alongside." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="3.  Stop and start the Panel Server if the folder didn't exist when it started. After that, changes show when you reload the page." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="4.  Open your page by name, for example http://127.0.0.1:4545/MyPanel.html." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="The Activity tab lists any built-in files your copies replace. Your copies don't receive fixes from updates, so remove any you no longer need. Turn off Custom panels to go back to the built-in pages." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="With Allow LAN access on, everything in the folder can be opened from other devices on your network." />
+                    <HyperlinkButton Content="Panel data reference" NavigateUri="https://github.com/EarthstormSoftware/EliteFIPServer/blob/main/docs/panel-server.md#customising-panels" />
                 </StackPanel>
             </Expander>
 
@@ -175,7 +212,7 @@
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="Matric won't connect" />
                     <TextBlock Style="{StaticResource HelpBody}" Text="Make sure Matric is running on this PC, that the Matric API port matches Matric's integration port, and that Elite FIP Server was allowed in Matric." />
                     <TextBlock Style="{StaticResource HelpSubheading}" Text="Still stuck?" />
-                    <TextBlock Style="{StaticResource HelpBody}" Text="Turn on Enable logging in Settings, reproduce the problem, and include the log file when reporting an issue." />
+                    <TextBlock Style="{StaticResource HelpBody}" Text="Turn on Enable logging in Settings, reproduce the problem, then select Open log folder in Settings and include the log file when reporting an issue." />
                 </StackPanel>
             </Expander>
 

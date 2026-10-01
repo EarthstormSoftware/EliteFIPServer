@@ -37,8 +37,7 @@ $fileNamesToSign = @(
     'EliteFIPServer.exe',
     'EliteFIPServer.dll',
     'EliteFIPServer.Core.dll',
-    'EliteAPI.dll',
-    'EliteFIPProtocol.dll'
+    'EliteAPI.dll'
 )
 
 $filesToSign = foreach ($fileName in $fileNamesToSign) {

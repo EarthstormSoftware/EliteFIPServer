@@ -32,7 +32,6 @@ Aside from various libraries which Visual Studio will highlight if missing, and 
 Elite FIP Server requires the following:
 
 - [EliteAPI](https://github.com/Somfic/EliteAPI), built in Release, in a sibling folder (`..\EliteAPI`)
-- [EliteFIPProtocol](https://github.com/EarthstormSoftware/EliteFIPProtocol), built in Release, in a sibling folder (`..\EliteFIPProtocol`)
 - MatricIntegration.dll. This is Ex Machina's library and is not included in this repository. The build uses the first of:
   1. a path passed with `-p:MatricIntegrationPath=<path to MatricIntegration.dll>`
   2. a copy you place in `libs\Matric\MatricIntegration.dll` (gitignored)
@@ -91,6 +90,11 @@ Start Matric, then start Matric Integration again from the Status tab.
 
 ### Autostart Panel Server
 The Settings tab allows the Panel Server to be started when Elite FIP Server starts. See [Panel server](docs/panel-server.md) for more information.
+
+### Custom panels
+Put your own panels, or edited copies of the built-in pages, in `Documents\EliteFIPServer\Panels` (Settings >
+Open panels folder). They're served ahead of the built-in files and survive updates. See
+[Panel server](docs/panel-server.md#customising-panels) for details.
 
 ### Start with Windows
 Turn on Settings > Start with Windows to launch Elite FIP Server when you sign in. Combine it with Start minimised
@@ -249,6 +253,8 @@ Text size is per standard Matric setting, but for text which combines multiple E
 - Start with Windows option
 - The dashboard's fonts are served by the app, so it works without an internet connection and contacts no third parties
 - The dashboard can be added to a tablet's home screen with its own icon
+- Exploration widget (bodies scanned, estimated values, what's worth mapping, signals) and Missions widget (active missions, destinations, rewards, time left)
+- Custom panels folder in Documents, for your own pages and edited copies of the built-in ones
 - MatricIntegration.dll is now found in the Matric installation folder instead of being copied next to the app
 
 ### v3.2.0

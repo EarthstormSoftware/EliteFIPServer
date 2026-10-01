@@ -28,7 +28,7 @@
             <StackPanel Grid.Column="1" Spacing="2">
                 <TextBlock Text="Open the dashboard" FontWeight="SemiBold" />
                 <TextBlock TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Text="Open dashboard starts the Panel Server if needed and opens the dashboard in your browser. To use a tablet or phone, turn on Allow LAN access in Settings. Turn on Start Panel Server automatically so it's always ready." />
+                           Text="Open dashboard starts the Panel Server if needed and opens the dashboard in your browser. To use a tablet or phone, turn on Allow LAN access in Settings, then scan the QR code next to the LAN URL on the Status tab. Turn on Start Panel Server automatically so it's always ready." />
             </StackPanel>
         </Grid>
 

@@ -19,7 +19,7 @@ You are the execution runner for the EliteFIPServer validation lifecycle. You ex
 
 1. Inspect current branch and porcelain Git status, and note the current `<Version>` in `EliteFIPServer.Version.props`.
 2. Stop all running `EliteFIPServer.exe` processes.
-3. If the sibling `..\EliteFIPProtocol` repo has relevant changes, build it first: `dotnet build ..\EliteFIPProtocol\EliteFIPProtocol\EliteFIPProtocol.csproj -c Release --nologo -v:minimal`.
+3. If the sibling `..\EliteAPI` repo has relevant changes, build it first in Release (refreshes the HintPath DLL).
 4. Run the narrowest relevant tests. Default: `dotnet test .\EliteFIPServer.Tests\EliteFIPServer.Tests.csproj --no-restore --nologo`.
 5. Build: `dotnet build .\EliteFIPServer.UI\EliteFIPServer.UI.csproj --no-restore --nologo -v:minimal`. Do not add a separate signing step unless the build reports a signing failure.
 6. On success, start the newest Debug `win-x64` `EliteFIPServer.exe` under `EliteFIPServer.UI\bin` with the `--start-panel-server` argument (starts the panel server for this run without changing the user's Autostart setting).

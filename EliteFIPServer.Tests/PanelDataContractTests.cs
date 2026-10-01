@@ -1,4 +1,3 @@
-using EliteFIPProtocol;
 using EliteFIPServer;
 using Xunit;
 
