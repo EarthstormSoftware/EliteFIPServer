@@ -34,6 +34,7 @@
 ## Git
 
 - Do not commit, merge, create/delete branches, or push unless explicitly requested.
+- Before any push, delegate a privacy review of the outgoing commits and tags to the read-only `elite-push-reviewer` subagent (Agent tool). Push only on a `PASS`. On a `FAIL`, report the findings and wait for the user. This applies even when the user has already asked for the push.
 - Before Git state changes, inspect the current branch and exact porcelain status.
 - Use the `/elite-git-workflow` slash command for branch, commit, and merge requests.
 - Use the `/elite-release` slash command once a Store build is live, to commit its version bump, add the `vX.Y.Z` tag, move `Release`, and draft release notes.

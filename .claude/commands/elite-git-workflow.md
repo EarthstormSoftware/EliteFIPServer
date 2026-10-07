@@ -12,6 +12,6 @@ Carry out the following request conservatively: $ARGUMENTS
 5. Use non-interactive Git commands. Preserve the user's requested capitalization and exact commit message.
 6. Before merging, require a clean source branch, switch to lowercase `main`, and use an explicit merge commit unless the user requests another strategy.
 7. Stop on conflicts; report paths and do not invent a resolution.
-8. Never push, delete a branch, fetch, pull, or rebase unless explicitly requested.
+8. Never push, delete a branch, fetch, pull, or rebase unless explicitly requested. Before any push, run the `elite-push-reviewer` subagent on the outgoing commits and tags. If it returns `FAIL`, report its findings and stop. Push only on `PASS`.
 9. After commit/merge, report hashes, parents for merge commits, current branches, and status of both repositories.
 10. Run the relevant tests/build after a merge, then restart `EliteFIPServer.UI` on success.

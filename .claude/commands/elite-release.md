@@ -22,7 +22,7 @@ Only run this after the user confirms the package is live (or submitted) in Part
 5. If the released version exists only in the working tree, commit just the three version files (`EliteFIPServer.Version.props`, `EliteFIPServer.UI/BuildInfo.cs`, `EliteFIPServer.UI/Package.appxmanifest`) plus `CLAUDE.md` and `docs/HANDOFF.md` with the message `Bump version to X.Y.Z.W for Store release`. If `HEAD` already carries the version, commit only the two doc updates, with the message `Record X.Y.Z.W as the last Store release`.
 6. Stop and report if the tag `vX.Y.Z` already exists. Otherwise create it on the release commit, then run `git tag -f Release` on the same commit.
 7. Draft Store "What's new" notes from `git log --no-merges --pretty=%s <previous Release commit>..<new commit>`. Leave out version bumps, Claude/agent configuration, and internal refactors. Write user-facing bullets in plain English and call the product "Matric", not MATRIC. Show the draft; do not write it to a file unless asked.
-8. Push only if the user asked: `git push origin main vX.Y.Z` then `git push -f origin Release` (Release always needs a force push). Mention any older release tags that are missing from `git ls-remote --tags origin`.
+8. Push only if the user asked. Before pushing, run the `elite-push-reviewer` subagent on the outgoing commits and tags. If it returns `FAIL`, report its findings and stop. On `PASS`, run `git push origin main vX.Y.Z` then `git push -f origin Release` (Release always needs a force push). Mention any older release tags that are missing from `git ls-remote --tags origin`.
 9. Update the "last Store upload" fact in repository memory if it records a version number.
 
 ## Report
