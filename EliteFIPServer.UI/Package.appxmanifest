@@ -14,7 +14,7 @@
   <Identity
     Name="REPLACE-WITH-PARTNER-CENTER-PACKAGE-IDENTITY-NAME"
     Publisher="CN=REPLACE-WITH-PARTNER-CENTER-PUBLISHER-ID"
-    Version="4.0.72.0" />
+    Version="4.0.74.0" />
 
   <Properties>
     <DisplayName>Elite FIP Server</DisplayName>
