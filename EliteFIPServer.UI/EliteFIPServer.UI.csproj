@@ -9,6 +9,9 @@
     <AssemblyName>EliteFIPServer</AssemblyName>
     <RootNamespace>EliteFIPServer</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- The exe's own icon, used by the installer's shortcuts and Installed apps entry. The Store package
+         takes its icons from Package.appxmanifest's images instead. -->
+    <ApplicationIcon>Images\EliteFIPServerIcon256.ico</ApplicationIcon>
     <UseWinUI>true</UseWinUI>
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
