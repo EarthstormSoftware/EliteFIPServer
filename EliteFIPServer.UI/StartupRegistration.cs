@@ -56,6 +56,18 @@ internal static class StartupRegistration
         return StartupState.Disabled;
     }
 
+    // Called by the installer's uninstall hook, so Windows isn't left launching a deleted exe at sign-in.
+    // Only removes the value when it points at this copy, not at another build.
+    public static void RemoveRunEntry()
+    {
+        using RegistryKey key = Registry.CurrentUser.OpenSubKey(RunKeyPath, true);
+        if (key?.GetValue(RunValueName) is string command
+            && command.Contains(Path.GetDirectoryName(Environment.ProcessPath), StringComparison.OrdinalIgnoreCase))
+        {
+            key.DeleteValue(RunValueName, false);
+        }
+    }
+
     private static StartupState Map(StartupTaskState state)
     {
         return state switch
@@ -67,16 +79,5 @@ internal static class StartupRegistration
         };
     }
 
-    private static bool IsPackaged()
-    {
-        try
-        {
-            return Package.Current != null;
-        }
-        catch (Exception)
-        {
-            // Package.Current throws when the app is not running from a package.
-            return false;
-        }
-    }
+    private static bool IsPackaged() => AppInstallation.IsPackaged;
 }

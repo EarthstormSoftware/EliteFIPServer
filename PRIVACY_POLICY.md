@@ -1,8 +1,8 @@
 # Privacy Policy for Elite FIP Server
 
-**Last updated:** 2026-09-30
+**Last updated:** 2026-10-25
 
-This policy explains what Elite FIP Server ("the app") does and does not do with your data. The short version: the app runs entirely on your own PC and local network. It does not create accounts, does not send your data to the developer or any cloud service, and does not include advertising, analytics, or tracking.
+This policy explains what Elite FIP Server ("the app") does and does not do with your data. The short version: the app runs entirely on your own PC and local network. It does not create accounts, does not send your data to the developer or any cloud service, and does not include advertising, analytics, or tracking. The only internet connection it makes is the update check in the version installed from GitHub Releases, described below.
 
 ## Who this policy covers
 
@@ -24,17 +24,26 @@ To do this, the app:
 - If you create the custom panels folder (`Documents\EliteFIPServer\Panels`), serves the files you put there through the panel web server, in the same way as the built-in pages. The app only reads that folder; it doesn't change or upload its contents.
 - Stores your app preferences (such as panel server port, whether LAN access is enabled, and Matric button text) locally on your PC.
 
+## Version installed from GitHub Releases
+
+The installer from GitHub Releases is a separate way to install the app. That version also:
+
+- Checks for updates each time it starts, by asking GitHub (github.com, operated by GitHub, Inc.) for the latest release of this app, and downloads a newer version if there is one. The request contains nothing about you, your game or your settings, but like any web request it reveals your IP address to GitHub, whose privacy statement applies to it. The Microsoft Store version never does this; the Store updates it.
+- Copies the Microsoft Store version's settings into its own the first time it runs, if the Store version is installed. Nothing is sent anywhere.
+
+Both versions also check at startup whether the other one is installed on your PC and, if it is, suggest uninstalling one. The app never uninstalls anything itself, and the result of the check stays on your PC.
+
 ## What the app does not do
 
 - It does not require or create a user account, sign-in, or Frontier account credentials.
 - It does not transmit your game data, journal contents, logs, or settings to the developer or to any cloud or third-party service.
 - It does not include advertising, analytics, crash-reporting services, or usage tracking.
-- It does not load fonts, scripts, or other content from the internet.
+- It does not load fonts, scripts, or other content from the internet (apart from the GitHub Releases version's update check above).
 - It does not sell or share your data, because it does not collect any data off your device in the first place.
 
 ## Third-party content
 
-None. The dashboard's pages, scripts and fonts are all served by the app itself, so opening the dashboard in a browser does not contact Google or any other third party. The QR code shown for the dashboard's network address is also created on your PC.
+None, apart from GitHub for the update check in the GitHub Releases version. The dashboard's pages, scripts and fonts are all served by the app itself, so opening the dashboard in a browser does not contact Google or any other third party. The QR code shown for the dashboard's network address is also created on your PC.
 
 ## Children's privacy
 

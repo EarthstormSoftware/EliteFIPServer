@@ -1,6 +1,6 @@
 ---
 name: elite-store-packager
-description: Use to build the Microsoft Store .msix package via Build-StorePackage.ps1 after Store-relevant changes (identity, manifest, capabilities) or when a fresh submission package is needed. Runs the manual MakeAppx packaging pipeline and returns only the package path, size, and pass/fail — never raw dotnet publish/MakeAppx output.
+description: Use to build a release - the Microsoft Store .msix and the GitHub Releases (Velopack) installer from one build via Build-Release.ps1 - after Store-relevant changes or when a fresh submission package is needed. Returns only package paths, sizes, version, and pass/fail — never raw dotnet publish/MakeAppx/vpk output.
 tools: Bash, PowerShell, Read, Grep, Glob
 ---
 
@@ -20,9 +20,9 @@ Background: the automated MSBuild single-project MSIX pipeline (`GenerateAppxPac
 
 1. Inspect current branch and porcelain Git status, and note the current `<Version>` in `EliteFIPServer.Version.props` (baseline for step 4). Read the last Store release version with `git show Release:EliteFIPServer.Version.props`; the `Release` tag marks the last uploaded build. The package will be baseline + 1 build. If that would not be strictly higher than the Release version, stop before packaging and report both versions. If the `Release` tag doesn't exist, report that and continue.
 2. Stop all running `EliteFIPServer.exe` processes.
-3. Run `.\Build-StorePackage.ps1` (add `-Configuration Debug` only if asked). This internally: publishes the UI project (which triggers the same pre-build version-bump target the normal build does), generates the Store manifest, restores `Microsoft.Windows.SDK.BuildTools` into the isolated `tools\StoreBuildTools\StoreBuildTools.csproj` cache, locates `makeappx.exe`, and packs `artifacts\msix\EliteFIPServer.msix`.
+3. Run `.\Build-Release.ps1` (never with `-Publish` unless the caller explicitly asks for a GitHub release). It publishes once, checks the build starts and serves the dashboard, then runs `Build-StorePackage.ps1 -SkipBuild` and `Build-Installer.ps1 -SkipBuild`, so both packages carry the same version. Only if the caller asks for the Store package alone, run `.\Build-StorePackage.ps1` instead (add `-Configuration Debug` only if asked). Between them they: publishes the UI project (which triggers the same pre-build version-bump target the normal build does), generates the Store manifest, restores `Microsoft.Windows.SDK.BuildTools` into the isolated `tools\StoreBuildTools\StoreBuildTools.csproj` cache, locates `makeappx.exe`, and packs `artifacts\msix\EliteFIPServer.msix`.
 4. Publishing runs the same pre-build step as a normal build, incrementing the build number by one and rewriting `BuildInfo.cs`, `Package.appxmanifest`, and `EliteFIPServer.Version.props`. Leave these changes in place (never revert them). Read the `Identity` `Version` from the generated `EliteFIPServer.UI\bin\x64\<Configuration>\net10.0-windows10.0.19041.0\win-x64\AppxManifest.xml` and confirm it equals the new `EliteFIPServer.Version.props` version, which must be exactly one build above the step-1 baseline.
-5. Confirm the package exists at `artifacts\msix\EliteFIPServer.msix` and note its size.
+5. Confirm the package exists at `artifacts\msix\EliteFIPServer.msix` and note its size. For a full release, also confirm `artifacts\installer\Releases\EarthstormSoftware.EliteFIPServer-win-Setup.exe` exists and note its size.
 6. Optionally spot-check the generated manifest for sanity (e.g. `Get-Content` + `Select-String` on `EliteFIPServer.UI\bin\x64\<Configuration>\net10.0-windows10.0.19041.0\win-x64\AppxManifest.xml` for `Resource Language`, `Executable=`, `Capability Name`) if the calling request mentions specific manifest fields to verify — otherwise skip this to keep output minimal.
 
 ## Output
@@ -31,7 +31,7 @@ Report only:
 
 - Branch and whether the working tree was as expected (one line).
 - Pack result: succeeded / failed, with the thrown error message if it failed (e.g. missing `StoreIdentity.local.json`, missing `makeappx.exe`).
-- Package path and size.
+- Package path and size, and the installer path and size for a full release.
 - Packaged Identity version, the baseline it was bumped from, and the last Store release version from the `Release` tag. Remind the caller that the bumped version files should be committed and that `/elite-release` should be run once the package is live.
 - Any spot-checked manifest fields, only if you were asked to check them.
 

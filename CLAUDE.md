@@ -18,6 +18,7 @@
 - Delegate multi-viewport dashboard checks to the `elite-dashboard-verifier` subagent after implementation. Reuse one browser page and avoid opening duplicate validation tabs.
 - Delegate the stop/test/build/restart lifecycle to the `elite-build-runner` subagent (Agent tool); retain only command, totals, failures, PID, and URL in the main conversation.
 - Delegate building the Microsoft Store `.msix` package to the `elite-store-packager` subagent (Agent tool); retain only pack result, package path/size, and packaged version in the main conversation — never raw `dotnet publish`/`MakeAppx` output.
+- Release builds use `.\Build-Release.ps1`: one build packaged as both the Store `.msix` and the Velopack installer, so both carry the same version (see the 2026-10-25 entry in [HANDOFF.md](docs/HANDOFF.md)). Keep `vpk` in `dotnet-tools.json` at the same version as the `Velopack` package. Never pass `-Publish` (a GitHub release) unless the user asks for that release.
 - Consult [elite-api-data-inventory.md](docs/elite-api-data-inventory.md) only when EliteAPI inventory is relevant; current dashboard implementation is in `EliteFIPServer.Core/wwwroot/Dashboard.html`, `CockpitDashboard.js`, and `Dashboard.css`.
 
 ## Validation

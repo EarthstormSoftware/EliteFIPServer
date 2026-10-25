@@ -10,16 +10,23 @@ The integration with Matric allows Matric to reflect the current game state in t
 screen display rather than a traditional keyboard increases immersion and lowers the requirement to remember
 all the many key bindings you might need.
 
-Elite FIP Server v4 is a WinUI 3 app and is available from the Microsoft Store. The older WPF app (v3 and earlier) is retired and no longer supported.
+Elite FIP Server v4 is a WinUI 3 app. It is available from the Microsoft Store, or as an installer from
+[GitHub Releases](https://github.com/EarthstormSoftware/EliteFIPServer/releases) for anyone who can't or would rather not use the Store.
+Install one or the other, not both. The older WPF app (v3 and earlier) is retired and no longer supported.
 
 If you are upgrading from a previous release, please check the runtime prerequisites and startup notes before running the app.
 
 ---
 
 ## Runtime Pre-requisites
-- Elite FIP Server is a .NET 10 application. Install both of these from the [.NET 10 download page](https://dotnet.microsoft.com/download/dotnet/10.0):
+- Elite FIP Server is a .NET 10 application and needs both of these:
   - .NET Runtime 10 (x64)
   - ASP.NET Core Runtime 10 (x64), used by the built-in Panel Server
+
+  The installer from GitHub Releases installs them for you if they are missing (Windows asks for permission for that step).
+  For the Microsoft Store version, or a copy you build yourself, install them from the
+  [.NET 10 download page](https://dotnet.microsoft.com/download/dotnet/10.0). Either way they are normal .NET installs, which
+  Microsoft Update keeps patched when Windows Update > Advanced options > Receive updates for other Microsoft products is on.
 
 - [Matric v2.x](https://matricapp.com) (optional, only needed for Matric integration)  
   Elite FIP Server uses the MatricIntegration.dll that ships with Matric. It is not included with Elite FIP Server;
@@ -43,16 +50,34 @@ To build the app, run from the repository root:
 .\Build-UI.ps1
 ```
 
-or build `EliteFIPServer.UI\EliteFIPServer.UI.csproj` directly. Every build increments the build number and updates
+or build `EliteFIPServer.UI\EliteFIPServer.UI.csproj` directly. `.\Build-Release.ps1` builds once and packages
+that build twice, as the Microsoft Store package (`Build-StorePackage.ps1`) and the GitHub Releases installer
+(`Build-Installer.ps1`, using [Velopack](https://velopack.io)), so both carry the same version. Every build increments the build number and updates
 `EliteFIPServer.Version.props`, `EliteFIPServer.UI\BuildInfo.cs` and `EliteFIPServer.UI\Package.appxmanifest`.
 
 Older versions of Elite FIP Server used the EliteJournalReader project to provide in-game events.
 
 ---
 
+## Installing from GitHub Releases
+Download `EarthstormSoftware.EliteFIPServer-win-Setup.exe` from the latest release and run it. It installs for your
+Windows account only (in `%LocalAppData%\EarthstormSoftware.EliteFIPServer`) and adds Start menu and desktop shortcuts.
+Uninstall it from Settings > Apps > Installed apps.
+
+- The installer isn't code-signed, so Windows SmartScreen shows "Windows protected your PC" the first time. Choose
+  More info, then Run anyway. If Smart App Control is turned on, Windows blocks unsigned apps completely; use the
+  Microsoft Store version instead.
+- This version checks GitHub Releases for updates when it starts and offers to restart into a new version. The
+  Microsoft Store version is updated by the Store and never checks GitHub.
+- If the Microsoft Store version is also installed, the app copies its settings the first time it runs. Install only
+  one version: running both makes them compete for the panel server port and Start with Windows, so either version
+  warns at startup when it finds the other, and points you to Settings > Apps > Installed apps to uninstall one.
+
+---
+
 ## Usage
 Use at own risk :)
-1. Install Elite FIP Server from the Microsoft Store, or build it from this repository.
+1. Install Elite FIP Server from the Microsoft Store or GitHub Releases, or build it from this repository.
 2. Start Matric and connect a client.
 3. Enable API Integration in Matric (Settings > API Integration > Enable 3rd party integration). Please note that PIN authorisation is no longer supported.
 4. Start Elite FIP Server (`EliteFIPServer.exe` if you built it yourself).
@@ -241,6 +266,14 @@ Text size is per standard Matric setting, but for text which combines multiple E
 
 ---
 # Change History
+
+### v4.0.82
+- New installer on GitHub Releases, for anyone who can't or would rather not use the Microsoft Store. It installs the
+  .NET runtimes it needs, updates itself from GitHub, and copies the Store version's settings
+- Both versions warn if the other is also installed, since only one is needed
+- Matric: the Fuel Reservoir slider now moves with the reservoir level, scaled to your ship's reservoir size. It
+  previously showed empty for any level under 1 tonne
+- Matric: the Main Fuel text button now shows main tank fuel; it was showing the reservoir
 
 ### v4.0
 - New WinUI 3 desktop app, available from the Microsoft Store

@@ -29,6 +29,19 @@ public class CoreServerLifecycleTests : IDisposable
         Assert.Equal(typeof(System.Net.Sockets.UdpClient), MatricApiClient.MatricSocketField.FieldType);
     }
 
+    // Reservoir levels are fractions of a tonne; the slider used to truncate them to 0 before scaling.
+    [Theory]
+    [InlineData(0.30, 0.30, 100)]
+    [InlineData(0.15, 0.30, 50)]
+    [InlineData(0.81, 1.07, 76)]
+    [InlineData(0.47, 0, 47)]
+    [InlineData(1.20, 1.07, 100)]
+    [InlineData(-0.1, 0.30, 0)]
+    public void Fuel_reservoir_slider_scales_to_the_ship_reservoir(double level, double capacity, int expected)
+    {
+        Assert.Equal(expected, MatricApiClient.FuelSliderPosition(level, capacity));
+    }
+
     [Fact]
     public async Task PanelServer_should_serve_custom_panels_ahead_of_built_in_files()
     {

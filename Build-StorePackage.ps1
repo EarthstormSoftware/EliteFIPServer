@@ -13,9 +13,14 @@
 #     (copy StoreIdentity.local.json.template and fill it in; this file is gitignored).
 #   - No running EliteFIPServer.exe (its output files would be locked during publish).
 
+#
+# -SkipBuild packages the existing build output instead of publishing again. Build-Release.ps1 uses it
+# so the Store package and the installer come from one build with one version number.
+
 param(
     [ValidateSet("Debug", "Release")]
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+    [switch]$SkipBuild
 )
 
 $ErrorActionPreference = "Stop"
@@ -33,14 +38,16 @@ if (-not (Test-Path $identityJsonPath)) {
     throw "Missing $identityJsonPath. Copy EliteFIPServer.UI\StoreIdentity.local.json.template to StoreIdentity.local.json and fill in your real Partner Center values first."
 }
 
-Write-Host "Stopping any running EliteFIPServer.exe..." -ForegroundColor Cyan
-Get-Process -Name "EliteFIPServer" -ErrorAction SilentlyContinue | Stop-Process -Force
-Start-Sleep -Seconds 1
+if (-not $SkipBuild) {
+    Write-Host "Stopping any running EliteFIPServer.exe..." -ForegroundColor Cyan
+    Get-Process -Name "EliteFIPServer" -ErrorAction SilentlyContinue | Stop-Process -Force
+    Start-Sleep -Seconds 1
 
-Write-Host "Publishing EliteFIPServer.UI ($Configuration, x64)..." -ForegroundColor Cyan
-dotnet publish $uiProject -c $Configuration -p:Platform=x64 --nologo -v:minimal
-if ($LASTEXITCODE -ne 0) {
-    throw "dotnet publish failed with exit code $LASTEXITCODE."
+    Write-Host "Publishing EliteFIPServer.UI ($Configuration, x64)..." -ForegroundColor Cyan
+    dotnet publish $uiProject -c $Configuration -p:Platform=x64 --nologo -v:minimal
+    if ($LASTEXITCODE -ne 0) {
+        throw "dotnet publish failed with exit code $LASTEXITCODE."
+    }
 }
 
 $contentDir = Join-Path $root "EliteFIPServer.UI\bin\x64\$Configuration\net10.0-windows10.0.19041.0\win-x64"

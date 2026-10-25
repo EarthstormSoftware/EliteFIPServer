@@ -27,7 +27,9 @@ namespace EliteFIPServer {
         private bool previousOnFoot;
         private bool previousHardpointsDeployed;
         private readonly Dictionary<string, string> appliedDeckIds = new();
-        
+        // Reservoir size of the current ship, from the last Loadout; 0 until one arrives.
+        private double reserveFuelCapacity;
+
 
         // Matric Flash Worker
         private CancellationTokenSource MatricFlashWorkerCTS;
@@ -287,6 +289,11 @@ namespace EliteFIPServer {
         }
 
         public void UpdateGameState(GameEventType eventType, Object gameData) {
+            // Keep the reservoir size even while stopped, as Loadout only arrives at login and on ship changes
+            if (eventType == GameEventType.Loadout && gameData is LoadoutData loadout) {
+                reserveFuelCapacity = loadout.ReserveFuelCapacity;
+            }
+
             // Only update if Matric Integration is running
             if (CurrentState.State == RunState.Started) {
                 if (eventType == GameEventType.Status) {
@@ -437,6 +444,14 @@ namespace EliteFIPServer {
             matric.GetConnectedClients();
         }
 
+        // Slider position (0-100) for a fuel level against its tank size. Without a known size
+        // (no Loadout yet), 1 tonne is treated as full; reservoirs range from about 0.3 to 1.2 tonnes.
+        public static int FuelSliderPosition(double level, double capacity) {
+            if (capacity <= 0) { capacity = 1; }
+            if (level <= 0) { return 0; }
+            return (int)Math.Clamp(Math.Round(level / capacity * 100), 0, 100);
+        }
+
         public void UpdateStatus(StatusData currentStatus) {
 
             if (currentStatus != null) {
@@ -540,20 +555,12 @@ namespace EliteFIPServer {
 
                 // Handle Sliders and text fields
                 if (MatricButtonList.ContainsKey(MatricConstants.FUELMAIN)) {
-                    MatricButtonList[MatricConstants.FUELMAIN].OffText = Math.Round((decimal)currentStatus.FuelReservoir, 2).ToString();
+                    MatricButtonList[MatricConstants.FUELMAIN].OffText = Math.Round((decimal)currentStatus.FuelMain, 2).ToString();
                 }
 
                 if (MatricButtonList.ContainsKey(MatricConstants.FUELRESERVOIR)) {
                     MatricButtonList[MatricConstants.FUELRESERVOIR].OffText = Math.Round((decimal)currentStatus.FuelReservoir, 2).ToString();
-
-                    // Set slider position, and handle data oddities
-                    if (Math.Round((decimal)currentStatus.FuelReservoir, 2) >= 1) {
-                        MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = 100;
-                    } else if (Math.Round((decimal)currentStatus.FuelReservoir, 2) <= 0) {
-                        MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = 0;
-                    } else {
-                        MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = (int)Math.Round((decimal)currentStatus.FuelReservoir, 2) * 100;
-                    }
+                    MatricButtonList[MatricConstants.FUELRESERVOIR].SliderPosition = FuelSliderPosition(currentStatus.FuelReservoir, reserveFuelCapacity);
                 }
 
 

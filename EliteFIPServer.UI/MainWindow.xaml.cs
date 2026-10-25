@@ -179,11 +179,98 @@ public sealed partial class MainWindow : Window
         Activated -= MainWindow_Activated;
         RestoreWindowPosition();
 
-        // Deferred so the dialog waits until the window is actually shown: with Start minimised to tray,
+        // Deferred so the dialogs wait until the window is actually shown: with Start minimised to tray,
         // the first activation happens only when the user restores the window.
+        DispatcherQueue.TryEnqueue(() => _ = ShowStartupDialogsAsync());
+    }
+
+    // One at a time, as WinUI allows only one open ContentDialog.
+    private async Task ShowStartupDialogsAsync()
+    {
         if (!Properties.Settings.Default.FirstRunCompleted)
         {
-            DispatcherQueue.TryEnqueue(() => _ = ShowWelcomeAsync());
+            await ShowWelcomeAsync();
+        }
+
+        // The tray's Open can show the welcome dialog too.
+        while (welcomeDialogOpen)
+        {
+            await Task.Delay(500);
+        }
+
+        await WarnIfInstalledTwiceAsync();
+
+        if (AppInstallation.IsInstalled)
+        {
+            await OfferUpdateAsync();
+        }
+    }
+
+    // The same check in the Store and installer versions, each looking for the other.
+    private async Task WarnIfInstalledTwiceAsync()
+    {
+        string otherCopy;
+        try
+        {
+            otherCopy = await Task.Run(AppInstallation.FindOtherCopy);
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Warn(ex, "Could not check for another installed copy");
+            return;
+        }
+
+        if (otherCopy == null)
+        {
+            return;
+        }
+
+        AddActivity($"The {otherCopy} of Elite FIP Server is also installed.");
+        var dialog = new ContentDialog
+        {
+            Title = "Elite FIP Server is installed twice",
+            Content = $"The {otherCopy} of Elite FIP Server is also installed. Only one is needed, and running both "
+                + "can clash: they use the same panel server port, can both start with Windows, and update separately.\n\n"
+                + "Uninstall one of them from Settings > Apps > Installed apps.",
+            PrimaryButtonText = "Open Installed apps",
+            CloseButtonText = "OK",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = Content.XamlRoot
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:appsfeatures"));
+        }
+    }
+
+    private async Task OfferUpdateAsync()
+    {
+        Velopack.UpdateInfo update;
+        try
+        {
+            update = await Task.Run(AppInstallation.DownloadUpdateAsync);
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Warn(ex, "Update check failed");
+            return;
+        }
+
+        if (update == null)
+        {
+            return;
+        }
+
+        string version = update.TargetFullRelease.Version.ToString();
+        AddActivity($"Update {version} downloaded.");
+        bool restart = await Confirm("Update ready",
+            $"Elite FIP Server {version} has been downloaded. Restart now to install it?\n\n"
+            + "If you choose No, it is installed the next time the app starts.");
+        if (restart)
+        {
+            AppInstallation.ApplyUpdateOnExit(update);
+            ShutdownApp();
         }
     }
 
