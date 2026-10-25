@@ -38,7 +38,8 @@
 - Before any push, delegate a privacy review of the outgoing commits and tags to the read-only `elite-push-reviewer` subagent (Agent tool). Push only on a `PASS`. On a `FAIL`, report the findings and wait for the user. This applies even when the user has already asked for the push.
 - Before Git state changes, inspect the current branch and exact porcelain status.
 - Use the `/elite-git-workflow` slash command for branch, commit, and merge requests.
-- Use the `/elite-release` slash command once a Store build is live, to commit its version bump, add the `vX.Y.Z` tag, move `Release`, and draft release notes.
+- Release order: `Build-Release.ps1` → commit the version bump → push (after `elite-push-reviewer` PASS) → `Build-Installer.ps1 -SkipBuild -Publish` (uploads the same build as a draft GitHub release) → the user publishes it, which creates `vX.Y.Z` → upload the `.msix` to Partner Center.
+- Use the `/elite-release` slash command once a Store build is live, to adopt the `vX.Y.Z` tag from the GitHub release, move `Release`, record the version, and draft Store release notes.
 
 ## Continuity
 
