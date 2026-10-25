@@ -267,7 +267,7 @@ Text size is per standard Matric setting, but for text which combines multiple E
 ---
 # Change History
 
-### v4.0.82
+### v4.0.85
 - New installer on GitHub Releases, for anyone who can't or would rather not use the Microsoft Store. It installs the
   .NET runtimes it needs, updates itself from GitHub, and copies the Store version's settings
 - Both versions warn if the other is also installed, since only one is needed
